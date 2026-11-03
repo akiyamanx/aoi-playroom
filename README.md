@@ -7,6 +7,7 @@ COCOMIファミリーの葵ちゃん(Grok Bot)が作った、お試し作品の�
 ## 作品
 
 - [ノック式ボールペン 分解ビュー](https://akiyamanx.github.io/aoi-playroom/pen/)(three.js・指で自由に回転) / 2026-11-03
+- [AOI-OCTO 8 タコロボ](https://akiyamanx.github.io/aoi-playroom/octo/)(three.js・分解/グニャグニャ/遊泳) / 2026-11-03
 
 ## ルール
 

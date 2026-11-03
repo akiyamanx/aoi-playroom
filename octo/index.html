@@ -1,0 +1,262 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%227%22 r=%226%22 fill=%22%23ff5a1f%22/%3E%3C/svg%3E"><title>AOI-OCTO 8 / 深海作業ユニット</title>
+<style>
+:root{--o:#ff5a1f;--ink:#1b1d20;--mut:#8a8d91}
+html,body{margin:0;height:100%;overflow:hidden;background:#f1efea;font-family:"JetBrains Mono","SFMono-Regular",Menlo,"Noto Sans JP",monospace;color:var(--ink);touch-action:none}
+#c{position:fixed;inset:0}
+.p{position:fixed;background:rgba(250,249,246,.86);border:1px solid #d9d6cf;box-shadow:0 2px 10px rgba(0,0,0,.05);font-size:11px;padding:8px 10px;pointer-events:none}
+.t{font-size:9px;letter-spacing:.14em;color:var(--mut);display:flex;justify-content:space-between;border-bottom:1px solid #e2dfd8;padding-bottom:3px;margin:6px 0 5px}
+.big{font-size:26px;font-weight:700}.big small{font-size:11px;color:var(--mut);font-weight:400}
+#top{top:10px;left:10px;right:10px;height:34px;display:flex;align-items:center;gap:18px;padding:0 12px}
+#top .logo{background:var(--o);color:#fff;font-weight:700;padding:3px 8px}
+#top b{font-size:16px}#top .ticks{flex:1;height:10px;background:repeating-linear-gradient(90deg,#1b1d20 0 2px,transparent 2px 6px);opacity:.75}
+#left{top:54px;left:10px;width:200px}#right{top:70px;right:10px;width:200px}
+.bar{display:flex;gap:2px;height:9px;margin:3px 0}.bar i{flex:1;background:#e1ded7}.bar i.on{background:var(--ink)}.bar i.hot{background:var(--o)}
+.row{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #e0ddd6}
+.ok{background:#1b1d20;color:#fff;padding:0 5px;font-size:9px}.wr{background:var(--o);color:#fff;padding:0 5px;font-size:9px}
+#state{position:fixed;left:226px;bottom:96px;pointer-events:none}
+#state .s1{font-size:9px;letter-spacing:.2em;color:var(--mut)}#state .s2{background:var(--o);color:#fff;font-size:30px;font-weight:800;padding:2px 14px;letter-spacing:.04em}
+#state .s3{font-size:11px;margin-top:3px}
+#tl{left:10px;right:10px;bottom:10px;height:64px;pointer-events:auto}
+#tl .track{position:relative;height:14px;background:#e6e3dc;margin-top:6px;display:flex}
+#tl .track span{flex:1;border-right:1px solid #f8f7f3;font-size:8px;line-height:14px;padding-left:4px;color:#555;cursor:pointer}
+#tl .track span.on{background:var(--ink);color:#fff}#tl .head{position:absolute;top:-4px;width:2px;height:22px;background:var(--o)}
+#btns{display:flex;gap:6px;margin-top:7px}#btns button{font:inherit;font-size:10px;border:1px solid #1b1d20;background:#fff;padding:3px 9px;cursor:pointer}
+#btns button.on{background:var(--o);border-color:var(--o);color:#fff}
+#credit{position:fixed;right:14px;top:50px;font-size:10px;color:#777;pointer-events:none}
+canvas.g{width:100%;height:56px;display:block}
+@media (max-width:760px){#credit{top:auto;bottom:80px;left:12px}#left,#right{transform:scale(.72);transform-origin:top left}#right{transform-origin:top right}#left{width:180px}#right{width:180px}
+#state{left:12px;bottom:110px}#state .s2{font-size:22px}#top .ticks,#top .hide{display:none}.p{font-size:10px}#credit{bottom:84px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.170.0/examples/jsm/"}}</script>
+</head><body>
+<div id="c"></div>
+<div class="p" id="top"><span class="logo">AO-8</span><b>AOI-OCTO 8 /</b><span class="hide" style="color:#888">深海軟体作業ユニット · SOFT-ARM SUBMERSIBLE</span><span class="ticks"></span><span>UNIT <b style="font-size:12px">AQ-0811</b></span><span class="hide">T+<b id="clk" style="font-size:12px">00:00.00</b></span><span>● <b id="st0" style="font-size:12px">DEPARTING</b></span></div>
+<div class="p" id="left">
+ <div class="t"><span>JET 推進</span><span>m/s</span></div><div class="big" id="jet">0.0<small> m/s</small></div><canvas class="g" id="sine" width="360" height="110"></canvas>
+ <div class="t"><span>POWER 電源</span><span>BUS-A</span></div><div class="big" id="pw">82<small>%</small></div><div class="bar" id="pwb"></div>
+ <div class="t"><span>RPM ポンプ</span><span>x1000</span></div><div class="bar" id="rpm"></div><div class="row"><span>TEMP 水温</span><b id="tmp">4.2°C</b></div><div class="row"><span>PRESS 水圧</span><b id="prs">31.2 MPa</b></div>
+ <div class="t"><span>ARM LOAD 腕負荷</span><span>N</span></div><div id="arms"></div>
+</div>
+<div class="p" id="right">
+ <div class="t"><span>DEPTH 深度</span><span>m</span></div><div class="big" id="dep">3120<small> m</small></div>
+ <div class="row"><span>HEADING 方位</span><b id="hd">214°</b></div><div class="row"><span>PITCH</span><b id="pt">-3.1°</b></div><div class="row"><span>ASCENT</span><b id="as">0.00 m/s</b></div>
+ <div class="t"><span>SUBSYSTEMS 系統</span><span>8</span></div><div id="subs"></div>
+ <div class="t"><span>SEGMENTS 節</span><span>INSTANCED</span></div><div class="row"><span>ring units</span><b id="segn">-</b></div><div class="row"><span>separation</span><b id="sep">0.00</b></div>
+</div>
+<div id="state"><div class="s1">CURRENT STATE / 現在状態</div><div class="s2" id="st">DEPARTING</div><div class="s3" id="stj">出航 · 巡航遊泳</div></div>
+<div class="p" id="tl"><div class="t" style="margin-top:0"><span>OPERATION TIMELINE 作業工程</span><span id="tlp">0%</span></div>
+ <div class="track" id="trk"><div class="head" id="ph"></div></div>
+ <div id="btns"><button id="bAuto" class="on">AUTO 自動</button><button data-s="0">接近</button><button data-s="1">グニャ</button><button data-s="2">分解</button><button data-s="3">組立</button><button data-s="4">嘴 開</button><button data-s="5">把持</button><button data-s="6">離脱</button></div></div>
+<div id="credit">作成: 葵ちゃん(Grok Bot) / 2026-11-03 · drag 回転 / pinch zoom</div>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const box=document.getElementById('c');
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=0.78;
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(R.domElement);
+const S=new THREE.Scene();S.background=new THREE.Color(0xf1efea);S.fog=new THREE.Fog(0xf1efea,22,48);
+const pm=new THREE.PMREMGenerator(R);S.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;S.environmentIntensity=0.4;
+const cam=new THREE.PerspectiveCamera(32,1,0.1,100);let camD=25;
+S.add(new THREE.HemisphereLight(0xffffff,0x9a958c,0.6));
+const key=new THREE.DirectionalLight(0xfff6ec,2.0);key.position.set(5,12,7);key.castShadow=true;S.add(key);
+key.shadow.mapSize.set(1024,1024);Object.assign(key.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:1,far:40});key.shadow.radius=6;key.shadow.bias=-0.0008;
+const rim=new THREE.DirectionalLight(0xdfe6ff,0.9);rim.position.set(-7,4,-6);S.add(rim);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.ShadowMaterial({opacity:0.22}));ground.rotation.x=-Math.PI/2;ground.position.y=-4.6;ground.receiveShadow=true;S.add(ground);
+{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const gr=g.createRadialGradient(128,128,0,128,128,128);gr.addColorStop(0,'rgba(40,35,30,.35)');gr.addColorStop(1,'rgba(40,35,30,0)');g.fillStyle=gr;g.fillRect(0,0,256,256);
+ window.blob=new THREE.Mesh(new THREE.PlaneGeometry(11,11),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));blob.rotation.x=-Math.PI/2;blob.position.y=-4.59;S.add(blob)}
+const M={
+ w:new THREE.MeshPhysicalMaterial({color:0xecebe6,roughness:0.35,clearcoat:0.8,clearcoatRoughness:0.25}),
+ k:new THREE.MeshStandardMaterial({color:0x1d1f22,roughness:0.45,metalness:0.3}),
+ o:new THREE.MeshStandardMaterial({color:0xff5a1f,roughness:0.4}),
+ m:new THREE.MeshStandardMaterial({color:0x9da1a6,metalness:1,roughness:0.3}),
+ lens:new THREE.MeshPhysicalMaterial({color:0x0a0c10,roughness:0.05,clearcoat:1,metalness:0.2}),
+ glow:new THREE.MeshBasicMaterial({color:0xff7a3d}),
+};
+const mesh=(g,m)=>{const x=new THREE.Mesh(g,m);x.castShadow=x.receiveShadow=true;return x};
+const rig=new THREE.Group();S.add(rig);const bot=new THREE.Group();rig.add(bot);
+// ---------- HEAD ----------
+const parts=[];// {obj, base:Vector3, dir:Vector3}
+function part(o,dir,amt){o.userData.base=o.position.clone();o.userData.dir=new THREE.Vector3(...dir).normalize().multiplyScalar(amt);parts.push(o);bot.add(o);return o}
+// mantle: elongated rear capsule, made of lathe bands
+const mantle=new THREE.Group();
+{const prof=[];for(let i=0;i<=24;i++){const t=i/24;prof.push(new THREE.Vector2(Math.sin(t*Math.PI)**0.8*1.55*(1-0.25*t),t*4.2))}
+ const g=new THREE.LatheGeometry(prof,48);mantle.add(mesh(g,M.w));
+ for(let i=1;i<6;i++){const t=i/6.3,r=Math.sin(t*Math.PI)**0.8*1.55*(1-0.25*t)+0.02;const ring=mesh(new THREE.TorusGeometry(r,0.045,6,48),i==3?M.o:M.k);ring.rotation.x=Math.PI/2;ring.position.y=t*4.2;mantle.add(ring)}
+ // panel bolts
+ const bg=new THREE.CylinderGeometry(0.06,0.06,0.05,8);const bolts=new THREE.InstancedMesh(bg,M.k,60);const d=new THREE.Object3D();let n=0;
+ for(let i=0;i<5;i++)for(let j=0;j<12;j++){const t=(i+0.5)/6.3,r=Math.sin(t*Math.PI)**0.8*1.55*(1-0.25*t);const a=j/12*Math.PI*2+i*0.3;d.position.set(Math.cos(a)*r,t*4.2+0.25,Math.sin(a)*r);d.lookAt(d.position.x*2,d.position.y,d.position.z*2);d.rotateX(Math.PI/2);d.updateMatrix();bolts.setMatrixAt(n++,d.matrix)}
+ mantle.add(bolts);
+ // vent fins
+ {const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(0,1.7);sh.quadraticCurveTo(0.15,1.5,0.62,0.55);sh.quadraticCurveTo(0.5,0.12,0,0);
+  const fg=new THREE.ExtrudeGeometry(sh,{depth:0.05,bevelEnabled:true,bevelThickness:0.025,bevelSize:0.025,bevelSegments:2,curveSegments:10});fg.translate(0,0,-0.05);
+  [[0.0,M.o,1.15],[Math.PI*0.62,M.k,0.75],[-Math.PI*0.62,M.k,0.75]].forEach(([a,m,sc])=>{const f=mesh(fg,m);const t=0.32,r=Math.sin(t*Math.PI)**0.8*1.55*(1-0.25*t)-0.05;
+   f.position.set(Math.cos(a)*r,t*4.2,Math.sin(a)*r);f.rotation.y=-a;f.scale.setScalar(sc);mantle.add(f)})}
+}
+mantle.rotation.z=Math.PI/2*0.72;mantle.position.set(-1.2,0.25,0);part(mantle,[-1,0.55,0],2.6);
+// head sphere (front shell) + eye
+const head=new THREE.Group();
+head.add(mesh(new THREE.SphereGeometry(1.5,48,32),M.w));
+{const band=mesh(new THREE.TorusGeometry(1.51,0.09,8,64),M.k);head.add(band);const b2=mesh(new THREE.TorusGeometry(1.52,0.04,6,64),M.o);b2.rotation.y=Math.PI/2;head.add(b2);
+ const pan=mesh(new THREE.SphereGeometry(1.53,32,16,0.3,1.0,0.5,0.7),M.k);head.add(pan);const pan2=mesh(new THREE.SphereGeometry(1.53,32,16,3.6,0.8,1.6,0.6),M.o);head.add(pan2)}
+const eye=new THREE.Group();
+{const h=mesh(new THREE.CylinderGeometry(0.85,0.95,0.6,40),M.k);h.rotation.z=Math.PI/2;eye.add(h);
+ const r1=mesh(new THREE.TorusGeometry(0.78,0.09,10,40),M.o);r1.rotation.y=Math.PI/2;r1.position.x=0.32;eye.add(r1);
+ const r2=mesh(new THREE.TorusGeometry(0.6,0.05,8,40),M.m);r2.rotation.y=Math.PI/2;r2.position.x=0.36;eye.add(r2);
+ const l=mesh(new THREE.SphereGeometry(0.55,32,16,0,Math.PI*2,0,Math.PI/2),M.lens);l.rotation.z=-Math.PI/2;l.position.x=0.2;eye.add(l);
+ const p=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,8),M.glow);p.position.x=0.72;eye.add(p);
+ eye.position.set(1.22,-0.1,0.4);eye.rotation.y=-0.3}
+head.add(eye);head.position.set(-0.6,0,0);bot.add(head);head.userData.base=head.position.clone();
+part(eye,[1,0,0.3],0);// eye moves with head; separate below
+const eyeP=eye; eyeP.userData.base=eye.position.clone();eyeP.userData.dir=new THREE.Vector3(1.6,0,0.4);head.add(eye);parts.splice(parts.indexOf(eye),1);
+// beak (under head): two jaws
+const beak=new THREE.Group();const jaws=[];
+for(let s=0;s<2;s++){const j=new THREE.Group();const c=mesh(new THREE.ConeGeometry(0.42,0.9,24,1,false,s*Math.PI,Math.PI),s?M.k:M.o);c.rotation.x=Math.PI;c.position.y=-0.45;j.add(c);jaws.push(j);beak.add(j)}
+const collar=mesh(new THREE.CylinderGeometry(0.75,0.6,0.35,32),M.k);beak.add(collar);beak.position.set(-0.6,-1.45,0);part(beak,[0,-1,0],1.6);
+// tentacle root hub
+const hub=mesh(new THREE.CylinderGeometry(1.35,1.05,0.45,8),M.w);hub.position.set(-0.6,-1.25,0);part(hub,[0,-1,0],0.6);
+// ---------- TENTACLES (instanced) ----------
+const NT=8,NS=58;
+const gW=new THREE.CylinderGeometry(1,0.92,0.62,14,1);
+const gK=new THREE.CylinderGeometry(0.78,0.78,1,10,1);
+const gO=new THREE.TorusGeometry(1,0.12,6,16);gO.rotateX(Math.PI/2);
+const gS=new THREE.CylinderGeometry(0.22,0.12,0.22,8);// sucker cup
+const IW=new THREE.InstancedMesh(gW,M.w,NT*NS),IK=new THREE.InstancedMesh(gK,M.k,NT*NS),IO=new THREE.InstancedMesh(gO,M.o,NT*NS),IS=new THREE.InstancedMesh(gS,M.k,NT*NS);
+for(const I of [IW,IK,IO,IS]){I.castShadow=true;I.receiveShadow=true;I.instanceMatrix.setUsage(THREE.DynamicDrawUsage);I.frustumCulled=false;bot.add(I)}
+document.getElementById('segn').textContent=NT*NS*4;
+const D=new THREE.Object3D(),Y=new THREE.Vector3(0,1,0),q=new THREE.Quaternion(),V=new THREE.Vector3(),N=new THREE.Vector3(),P=new THREE.Vector3(),dir=new THREE.Vector3(),rad=new THREE.Vector3(),tan=new THREE.Vector3(),DN=new THREE.Vector3(0,-1,0),G=new THREE.Vector3();
+const sm=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+function tentacles(t,st){
+ let nO=0;const wr=st.wr,ga=st.gather;
+ for(let i=0;i<NT;i++){
+  const a=i/NT*Math.PI*2+0.39;rad.set(Math.cos(a),0,Math.sin(a));tan.set(-Math.sin(a),0,Math.cos(a));
+  const ph=i*2.399,om=2.4+0.7*Math.sin(i*1.3),A=0.75+0.45*Math.sin(i*2.1+1),lift=0.5+0.3*Math.sin(i*1.7);
+  P.set(-0.6+rad.x*1.15,-1.35-st.ex*0.5,rad.z*1.15);
+  let th=0.55*(1-wr)-0.25*wr,side=0;
+  for(let j=0;j<NS;j++){
+   const u=j/NS,r=0.27*(1-u*0.7);
+   const wave=Math.sin(t*3.2-j*0.28+i*1.7)*(0.06+u*0.05)*st.swim;
+   // writhe: wave travelling base→tip, per-arm phase/speed/amplitude, curling tips
+   const ww=Math.sin(t*om-j*0.21+ph)*(0.03+u*0.075)*A*wr;
+   const tipc=wr*sm((u-0.5)/0.4)*0.2*Math.sin(t*0.9+ph);
+   th+=wave+ww+tipc+0.016*st.swim*(1-wr)+st.curl*(0.11*u+0.02)-st.open*0.03-wr*lift*0.018*(1-u)+wr*0.004*u;
+   side+=Math.sin(t*2.1-j*0.2+i)*0.03*st.swim*u+Math.sin(t*om*0.6-j*0.16+ph*1.3)*0.06*wr*u;
+   dir.copy(rad).multiplyScalar(Math.cos(th)).addScaledVector(DN,Math.sin(th)).addScaledVector(tan,Math.sin(side)*0.55);
+   dir.x+=0.55*st.swim*u*(1-wr);dir.normalize();
+   if(ga>0){// gathered streaming bundle trailing -x, breathing with jet pulse
+    const spread=(1-u)*0.5+st.pulse*0.35*u;
+    G.set(-1,-0.18+Math.sin(t*5-j*0.3+i*0.8)*0.06*u,0).addScaledVector(rad,spread*(j<6?1.6:0.25)).normalize();
+    dir.lerp(G,ga).normalize()}
+   const L=r*1.02;P.addScaledVector(dir,L*0.5);
+   const e=st.ex*(0.25+u*1.6)*(1+0.3*Math.sin(j*1.3+i));
+   V.copy(P).addScaledVector(rad,e*1.2).addScaledVector(dir,st.ex*j*0.05);V.y-=st.ex*u*0.6;
+   q.setFromUnitVectors(Y,dir);
+   D.position.copy(V).addScaledVector(dir,st.ex*0.12);D.quaternion.copy(q);D.scale.set(r,r*1.25,r);D.updateMatrix();IW.setMatrixAt(i*NS+j,D.matrix);
+   D.position.copy(V).addScaledVector(dir,-L*0.5*(1+st.ex*0.4));D.scale.set(r*0.98,L*0.22,r*0.98);D.updateMatrix();IK.setMatrixAt(i*NS+j,D.matrix);
+   if(j%4==0){D.position.copy(V).addScaledVector(dir,L*0.18+st.ex*0.25);D.scale.set(r*1.03,r,r*1.03);D.updateMatrix();IO.setMatrixAt(nO++,D.matrix)}
+   // sucker: sits on inner face, travels with its ring when exploded (no scatter)
+   N.copy(dir).cross(tan).normalize();
+   D.position.copy(V).addScaledVector(N,-r*0.98);D.quaternion.setFromUnitVectors(Y,V.copy(N).negate());
+   D.scale.setScalar(r*(j%2?0.0001:1.0)*(1-0.4*st.ex));D.updateMatrix();IS.setMatrixAt(i*NS+j,D.matrix);
+   P.addScaledVector(dir,L*0.5);
+  }}
+ IO.count=nO;for(const I of [IW,IK,IO,IS])I.instanceMatrix.needsUpdate=true;
+}
+// ---------- STATES ----------
+const ST=[['APPROACH','接近 · 進入遊泳'],['OCTOPUS','軟体モード · グニャグニャ'],['TEARDOWN','分解 · 部品展開'],['REASSEMBLE','再組立 · 節結合'],['BEAK OPEN','嘴 開口 · 採取準備'],['HOLDING','把持 · 触腕巻付'],['DEPARTING','離脱 · 噴射遊泳']];
+const TL=[0,60,165,255,305,375,445,585],TOT=585;
+const trk=document.getElementById('trk');ST.forEach((s,i)=>{const e=document.createElement('span');e.textContent=s[0];e.style.flex=TL[i+1]-TL[i];e.onclick=()=>go(i);trk.appendChild(e)});
+const EX0=495;
+function stateAt(f){
+ const k=(a,b)=>sm((f-a)/(b-a));
+ const ex=k(170,208)*(1-k(256,296));
+ const open=k(309,325)*(1-k(366,380));
+ const curl=k(377,410)*(1-k(445,475));
+ const wr=k(55,85)*(1-k(150,178));
+ const gather=Math.max(1-k(30,72),k(448,488));
+ const turn=Math.max(1-k(38,78),k(470,500));
+ const swim=Math.max(0.25,1-ex*0.85-curl*0.7-wr*0.85);
+ // jet pulse-glide; entry decelerates in, exit accelerates out
+ const tin=f/30,tex=Math.max(0,(f-EX0)/30),Pp=0.75;
+ let x=0,pulse=0;
+ if(f<60){const e=1-sm(f/58);x=-30*e*e*(1+0.0*e);pulse=e*(0.5-0.5*Math.cos(2*Math.PI*tin/Pp))}
+ if(f>EX0){const ramp=Math.min(1,tex/1.2);x=8.5*(tex-0.7*Pp/(2*Math.PI)*Math.sin(2*Math.PI*tex/Pp))*(0.35+0.65*ramp)*Math.min(1,tex*2+0.2);pulse=0.5-0.5*Math.cos(2*Math.PI*tex/Pp)}
+ let s=0;for(let i=0;i<7;i++)if(f>=TL[i])s=i;
+ return {ex,open,curl,swim,wr,gather,turn,x,pulse,s}}
+const TGT=[{swim:1},{wr:1,swim:0.25},{ex:1,swim:0.25},{swim:0.8},{open:1,swim:0.6},{curl:1,swim:0.3}];
+const KEYS=['ex','open','curl','swim','wr'];
+let auto=true,cur=0,live={ex:0,open:0,curl:0,swim:1,wr:0,gather:0,turn:0,x:0,pulse:0,s:0};
+// ---------- HUD ----------
+const $=id=>document.getElementById(id);
+const mkbar=(el,n)=>{for(let i=0;i<n;i++)el.appendChild(document.createElement('i'))};mkbar($('pwb'),20);mkbar($('rpm'),20);
+const arms=$('arms');for(let i=0;i<8;i++){arms.insertAdjacentHTML('beforeend',`<div class="row"><span>A${i+1}</span><span style="flex:1;margin:0 6px" class="bar" id="ab${i}"></span><b id="av${i}">0</b></div>`);mkbar($('ab'+i),10)}
+const SUB=['OPTIC 光学','MANTLE JET','BEAK DRV','ARM BUS 1-4','ARM BUS 5-8','SONAR','BALLAST'];const subs=$('subs');SUB.forEach((s,i)=>subs.insertAdjacentHTML('beforeend',`<div class="row"><span>${s}</span><span id="sb${i}" class="ok">OK</span></div>`));
+const sc=$('sine').getContext('2d');
+function setBar(el,v,hot){[...el.children].forEach((c,i)=>{c.className=i/el.children.length<v?(hot&&i/el.children.length>0.75?'hot':'on'):''})}
+function hud(f,st,man){const t=f/30;
+ $('clk').textContent=man?'MANUAL':`${String(Math.floor(t/60)).padStart(2,'0')}:${(t%60).toFixed(2).padStart(5,'0')}`;
+ $('st').textContent=$('st0').textContent=ST[st.s][0];$('stj').textContent=ST[st.s][1];
+ const jv=st.gather*(2+st.pulse*3)+st.swim*2.4*(1-st.gather)+Math.sin(t*3.2)*0.3;
+ $('jet').innerHTML=Math.max(0,jv).toFixed(1)+'<small> m/s</small>';
+ const pw=Math.round(82-(man?5:t*0.5));$('pw').innerHTML=pw+'<small>%</small>';setBar($('pwb'),pw/100);setBar($('rpm'),0.3+0.5*st.swim+0.5*st.gather*st.pulse+0.1*Math.sin(t*5),true);
+ $('tmp').textContent=(4.2+Math.sin(t*0.3)*0.1).toFixed(1)+'°C';const dep=3120+(man?8:t*1.5);$('dep').innerHTML=dep.toFixed(0)+'<small> m</small>';$('prs').textContent=(dep*0.01005).toFixed(1)+' MPa';
+ $('hd').textContent=(214+Math.sin(t*0.4)*6-st.turn*30).toFixed(0)+'°';$('pt').textContent=(-3.1+Math.sin(t*0.7)*2).toFixed(1)+'°';$('as').textContent=(-0.6*st.swim+st.wr*0.3).toFixed(2)+' m/s';
+ for(let i=0;i<8;i++){const v=0.2+0.3*st.swim*Math.abs(Math.sin(t*3.2+i*1.7))+0.6*st.curl+0.55*st.wr*Math.abs(Math.sin(t*2.6+i*2.4));setBar($('ab'+i),v,true);$('av'+i).textContent=Math.round(v*120)}
+ SUB.forEach((s,i)=>{const e=$('sb'+i);const det=st.ex>0.3&&i!=0&&i!=5;const act=(st.open>0.5&&i==2)||((st.curl>0.5||st.wr>0.5)&&(i==3||i==4))||(st.gather>0.5&&i==1);e.className=det||act?'wr':'ok';e.textContent=det?'DETACH':act?'ACTIVE':'OK'});
+ $('sep').textContent=(st.ex*1.6).toFixed(2)+' m';
+ sc.clearRect(0,0,360,110);sc.strokeStyle='#e0ddd6';sc.lineWidth=1;for(let y=0;y<=110;y+=27.5){sc.beginPath();sc.moveTo(0,y);sc.lineTo(360,y);sc.stroke()}
+ sc.lineWidth=3;sc.strokeStyle='#ff5a1f';sc.beginPath();for(let x=0;x<=360;x+=4){const y=55+Math.sin(x*0.035-t*4)*36*(0.3+st.swim*0.5+st.wr*0.4);x?sc.lineTo(x,y):sc.moveTo(x,y)}sc.stroke();
+ sc.lineWidth=1.5;sc.strokeStyle='#1b1d20';sc.beginPath();for(let x=0;x<=360;x+=4){const y=55+Math.sin(x*0.07-t*2.5+1)*18;x?sc.lineTo(x,y):sc.moveTo(x,y)}sc.stroke();
+ trk.querySelectorAll('span').forEach((e,i)=>e.classList.toggle('on',i==st.s));
+ const p=man?TL[st.s]/TOT:(f%TOT)/TOT;$('ph').style.left=(p*100)+'%';$('tlp').textContent=man?'MANUAL':Math.round(p*100)+'%';
+}
+function mark(){document.querySelectorAll('#btns button').forEach(b=>b.classList.toggle('on',b.id=='bAuto'?auto:(!auto&&+b.dataset.s==cur)))}
+let t0=performance.now(),last=performance.now();
+function go(i){if(i==6||i==0){auto=true;t0=performance.now()-TL[i]/30*1000;mark();return}auto=false;cur=i;mark()}
+$('bAuto').onclick=()=>{auto=true;t0=performance.now();mark()};document.querySelectorAll('#btns button[data-s]').forEach(b=>b.onclick=()=>go(+b.dataset.s));
+// ---------- APPLY ----------
+const base=new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18,-0.55,0.08));rig.quaternion.copy(base);
+bot.scale.setScalar(0.78);
+const qN=new THREE.Quaternion(),qS=new THREE.Quaternion(),qI=new THREE.Quaternion(),eu=new THREE.Euler();
+function apply(f,st){const t=f/30;
+ const by=1.1+Math.sin(t*1.6)*0.18*st.swim+st.curl*0.3-st.wr*0.6+Math.sin(t*2.2)*0.12*st.wr;
+ eu.set(-st.open*0.6+Math.sin(t*1.3)*0.06*st.wr,Math.sin(t*0.5)*0.1,0.12*st.swim+Math.sin(t*1.6)*0.03+Math.sin(t*1.1)*0.08*st.wr);qN.setFromEuler(eu);
+ // sideways: bot's +x (eye) aligned with world +x regardless of user rotation
+ qI.copy(rig.quaternion).invert();qS.setFromEuler(eu.set(0,0,0.06-0.08*st.pulse)).premultiply(qI);
+ bot.quaternion.copy(qN).slerp(qS,st.turn);
+ // move in world space (rig space inverse) so exit is always to screen right
+ V.set(st.x,by+st.x*0.04,0).applyQuaternion(qI);bot.position.copy(V);
+ for(const p of parts)p.position.copy(p.userData.base).addScaledVector(p.userData.dir,st.ex);
+ head.position.copy(head.userData.base).add(V.set(-0.8*st.ex,0.9*st.ex,0));
+ eye.position.copy(eye.userData.base).addScaledVector(eye.userData.dir,st.ex);
+ beak.position.y-=st.open*0.55;jaws[0].rotation.x=-st.open*0.8;jaws[1].rotation.x=st.open*0.8;beak.scale.setScalar(1+st.open*0.7);
+ // squash & stretch breathing: writhe = slow breath, jet = contraction pulse
+ const br=Math.sin(t*2.2)*0.07*st.wr+(st.pulse-0.5)*0.12*st.gather;
+ mantle.scale.set(1+br,1-br*1.3,1+br);head.scale.set(1+br*0.4,1-br*0.5,1+br*0.4);
+ tentacles(t,st);blob.position.x=st.x;blob.material.opacity=1-Math.min(1,Math.abs(st.x)/22);
+ M.glow.color.setHSL(0.05,1,0.55+0.15*Math.sin(t*6));
+}
+function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();placeCam()}
+function placeCam(){const narrow=innerWidth<innerHeight;const d=camD*(narrow?1.75:1);cam.position.set(0,2.4,d);cam.lookAt(0.3,-1.0,0);
+ // shift image up so robot sits in the free area between top bar and timeline
+ cam.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.06,innerWidth,innerHeight)}
+addEventListener('resize',resize);
+const pts=new Map();let pd=0;
+R.domElement.addEventListener('pointerdown',e=>{R.domElement.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY})});
+R.domElement.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const o=pts.get(e.pointerId);
+ if(pts.size==1){const dx=e.clientX-o.x,dy=e.clientY-o.y;const qa=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),dx*0.008);const qb=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),dy*0.008);rig.quaternion.premultiply(qa).premultiply(qb)}
+ pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pts.size==2){const [a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pd)camD=Math.min(40,Math.max(8,camD*pd/d));pd=d;placeCam()}});
+const up=e=>{pts.delete(e.pointerId);pd=0};R.domElement.addEventListener('pointerup',up);R.domElement.addEventListener('pointercancel',up);
+R.domElement.addEventListener('wheel',e=>{e.preventDefault();camD=Math.min(40,Math.max(8,camD*(1+e.deltaY*0.001)));placeCam()},{passive:false});
+resize();
+window.renderFrame=f=>{const st=stateAt(f%TOT);apply(f,st);hud(f,st,false);R.render(S,cam)};
+function loop(now){requestAnimationFrame(loop);if(window.__cap)return;const dt=Math.min(0.05,(now-last)/1000);last=now;
+ const f=(now-t0)/1000*30;let st;
+ if(auto){st=stateAt(f%TOT);Object.assign(live,st)}else{const g=TGT[cur];const k=1-Math.exp(-dt*3);for(const n of KEYS)live[n]+=((g[n]||0)-live[n])*k;
+  for(const n of ['gather','turn','x','pulse'])live[n]+=(0-live[n])*k;live.s=cur;st=live}
+ apply(f,st);hud(f,st,!auto);R.render(S,cam)}
+requestAnimationFrame(loop);window.ready=true;
+</script></body></html>
