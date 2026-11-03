@@ -48,7 +48,7 @@ canvas.g{width:100%;height:56px;display:block}
 <div id="state"><div class="s1">CURRENT STATE / 現在状態</div><div class="s2" id="st">DEPARTING</div><div class="s3" id="stj">出航 · 巡航遊泳</div></div>
 <div class="p" id="tl"><div class="t" style="margin-top:0"><span>OPERATION TIMELINE 作業工程</span><span id="tlp">0%</span></div>
  <div class="track" id="trk"><div class="head" id="ph"></div></div>
- <div id="btns"><button id="bAuto" class="on">AUTO 自動</button><button data-s="0">接近</button><button data-s="1">グニャ</button><button data-s="2">分解</button><button data-s="3">組立</button><button data-s="4">嘴 開</button><button data-s="5">把持</button><button data-s="6">離脱</button></div></div>
+ <div id="btns"><button id="bAuto" class="on">AUTO 自動</button><button data-s="0">接近</button><button data-s="1">探索</button><button data-s="2">匍匐</button><button data-s="3">分解</button><button data-s="4">組立</button><button data-s="5">フェッチ</button><button data-s="6">嘴 開</button><button data-s="7">把持</button><button data-s="8">離脱</button></div></div>
 <div id="credit">作成: 葵ちゃん(Grok Bot) / 2026-11-03 · drag 回転 / pinch zoom</div>
 <script type="module">
 import * as THREE from 'three';
@@ -104,9 +104,9 @@ head.add(mesh(new THREE.SphereGeometry(1.5,48,32),M.w));
 const eye=new THREE.Group();
 {const h=mesh(new THREE.CylinderGeometry(0.85,0.95,0.6,40),M.k);h.rotation.z=Math.PI/2;eye.add(h);
  const r1=mesh(new THREE.TorusGeometry(0.78,0.09,10,40),M.o);r1.rotation.y=Math.PI/2;r1.position.x=0.32;eye.add(r1);
- const r2=mesh(new THREE.TorusGeometry(0.6,0.05,8,40),M.m);r2.rotation.y=Math.PI/2;r2.position.x=0.36;eye.add(r2);
+ const r2=mesh(new THREE.TorusGeometry(0.6,0.05,8,40),M.m);r2.rotation.y=Math.PI/2;r2.position.x=0.36;eye.add(r2);window.iris=r2;
  const l=mesh(new THREE.SphereGeometry(0.55,32,16,0,Math.PI*2,0,Math.PI/2),M.lens);l.rotation.z=-Math.PI/2;l.position.x=0.2;eye.add(l);
- const p=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,8),M.glow);p.position.x=0.72;eye.add(p);
+ const p=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,8),M.glow);p.position.x=0.72;eye.add(p);window.pupil=p;
  eye.position.set(1.22,-0.1,0.4);eye.rotation.y=-0.3}
 head.add(eye);head.position.set(-0.6,0,0);bot.add(head);head.userData.base=head.position.clone();
 part(eye,[1,0,0.3],0);// eye moves with head; separate below
@@ -128,66 +128,171 @@ for(const I of [IW,IK,IO,IS]){I.castShadow=true;I.receiveShadow=true;I.instanceM
 document.getElementById('segn').textContent=NT*NS*4;
 const D=new THREE.Object3D(),Y=new THREE.Vector3(0,1,0),q=new THREE.Quaternion(),V=new THREE.Vector3(),N=new THREE.Vector3(),P=new THREE.Vector3(),dir=new THREE.Vector3(),rad=new THREE.Vector3(),tan=new THREE.Vector3(),DN=new THREE.Vector3(0,-1,0),G=new THREE.Vector3();
 const sm=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+// ================= v4 MOTION (research-based) =================
+const fr=x=>{x=Math.sin(x*127.1)*43758.5453;return x-Math.floor(x)};
+function nz(x,s){return 0.5*Math.sin(x*(0.9+0.3*fr(s))+fr(s+1)*6.28)+0.3*Math.sin(x*(1.9+0.6*fr(s+2))+fr(s+3)*6.28)+0.2*Math.sin(x*(3.7+fr(s+4))+fr(s+5)*6.28)}
+const mj=x=>x<=0?0:x>=1?1:x*x*x*(10+x*(-15+6*x));// minimum-jerk: bell-shaped velocity
+const bell=x=>x<=0||x>=1?0:Math.sin(Math.PI*x)**2;
+const LS=[],CS=[];let LT=0;for(let j=0;j<NS;j++){const u=j/NS;LS[j]=0.27*(1-u*0.7)*1.02;CS[j]=LT;LT+=LS[j]}
+const ARM=[...Array(NT)].map((_,i)=>{const a=i/NT*Math.PI*2+0.39,fx=Math.cos(a);
+ return {a,fx,s:i*7.31+1,k:0.16+0.1*fr(i+40),f:0.9+0.6*fr(i+50),amp:0.7+0.6*fr(i+60),
+  rf:0.2+0.3*fr(i+70),rph:fr(i+80)*6.28,ramp:0.6+0.8*fr(i+90),
+  th0:0.36-0.14*fx+0.36*Math.max(0,-fx)+0.1*Math.max(0,-Math.sin(a)),// front arms forward/level, rear arms low to floor
+  pb:new THREE.Vector3(-0.6+Math.cos(a)*1.15,-1.35,Math.sin(a)*1.15)}});
+// front arms: 0,7 (most front), 1,6. slight right-hand bias (7,6 = right side when facing +x)
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const IDLE_EV=[
+ {arm:7,t0:2.9,ext:1.1,hold:0.9,ret:1.3,tgt:V3(4.6,0.3,-2.0)},
+ {arm:0,t0:4.4,ext:0.9,hold:0.7,ret:1.1,tgt:V3(4.2,-0.9,1.6)},
+ {arm:6,t0:5.9,ext:1.4,hold:1.0,ret:1.5,tgt:V3(2.6,-1.6,-4.0)},
+ {arm:7,t0:7.6,ext:0.8,hold:0.6,ret:1.0,tgt:V3(4.9,1.2,-0.4)},
+ {arm:1,t0:6.8,ext:1.2,hold:0.8,ret:1.3,tgt:V3(2.4,-0.4,3.9)}];
+const FETCH={arm:0,t0:557/30,ext:1.2,hold:0.45,fold:1.0,rel:22.5,relDur:1.2,tgt:V3(3.9,-1.0,2.1),fetch:true};
+const MOUTH=V3(0.1,-2.3,0.7);
+// crawl steps: every 0.3–1s, 1–3 arms push (rear) / pull (front, movement dir)
+const STEPS=[];{let t=310/30,k=0;while(t<392/30){const n=1+Math.floor(fr(k+200)*1.6),arms=[];const pool=[3,4,2,5,0,7,1,6];
+ for(let m=0;m<n;m++)arms.push(pool[Math.floor(fr(k*3+m+300)*(m==0?4:8))]);STEPS.push({t,arms});t+=0.45+0.55*fr(k+400);k++}}
+const CR0=-1.6,CR1=1.6;
+function crawlAt(t){let x=0,push=new Array(NT).fill(0),bob=0;for(const s of STEPS){const p=(t-s.t)/0.7;x+=mj(p);const b=bell(p);bob+=b;for(const a of s.arms)push[a]=Math.max(push[a],b)}return {x:CR0+(CR1-CR0)*x/STEPS.length,push,bob}}
+// blinks at random intervals
+const BL=[];{let t=1.2,k=0;while(t<80){BL.push(t);t+=1.4+4.2*fr(k+500)+(fr(k+600)<0.2?0.25:0);k++}}
+const blinkAt=t=>{let b=0;for(const x of BL){const p=(t-x)/0.2;if(p>0&&p<1)b=Math.max(b,Math.sin(p*Math.PI))}return b};
+// event control for one arm
+const dR=new THREE.Vector3(),d1=new THREE.Vector3(),d2=new THREE.Vector3(),nR=new THREE.Vector3(),dL=new THREE.Vector3(),tmp=new THREE.Vector3(),BP=new THREE.Vector3();
+function ctlFor(i,t,evs){for(const e of evs){if(e.arm!=i)continue;
+  const tEnd=e.fetch?e.rel:e.t0+e.ext+e.hold+e.ret;
+  if(t<e.t0-0.35||t>tEnd+(e.fetch?e.relDur:0.35))continue;
+  const dist=Math.min(tmp.copy(e.tgt).sub(ARM[i].pb).length(),LT*0.82);
+  let s=dist*mj((t-e.t0)/e.ext);if(!e.fetch)s-=dist*mj((t-(e.t0+e.ext+e.hold))/e.ret);
+  const R=sm((t-e.t0+0.35)/0.35)*(e.fetch?1-sm((t-e.rel)/e.relDur):1-sm((t-tEnd)/0.35));
+  const hold=t>e.t0+e.ext&&(e.fetch||t<e.t0+e.ext+e.hold)?1:0;
+  const F=e.fetch?mj((t-(e.t0+e.ext+e.hold))/e.fold):0;
+  return {e,s,R,hold,F,dist}}return null}
+let FLOORY=-5;const H=new THREE.Vector3();const STR=window.STR=[];const ORB={on:0,pos:V3(0,0,0),eat:0};
 function tentacles(t,st){
- let nO=0;const wr=st.wr,ga=st.gather;
+ let nO=0;const ga=st.gather;
+ const amb=(0.5+0.5*st.wr)*(1-0.6*st.ex);
+ const evs=st.evs;
  for(let i=0;i<NT;i++){
-  const a=i/NT*Math.PI*2+0.39;rad.set(Math.cos(a),0,Math.sin(a));tan.set(-Math.sin(a),0,Math.cos(a));
-  const ph=i*2.399,om=2.4+0.7*Math.sin(i*1.3),A=0.75+0.45*Math.sin(i*2.1+1),lift=0.5+0.3*Math.sin(i*1.7);
-  P.set(-0.6+rad.x*1.15,-1.35-st.ex*0.5,rad.z*1.15);
-  let th=0.55*(1-wr)-0.25*wr,side=0;
+  const A=ARM[i],ctl=ctlFor(i,st.et,evs);
+  rad.set(Math.cos(A.a),0,Math.sin(A.a));tan.set(-Math.sin(A.a),0,Math.cos(A.a));
+  P.copy(A.pb);P.y-=st.ex*0.5;
+  const push=st.push?st.push[i]:0;
+  let th=A.th0+push*0.3+st.crawl*0.12*Math.max(0,-A.fx)+nz(t*0.11,A.s+11)*0.22*st.wr*(1-st.curl);
+  let side=nz(t*0.17,A.s+21)*0.22*amb;
+  const stretch=0.06*nz(t*0.4,A.s+33)*amb+0.14*push;// proximal third mainly stretches/shortens
+  // reach setup (planar curve toward target)
+  let phi=0,crossed=false;const R=ctl?ctl.R:0;
+  if(ctl){dR.copy(ctl.e.tgt).sub(A.pb).normalize();
+   if(ctl.F>0){const B=MOUTH,dB=tmp.copy(B).sub(A.pb),lb=dB.length();const L1=ctl.dist/2;const h=Math.sqrt(Math.max(0,L1*L1-lb*lb/4));
+    nR.copy(dR).addScaledVector(dB,-dR.dot(dB)/(lb*lb)).normalize();
+    const E=d1.copy(A.pb).addScaledVector(dB,0.5).addScaledVector(nR,h);d2.copy(B).sub(E).normalize();d1.sub(A.pb).normalize()}}
+  let turn=0;const pd=new THREE.Vector3(9,9,9);const P0=P.clone();
   for(let j=0;j<NS;j++){
    const u=j/NS,r=0.27*(1-u*0.7);
-   const wave=Math.sin(t*3.2-j*0.28+i*1.7)*(0.06+u*0.05)*st.swim;
-   // writhe: wave travelling base→tip, per-arm phase/speed/amplitude, curling tips
-   const ww=Math.sin(t*om-j*0.21+ph)*(0.03+u*0.075)*A*wr;
-   const tipc=wr*sm((u-0.5)/0.4)*0.2*Math.sin(t*0.9+ph);
-   th+=wave+ww+tipc+0.016*st.swim*(1-wr)+st.curl*(0.11*u+0.02)-st.open*0.03-wr*lift*0.018*(1-u)+wr*0.004*u;
-   side+=Math.sin(t*2.1-j*0.2+i)*0.03*st.swim*u+Math.sin(t*om*0.6-j*0.16+ph*1.3)*0.06*wr*u;
-   dir.copy(rad).multiplyScalar(Math.cos(th)).addScaledVector(DN,Math.sin(th)).addScaledVector(tan,Math.sin(side)*0.55);
-   dir.x+=0.55*st.swim*u*(1-wr);dir.normalize();
-   if(ga>0){// gathered streaming bundle trailing -x, breathing with jet pulse
-    const spread=(1-u)*0.5+st.pulse*0.35*u;
-    G.set(-1,-0.18+Math.sin(t*5-j*0.3+i*0.8)*0.06*u,0).addScaledVector(rad,spread*(j<6?1.6:0.25)).normalize();
+   const prox=0.55+0.45*sm((u-0.15)/0.25);// whole arm undulates, base sways a bit less
+   const fl=(1-0.7*ga);// flowing traveling waves base->tip, multiple overlapping
+   const tw=(nz(t*A.f-j*A.k,A.s)*(0.03+u*0.04)*A.amp*amb+(Math.sin(j*0.3-t*(0.9+0.5*A.f)+A.rph)*0.06+Math.sin(j*0.13-t*0.55+A.s)*0.03)*fl)*prox;
+   const outer=(0.09+0.05*fr(i+120))*sm((u-0.45)/0.35)*(1-0.4*push)*(1-0.5*st.gather);// outer third loosely curled inward
+   const rip=Math.sin(2*Math.PI*A.rf*t+A.rph-j*0.28)*0.07*u*u*A.ramp*(0.5+0.5*amb);// 0.2–0.5Hz tip ripple
+   const twitch=Math.sin(t*(6+3*fr(i+9))+j*0.6)*0.012*sm((u-0.75)/0.25)*amb;
+   const swimw=Math.sin(t*3.2-j*0.28+i*1.7)*(0.04+u*0.03)*st.swim;
+   th+=tw+outer+rip+twitch+swimw+st.curl*(0.11*u+0.02)*prox;
+   side+=(nz(t*A.f*0.7-j*A.k*0.8,A.s+3)*0.03*amb+Math.sin(j*0.26-t*(0.7+0.4*A.f)+A.s*1.7)*0.045*fl+(fr(i+130)<0.5?-1:1)*(0.04+0.015*fr(i+140))*fl*(1-R))*prox;
+   H.copy(rad).multiplyScalar(Math.cos(side)).addScaledVector(tan,Math.sin(side));dir.copy(H).multiplyScalar(Math.cos(th)).addScaledVector(DN,Math.sin(th)).normalize();
+   if(R>0){// override: straight (gentle planar arc) up to bend point s, curled distal beyond
+    const c=CS[j];
+    if(c<ctl.s){const al=0.12*(c/Math.max(ctl.s,0.01)-0.5)+0.16*Math.sin(c*1.1-t*2.4+i)*(1-0.6*ctl.hold*0);nR.copy(DN).addScaledVector(dR,-dR.y*-1*0).addScaledVector(dR,-DN.dot(dR)).normalize();
+     tmp.copy(dR).multiplyScalar(Math.cos(al)).addScaledVector(nR,Math.sin(al)).addScaledVector(tan,0.12*Math.sin(c*0.8-t*1.7+i*2)).normalize();
+     if(ctl.F>0){const e2=sm((c-ctl.s/2)/0.5+0.5);G.copy(d1).lerp(d2,e2).addScaledVector(nR,0.18*Math.sin(Math.PI*((c%(ctl.s/2))/(ctl.s/2)))).normalize();tmp.lerp(G,ctl.F).normalize()}
+     dL.copy(tmp)}
+    else{if(!crossed){crossed=true;if(j==0)dL.copy(dR);BP.copy(P)}
+     const rate=(4.6/Math.max(4,NS-j))*(1+0.3*ctl.hold*Math.sin(2*Math.PI*1.1*t-j*0.3));
+     phi=Math.min(phi+rate,4.8);nR.copy(DN).addScaledVector(dL,-DN.dot(dL));if(nR.lengthSq()<1e-4)nR.copy(rad).negate();nR.normalize();
+     tmp.copy(dL).multiplyScalar(Math.cos(phi)).addScaledVector(nR,Math.sin(phi))}
+    dir.lerp(tmp,R).normalize()}
+   if(st.scull>0){const w=0.35+0.65*Math.max(0,Math.sin(A.a)),ps=Math.sin(2*Math.PI*(t-800/30)/(22/30)-j*0.22+i*0.4),pp=ps>0?ps:0.35*ps;
+    th+=st.scull*w*0.035*pp*(0.5+u);side+=st.scull*w*0.05*pp*(0.4+u);
+    if(st.om){tmp.copy(st.om).cross(P);dir.addScaledVector(tmp,-0.05*u*st.scull).normalize()}}
+   if(ga>0){const fla=st.jc<0?0.25:st.jc<3?0.95-0.1*st.jc:Math.max(0.15,0.65-0.25*(st.jc-3));const spread=(1-u)*0.42*(1-0.5*st.pulse)+(1-st.pulse)*fla*(0.3+u);
+    G.set(1,-0.12+Math.sin(2*Math.PI*t/0.8-j*0.22)*0.15*u*u,Math.sin(2*Math.PI*t/0.8-j*0.22+1.3)*0.05*u*u).addScaledVector(rad,spread*(j<6?1.6:0.22+0.7*fla*(1-st.pulse))).normalize();
     dir.lerp(G,ga).normalize()}
-   const L=r*1.02;P.addScaledVector(dir,L*0.5);
+   if(st.sw>0&&st.sp){const sp=st.sp,ph2=i/NT*Math.PI*2+0.39;
+    const o=sp.o*(1+0.04*Math.sin(i*2.1)),tip=sp.tip;
+    let ang=o*(1.2-1.05*sm((u-0.3)/0.3))-tip*1.5*sm((u-0.68)/0.3)*(0.6+0.4*o)+0.07*Math.sin(2*Math.PI*(t/SC)-j*0.2+i)*u;
+    G.set(Math.cos(ang),Math.sin(ang)*Math.cos(ph2)-0.04,Math.sin(ang)*Math.sin(ph2));dir.lerp(G,st.sw).normalize()}
+   const L=LS[j]*(u<0.33?1+stretch:1);
+   let onFloor=false;if(P.y<FLOORY+0.8)side+=(outer*2.2+0.03)*(fr(i+130)<0.5?-1:1)*(1-R);
+   if(R<0.5&&ga<0.5&&P.y+dir.y*L<FLOORY+r&&dir.y<0){dir.y*=0.08;dir.normalize();th=Math.min(th,Math.PI*0.5)*0.97;onFloor=true}
+   if(pd.x<5)turn+=Math.acos(Math.min(1,pd.dot(dir)));pd.copy(dir);
+   P.addScaledVector(dir,L*0.5);
    const e=st.ex*(0.25+u*1.6)*(1+0.3*Math.sin(j*1.3+i));
    V.copy(P).addScaledVector(rad,e*1.2).addScaledVector(dir,st.ex*j*0.05);V.y-=st.ex*u*0.6;
    q.setFromUnitVectors(Y,dir);
-   D.position.copy(V).addScaledVector(dir,st.ex*0.12);D.quaternion.copy(q);D.scale.set(r,r*1.25,r);D.updateMatrix();IW.setMatrixAt(i*NS+j,D.matrix);
+   D.position.copy(V).addScaledVector(dir,st.ex*0.12);D.quaternion.copy(q);D.scale.set(r,L*1.225,r);D.updateMatrix();IW.setMatrixAt(i*NS+j,D.matrix);
    D.position.copy(V).addScaledVector(dir,-L*0.5*(1+st.ex*0.4));D.scale.set(r*0.98,L*0.22,r*0.98);D.updateMatrix();IK.setMatrixAt(i*NS+j,D.matrix);
    if(j%4==0){D.position.copy(V).addScaledVector(dir,L*0.18+st.ex*0.25);D.scale.set(r*1.03,r,r*1.03);D.updateMatrix();IO.setMatrixAt(nO++,D.matrix)}
-   // sucker: sits on inner face, travels with its ring when exploded (no scatter)
+   // suckers: cupping pulse in sequence near grasp / floor contact
+   let cup=1;if(ctl&&crossed&&(ctl.hold||ctl.F>0)&&CS[j]-ctl.s<2.2)cup=1+0.6*Math.max(0,Math.sin(t*9-j*0.9));else if(onFloor)cup=1+0.3*Math.max(0,Math.sin(t*4-j*0.7+i));
    N.copy(dir).cross(tan).normalize();
-   D.position.copy(V).addScaledVector(N,-r*0.98);D.quaternion.setFromUnitVectors(Y,V.copy(N).negate());
-   D.scale.setScalar(r*(j%2?0.0001:1.0)*(1-0.4*st.ex));D.updateMatrix();IS.setMatrixAt(i*NS+j,D.matrix);
+   D.position.copy(V).addScaledVector(N,-r*0.98);D.quaternion.setFromUnitVectors(Y,tmp.copy(N).negate());
+   D.scale.setScalar(r*(j%2?0.0001:cup)*(1-0.4*st.ex));D.updateMatrix();IS.setMatrixAt(i*NS+j,D.matrix);
    P.addScaledVector(dir,L*0.5);
-  }}
+  }
+  if(ctl&&ctl.e.fetch&&crossed){ORB.grip=BP.clone()}
+  STR[i]=P.distanceTo(P0)/LT;
+ }
  IO.count=nO;for(const I of [IW,IK,IO,IS])I.instanceMatrix.needsUpdate=true;
 }
+// orb (prey) to fetch
+const orb=new THREE.Group();{const core=new THREE.Mesh(new THREE.SphereGeometry(0.3,24,16),new THREE.MeshBasicMaterial({color:0xff7a2f}));orb.add(core);
+ const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,140,60,.9)');gr.addColorStop(.35,'rgba(255,110,40,.35)');gr.addColorStop(1,'rgba(255,90,31,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));sp.scale.setScalar(1.9);orb.add(sp);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.025,6,32),M.k);orb.add(ring);orb.userData.ring=ring}
+bot.add(orb);orb.visible=false;
 // ---------- STATES ----------
-const ST=[['APPROACH','接近 · 進入遊泳'],['OCTOPUS','軟体モード · グニャグニャ'],['TEARDOWN','分解 · 部品展開'],['REASSEMBLE','再組立 · 節結合'],['BEAK OPEN','嘴 開口 · 採取準備'],['HOLDING','把持 · 触腕巻付'],['DEPARTING','離脱 · 噴射遊泳']];
-const TL=[0,60,165,255,305,375,445,585],TOT=585;
+const ST=[['APPROACH','接近 · 噴射進入'],['OCTOPUS','探索 · 自由運動'],['CRAWL','匍匐 · 後腕推進'],['TEARDOWN','分解 · 部品展開'],['REASSEMBLE','再組立 · 節結合'],['FETCH','フェッチ · 捕獲搬送'],['BEAK OPEN','嘴 開口 · 摂食'],['HOLDING','把持 · 触腕巻付'],['DEPARTING','離脱 · 噴射遊泳']];
+const EX0=876;
+// jet integrator: contract 0.2s (thrust) / refill 0.6s (glide)
+const jetC=ph=>ph<0.25?sm(ph/0.25):1-sm((ph-0.25)/0.75);
+// medusoid arm swimming: recovery (open) 0.75s, power (close) 0.3s
+const SC=1.05,SR=0.75/1.05;
+function swimPh(f){if(f<EX0)return null;const tt=(f-EX0)/30,ph=(tt/SC)%1,k=Math.floor(tt/SC);
+ let o,tip,pul,q=0;
+ if(ph<SR){const r=ph/SR;o=sm(r)*(0.85+0.05*Math.min(k,3));tip=sm(r/0.35);pul=k==0?0:1-sm(r/0.8)}
+ else{q=(ph-SR)/(1-SR);o=(1-q*q*(3-2*q))*(0.85+0.05*Math.min(k,3));tip=1-sm((q-0.55)/0.35);pul=sm(q/0.6)}
+ return {o,tip,pul,q,k,ph,pow:ph>=SR}}
+const XT=[];let TOT;{let x=0,v=0;for(let f=0;f<1400;f++){XT[f]=x;if(f>=EX0){const tex=(f-EX0)/30;for(let s=0;s<4;s++){const tt=tex+s/120,ph=(tt/SC)%1,kc=Math.floor(tt/SC);const a=ph>=SR?62*Math.sin(Math.PI*(ph-SR)/(1-SR))*(0.75+0.2*Math.min(kc,3)):0;v=v*Math.exp(-2.4/120)+a/120;x+=v/120}}
+ if(x>30){TOT=f+4;break}}}
+const TL=[0,60,300,400,490,540,625,700,790,TOT];
 const trk=document.getElementById('trk');ST.forEach((s,i)=>{const e=document.createElement('span');e.textContent=s[0];e.style.flex=TL[i+1]-TL[i];e.onclick=()=>go(i);trk.appendChild(e)});
-const EX0=495;
+const kk=(f,a,b)=>sm((f-a)/(b-a));
+const actAt=f=>Math.max(kk(f,300,320)*(1-kk(f,400,520)),kk(f,405,420)*(1-kk(f,540,620)),kk(f,555,570)*(1-kk(f,700,780)),kk(f,EX0-60,EX0));
+// breathing phase: 3.4s at rest, ~1.8s after activity (integrated so it stays smooth)
+const BPH=[0];for(let f=1;f<TOT+2;f++)BPH[f]=BPH[f-1]+1/30/(3.4-1.6*actAt(f));
+const brC=ph=>ph<1/3?sm(ph*3):1-sm((ph-1/3)*1.5);// contraction ~1/3 of cycle
 function stateAt(f){
- const k=(a,b)=>sm((f-a)/(b-a));
- const ex=k(170,208)*(1-k(256,296));
- const open=k(309,325)*(1-k(366,380));
- const curl=k(377,410)*(1-k(445,475));
- const wr=k(55,85)*(1-k(150,178));
- const gather=Math.max(1-k(30,72),k(448,488));
- const turn=Math.max(1-k(38,78),k(470,500));
- const swim=Math.max(0.25,1-ex*0.85-curl*0.7-wr*0.85);
- // jet pulse-glide; entry decelerates in, exit accelerates out
- const tin=f/30,tex=Math.max(0,(f-EX0)/30),Pp=0.75;
- let x=0,pulse=0;
- if(f<60){const e=1-sm(f/58);x=-30*e*e*(1+0.0*e);pulse=e*(0.5-0.5*Math.cos(2*Math.PI*tin/Pp))}
- if(f>EX0){const ramp=Math.min(1,tex/1.2);x=8.5*(tex-0.7*Pp/(2*Math.PI)*Math.sin(2*Math.PI*tex/Pp))*(0.35+0.65*ramp)*Math.min(1,tex*2+0.2);pulse=0.5-0.5*Math.cos(2*Math.PI*tex/Pp)}
- let s=0;for(let i=0;i<7;i++)if(f>=TL[i])s=i;
- return {ex,open,curl,swim,wr,gather,turn,x,pulse,s}}
-const TGT=[{swim:1},{wr:1,swim:0.25},{ex:1,swim:0.25},{swim:0.8},{open:1,swim:0.6},{curl:1,swim:0.3}];
-const KEYS=['ex','open','curl','swim','wr'];
-let auto=true,cur=0,live={ex:0,open:0,curl:0,swim:1,wr:0,gather:0,turn:0,x:0,pulse:0,s:0};
+ const k=(a,b)=>kk(f,a,b),t=f/30;
+ const ex=k(405,443)*(1-k(491,531));
+ const open=k(625,640)*(1-k(672,688));
+ const curl=k(703,735)*(1-k(790,815));const pre=k(850,862)*(1-k(866,874));const scull=k(790,804)*(1-k(862,876));
+ const wr=k(50,90)*(1-k(285,315));
+ const crawl=k(300,318)*(1-k(392,408));
+ const gather=Math.max(1-k(30,72),k(864,884));
+ const turn=Math.max(1-k(38,78),(mj((f-798)/24)*0.3+mj((f-820)/24)*0.4+mj((f-842)/22)*0.3));
+ const swim=0.3*(1-k(40,80));
+ let x=0,pulse=0,push=null,bob=0;
+ const cr=crawlAt(t);if(f<300)x=CR0;else{x=cr.x;push=cr.push.map(v=>v*crawl);bob=cr.bob*crawl}
+ if(f<60){const e=1-sm(f/58);x=CR0-28*e*e;pulse=e>0.02?jetC((t/0.8)%1):0}
+ const sp=swimPh(f);if(f>=EX0){x+=XT[f];pulse=sp.pul}
+ const fetchOn=f>=540&&f<712?1:0;
+ let s=0;for(let i=0;i<9;i++)if(f>=TL[i])s=i;
+ return {sp,sw:f>=EX0-8?kk(f,EX0-8,EX0+6):0,pre,scull,jc:f>=EX0?(f-EX0)/24:-1,ex,open,curl:Math.max(curl,pre*0.8),swim,wr,gather,turn,x,pulse,s,crawl,push,bob,et:t,evs:fetchOn?[FETCH]:IDLE_EV,fetch:f>=540&&f<700?1:0,
+  orbA:k(540,556),eatv:k(600,628)*(1-k(672,700)),eat:k(642,668),act:actAt(f),bph:BPH[Math.min(f|0,TOT)]}}
+const TGT={1:{wr:1},3:{ex:1},4:{},6:{open:1},7:{curl:1}};
+const KEYS=['ex','open','curl','swim','wr','crawl'];
+let auto=true,cur=0,live={ex:0,open:0,curl:0,swim:0,wr:1,gather:0,turn:0,x:0,pulse:0,s:1,crawl:0,push:null,bob:0,et:0,evs:[],fetch:0,orbA:0,eat:0,act:0,bph:0};
+
 // ---------- HUD ----------
 const $=id=>document.getElementById(id);
 const mkbar=(el,n)=>{for(let i=0;i<n;i++)el.appendChild(document.createElement('i'))};mkbar($('pwb'),20);mkbar($('rpm'),20);
@@ -214,32 +319,50 @@ function hud(f,st,man){const t=f/30;
 }
 function mark(){document.querySelectorAll('#btns button').forEach(b=>b.classList.toggle('on',b.id=='bAuto'?auto:(!auto&&+b.dataset.s==cur)))}
 let t0=performance.now(),last=performance.now();
-function go(i){if(i==6||i==0){auto=true;t0=performance.now()-TL[i]/30*1000;mark();return}auto=false;cur=i;mark()}
+function go(i){if([0,2,5,8].includes(i)){auto=true;t0=performance.now()-TL[i]/30*1000;mark();return}auto=false;cur=i;mark()}
 $('bAuto').onclick=()=>{auto=true;t0=performance.now();mark()};document.querySelectorAll('#btns button[data-s]').forEach(b=>b.onclick=()=>go(+b.dataset.s));
 // ---------- APPLY ----------
 const base=new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18,-0.55,0.08));rig.quaternion.copy(base);
 bot.scale.setScalar(0.78);
 const qN=new THREE.Quaternion(),qS=new THREE.Quaternion(),qI=new THREE.Quaternion(),eu=new THREE.Euler();
+const OM=new THREE.Vector3();
+const BUB=[];{const g=new THREE.SphereGeometry(1,12,8);for(let n=0;n<30;n++){const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.5,roughness:0.1,metalness:0,depthWrite:false}));m.visible=false;rig.add(m);BUB.push(m)}}
+function bubbles(f,st,by){for(const b of BUB)b.visible=false;if(f<EX0)return;let n=0;
+ for(let k=0;k<5&&n<BUB.length;k++){const fb=EX0+Math.round((k*SC+SR*SC+0.08)*30);const a=(f-fb)/30;if(a<0||a>0.9)continue;
+  for(let m=0;m<6;m++,n++){const b=BUB[n];const sd=k*10+m;const sp=1.5+2.5*fr(sd+700);
+   V.set(st.x*0+(XT[fb]+CR1)-1.4-sp*(1-Math.exp(-a*3))*0.9,by-0.9+(fr(sd+710)-0.5)*1.0+a*0.6,(fr(sd+720)-0.5)*1.2).applyQuaternion(qI);
+   b.position.copy(V);b.scale.setScalar(0.32*bot.scale.x*(0.4+0.8*fr(sd+730))*(0.6+a));b.material.opacity=0.55*(1-a/0.9);b.visible=true}}}
 function apply(f,st){const t=f/30;
- const by=1.1+Math.sin(t*1.6)*0.18*st.swim+st.curl*0.3-st.wr*0.6+Math.sin(t*2.2)*0.12*st.wr;
- eu.set(-st.open*0.6+Math.sin(t*1.3)*0.06*st.wr,Math.sin(t*0.5)*0.1,0.12*st.swim+Math.sin(t*1.6)*0.03+Math.sin(t*1.1)*0.08*st.wr);qN.setFromEuler(eu);
- // sideways: bot's +x (eye) aligned with world +x regardless of user rotation
- qI.copy(rig.quaternion).invert();qS.setFromEuler(eu.set(0,0,0.06-0.08*st.pulse)).premultiply(qI);
+ const by=1.1-1.0*(1-st.gather)*(1-0.6*(st.scull||0))*(1-0.5*st.ex)+Math.sin(t*1.6)*0.18*st.swim+st.curl*0.3-st.wr*0.7-st.crawl*0.55+(st.bob||0)*0.08+nz(t*0.3,3)*0.12*st.wr+nz(t*0.25,8)*0.05;FLOORY=(-4.6-by)/0.78+0.12;
+ const ev=st.eatv||0;eu.set(-st.open*0.25-ev*0.5+nz(t*0.27,13)*0.06,nz(t*0.18,14)*0.12,0.1*st.swim+nz(t*0.22,15)*0.06-st.crawl*0.06);qN.setFromEuler(eu);
+ // jet: mantle leads (yaw pi), always toward screen right
+ qI.copy(rig.quaternion).invert();qS.setFromEuler(eu.set(0,Math.PI,-0.05+0.06*st.pulse)).premultiply(qI);
  bot.quaternion.copy(qN).slerp(qS,st.turn);
- // move in world space (rig space inverse) so exit is always to screen right
- V.set(st.x,by+st.x*0.04,0).applyQuaternion(qI);bot.position.copy(V);
+ if(st.scull>0&&!st._p){const sp=stateAt(Math.max(0,f-1));sp._p=1;const qa=bot.quaternion.clone();apply(f-1,sp);const qb=bot.quaternion.clone();bot.quaternion.copy(qa);const dq=qb.invert().multiply(qa);const ang=2*Math.acos(Math.min(1,Math.abs(dq.w)));const sn=Math.sqrt(Math.max(1e-9,1-dq.w*dq.w))*Math.sign(dq.w||1);st.om=new THREE.Vector3(dq.x,dq.y,dq.z).multiplyScalar(ang*30/sn)}
+ V.set(st.x,by+st.x*0.02,0).applyQuaternion(qI);bot.position.copy(V);
  for(const p of parts)p.position.copy(p.userData.base).addScaledVector(p.userData.dir,st.ex);
  head.position.copy(head.userData.base).add(V.set(-0.8*st.ex,0.9*st.ex,0));
  eye.position.copy(eye.userData.base).addScaledVector(eye.userData.dir,st.ex);
  beak.position.y-=st.open*0.55;jaws[0].rotation.x=-st.open*0.8;jaws[1].rotation.x=st.open*0.8;beak.scale.setScalar(1+st.open*0.7);
- // squash & stretch breathing: writhe = slow breath, jet = contraction pulse
- const br=Math.sin(t*2.2)*0.07*st.wr+(st.pulse-0.5)*0.12*st.gather;
- mantle.scale.set(1+br,1-br*1.3,1+br);head.scale.set(1+br*0.4,1-br*0.5,1+br*0.4);
- tentacles(t,st);blob.position.x=st.x;blob.material.opacity=1-Math.min(1,Math.abs(st.x)/22);
+ // breathing: contraction 1/3 of cycle; jet pulses override
+ const c=brC((st.bph||t/3.4)%1);const br=(-c*0.06+0.02+0.06*(st.pre||0))*(1-st.gather)+(0.5-st.pulse)*0.16*st.gather;
+ mantle.scale.set(1+br,1+br*0.6,1+br);head.scale.set(1+br*0.3,1+br*0.2,1+br*0.3);
+ if(Math.abs((window.EV||0)-ev)>1e-4){window.EV=ev;placeCam()}
+ tentacles(t,st);
+ // orb
+ orb.visible=st.fetch>0&&st.eat<0.98;
+ if(orb.visible){const g=ORB.grip&&st.et>FETCH.t0+FETCH.ext-0.05;OM.copy(g?ORB.grip:FETCH.tgt);if(!g)OM.y+=Math.sin(t*2.2)*0.12;
+  OM.lerp(MOUTH,sm(st.eat*1.2));orb.position.copy(OM);orb.scale.setScalar(Math.max(0.01,st.orbA*(1-st.eat)*(1+0.08*Math.sin(t*8))));orb.userData.ring.rotation.set(t*1.3,t*0.9,0)}
+ ORB.grip=null;
+ const look=orb.visible?Math.max(-1,Math.min(1,(OM.z)*0.12)):0;
+ pupil.position.set(0.72,nz(t*0.7,23)*0.18*(1-st.fetch)+(orb.visible?(OM.y+1)*0.1:0),nz(t*0.55,24)*0.2*(1-st.fetch)+look*0.25);
+ const bl=blinkAt(t);iris.scale.setScalar(1-0.45*bl+0.06*nz(t*1.3,25));pupil.scale.setScalar(1-0.6*bl);
+ blob.position.x=st.x;blob.material.opacity=1-Math.min(1,Math.abs(st.x)/22);
+ bubbles(f,st,by);
  M.glow.color.setHSL(0.05,1,0.55+0.15*Math.sin(t*6));
 }
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();placeCam()}
-function placeCam(){const narrow=innerWidth<innerHeight;const d=camD*(narrow?1.75:1);cam.position.set(0,2.4,d);cam.lookAt(0.3,-1.0,0);
+function placeCam(){const narrow=innerWidth<innerHeight;const d=camD*(narrow?1.75:1);cam.position.set(0,2.4-1.4*(window.EV||0),d);cam.lookAt(0.3,-1.0,0);
  // shift image up so robot sits in the free area between top bar and timeline
  cam.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.06,innerWidth,innerHeight)}
 addEventListener('resize',resize);
@@ -252,11 +375,12 @@ R.domElement.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;
 const up=e=>{pts.delete(e.pointerId);pd=0};R.domElement.addEventListener('pointerup',up);R.domElement.addEventListener('pointercancel',up);
 R.domElement.addEventListener('wheel',e=>{e.preventDefault();camD=Math.min(40,Math.max(8,camD*(1+e.deltaY*0.001)));placeCam()},{passive:false});
 resize();
-window.renderFrame=f=>{const st=stateAt(f%TOT);apply(f,st);hud(f,st,false);R.render(S,cam)};
+window.TOT=TOT;window.renderFrame=f=>{f=f%TOT;const st=stateAt(f);apply(f,st);hud(f,st,false);R.render(S,cam)};
 function loop(now){requestAnimationFrame(loop);if(window.__cap)return;const dt=Math.min(0.05,(now-last)/1000);last=now;
  const f=(now-t0)/1000*30;let st;
- if(auto){st=stateAt(f%TOT);Object.assign(live,st)}else{const g=TGT[cur];const k=1-Math.exp(-dt*3);for(const n of KEYS)live[n]+=((g[n]||0)-live[n])*k;
-  for(const n of ['gather','turn','x','pulse'])live[n]+=(0-live[n])*k;live.s=cur;st=live}
+ if(auto){const fw=f%TOT;st=stateAt(fw);Object.assign(live,st);apply(fw,st);hud(fw,st,false);R.render(S,cam);return}else{const g=TGT[cur];const k=1-Math.exp(-dt*3);for(const n of KEYS)live[n]+=((g[n]||0)-live[n])*k;
+  for(const n of ['gather','turn','x','pulse'])live[n]+=(0-live[n])*k;live.s=cur;live.push=null;live.bob=0;live.fetch=0;live.evs=cur==1?IDLE_EV:[];live.et=2.5+((f/30)%7.5);live.bph=f/30/3.4;st=live}
  apply(f,st);hud(f,st,!auto);R.render(S,cam)}
 requestAnimationFrame(loop);window.ready=true;
-</script></body></html>
+</script><a href="./making.html" style="position:fixed;right:12px;bottom:56px;z-index:99;background:#ff5a1f;color:#fff;padding:6px 12px;border-radius:16px;font:12px sans-serif;text-decoration:none">📖 できるまで / Making</a>
+</body></html>
