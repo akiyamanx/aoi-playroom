@@ -1,0 +1,181 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ノック式ボールペン 分解ビュー</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;
+background:radial-gradient(120% 90% at 30% 10%,#eef3fb 0%,#d9e3f1 45%,#b9c7dc 100%);color:#24324a}
+#c{position:fixed;inset:0}
+h1{position:fixed;top:10px;left:0;right:0;text-align:center;margin:0;font-size:clamp(15px,4.2vw,22px);font-weight:700;letter-spacing:.05em;pointer-events:none}
+#ui{position:fixed;bottom:34px;left:0;right:0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 8px}
+button{border:0;border-radius:999px;padding:10px 16px;font-size:15px;font-weight:600;color:#1f3a63;background:rgba(255,255,255,.75);
+box-shadow:0 2px 8px rgba(40,60,100,.18);backdrop-filter:blur(6px);cursor:pointer}
+button.on{background:#5b84c4;color:#fff}
+#credit{position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:12px;opacity:.75;pointer-events:none}
+.lb{font-size:13px;font-weight:600;white-space:nowrap;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.88);
+color:#1d2f4d;border-left:4px solid #5b84c4;box-shadow:0 1px 5px rgba(30,50,90,.2);transition:opacity .3s}
+body.cap #ui{display:none} body.cap .lb{transition:none}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.170.0/examples/jsm/"}}</script>
+</head><body>
+<div id="c"></div><h1>ノック式ボールペン 分解ビュー</h1>
+<div id="ui"><button id="bAuto">自動再生</button><button id="bEx">分解する</button><button id="bAs">組み立てる</button><button id="bKn">カチッとノック</button></div>
+<div id="credit">作成: 葵ちゃん(Grok Bot) / 2026-11-03</div>
+<script type="module">
+import * as THREE from 'three';
+import {CSS2DRenderer,CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const box=document.getElementById('c');
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=0.85;
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(R.domElement);
+const L=new CSS2DRenderer();L.domElement.style.cssText='position:absolute;top:0;pointer-events:none';box.appendChild(L.domElement);
+const S=new THREE.Scene();
+{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');const gr=g.createRadialGradient(150,50,0,256,256,560);
+gr.addColorStop(0,'#eef3fb');gr.addColorStop(.45,'#d9e3f1');gr.addColorStop(1,'#b9c7dc');g.fillStyle=gr;g.fillRect(0,0,512,512);
+const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;S.background=tx;S.backgroundIntensity=1}
+const pm=new THREE.PMREMGenerator(R);S.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;S.environmentIntensity=0.55;
+const cam=new THREE.PerspectiveCamera(35,1,0.1,100);
+
+S.add(new THREE.HemisphereLight(0xf4f7ff,0x8090a8,0.7));
+const sun=new THREE.DirectionalLight(0xffffff,1.3);sun.position.set(3,10,6);
+const top=new THREE.DirectionalLight(0xffffff,0.35);top.position.set(0,20,0);top.castShadow=true;S.add(top);
+top.shadow.mapSize.set(2048,2048);Object.assign(top.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:40});top.shadow.radius=5;top.shadow.bias=-0.0005;S.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe8ff,0.5);fill.position.set(-6,3,-5);S.add(fill);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.ShadowMaterial({opacity:0.28}));
+ground.rotation.x=-Math.PI/2;ground.position.y=-1.3;ground.receiveShadow=true;S.add(ground);
+// materials
+const M={
+ white:new THREE.MeshPhysicalMaterial({color:0xe9e9e4,roughness:0.28,clearcoat:1,clearcoatRoughness:0.12}),
+ grip:new THREE.MeshPhysicalMaterial({color:0x7890b2,roughness:0.75,sheen:0.4,sheenColor:0xc8d6ea}),
+ dimple:new THREE.MeshPhysicalMaterial({color:0xf2f2ee,roughness:0.35,clearcoat:.6}),
+ clear:new THREE.MeshPhysicalMaterial({color:0xdfe6ec,roughness:0.12,transmission:1,thickness:0.35,ior:1.5,clearcoat:1,attenuationColor:0xdfeef5,attenuationDistance:1.5}),
+ blueclear:new THREE.MeshPhysicalMaterial({color:0xa9c9e4,roughness:0.1,transmission:0.9,thickness:0.4,ior:1.5,clearcoat:1,attenuationColor:0x7fb0dc,attenuationDistance:0.6}),
+ win:new THREE.MeshPhysicalMaterial({color:0x3f6fae,roughness:0.2,clearcoat:1}),
+ ink:new THREE.MeshPhysicalMaterial({color:0x2f63c9,roughness:0.3,transparent:true,opacity:0.9}),
+ metal:new THREE.MeshStandardMaterial({color:0xc9ccd2,metalness:1,roughness:0.25}),
+ spring:new THREE.MeshStandardMaterial({color:0xb8bcc4,metalness:1,roughness:0.3}),
+};
+// lathe along X: profile pts [x,r]
+function lathe(pts,mat,seg=64){const g=new THREE.LatheGeometry(pts.map(([x,r])=>new THREE.Vector2(r,x)),seg);g.rotateZ(-Math.PI/2);
+ const m=new THREE.Mesh(g,mat);m.castShadow=!mat.transparent;m.receiveShadow=true;return m}
+const smooth=(a,b,n,f)=>{const o=[];for(let i=0;i<=n;i++){const u=i/n;o.push([a+(b-a)*u,f(u)])}return o};
+const pen=new THREE.Group();S.add(pen);
+const parts=[];
+function part(name,obj,ex,lpos){const g=new THREE.Group();g.add(obj);pen.add(g);
+ const d=document.createElement('div');d.className='lb';d.textContent=name;const w=document.createElement('div');w.appendChild(d);
+ const lo=new CSS2DObject(w);lo.position.copy(lpos);g.add(lo);const p={name,g,ex,lo,el:d,wrap:w,lpos};parts.push(p);return p}
+// tip cone (clear)
+const tip=new THREE.Group();
+tip.add(lathe([[-7.0,0.001],[-7.0,0.13],[-6.85,0.16],[-6.2,0.33],[-5.7,0.43],[-5.45,0.43],[-5.45,0.001]],M.clear));
+for(let i=0;i<8;i++){const r=lathe([[-6.75,0.001],[-6.75,0.17],[-6.6,0.2],[-6.45,0.001]],M.clear,24);}
+const tipRing=lathe([[-6.95,0],[-6.95,0.15],[-6.8,0.18],[-6.8,0]],M.clear);tip.add(tipRing);
+const P_tip=part('先端コーン(透明)',tip,new THREE.Vector3(-3.2,0,0),new THREE.Vector3(-6.3,0.9,0));
+// grip
+const grip=new THREE.Group();
+grip.add(lathe(smooth(-5.7,-2.1,40,u=>0.44+0.1*Math.sin(Math.PI*Math.pow(u,0.8))-0.03*u+(u>0.97?-0.04:0)),M.grip));
+[[-4.6,0.3],[-3.7,0.36]].forEach(([x,s])=>{const dm=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),M.dimple);
+ dm.scale.set(s,0.08,0.17);dm.position.set(x,0.49,0.14);dm.rotation.x=0.28;dm.castShadow=false;
+ const q=new THREE.Group();q.add(dm);q.rotation.x=1.15;grip.add(q)});
+const P_grip=part('グリップ(ラバー)',grip,new THREE.Vector3(-1.6,0,0),new THREE.Vector3(-3.9,1.0,0));
+// barrel white tapered
+const barrel=new THREE.Group();
+barrel.add(lathe([[-2.2,0.001],[-2.2,0.44],...smooth(-2.1,4.9,50,u=>0.47+0.02*Math.sin(Math.PI*u*0.8)-0.11*u*u),[4.9,0.30],[4.9,0.001]],M.white));
+const wnd=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),M.win);wnd.scale.set(0.24,0.06,0.12);
+const wq=new THREE.Group();wnd.position.set(4.25,0.375,0);wq.add(wnd);wq.rotation.x=1.15;barrel.add(wq);
+const P_bar=part('軸(本体)',barrel,new THREE.Vector3(0,0,0),new THREE.Vector3(1.2,0.95,0));
+// back cap + clip
+const cap=new THREE.Group();
+cap.add(lathe([[4.75,0.001],[4.75,0.34],[4.8,0.38],[5.3,0.38],[6.0,0.31],[6.05,0.22],[6.05,0.001]],M.blueclear));
+const cpts=[new THREE.Vector3(5.7,0.36,0),new THREE.Vector3(5.6,0.62,0),new THREE.Vector3(4.6,0.66,0),new THREE.Vector3(3.0,0.6,0),new THREE.Vector3(1.9,0.5,0)];
+// wide flat curved clip
+const cgeo=new THREE.BoxGeometry(3.9,0.06,0.34,60,1,4);const cp=cgeo.attributes.position;
+for(let i=0;i<cp.count;i++){const x=cp.getX(i),u=Math.min(1,Math.max(0,(x+1.95)/3.9));const y=cp.getY(i)+0.47+0.13*Math.sin(Math.PI*Math.pow(u,0.7))+0.06*u;
+ cp.setXYZ(i,x+3.75,y,cp.getZ(i)*(0.75+0.25*u))}cgeo.computeVertexNormals();
+const clip=new THREE.Mesh(cgeo,M.blueclear);
+const bridge=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.26,0.34),M.blueclear);bridge.position.set(5.6,0.5,0);
+const tipB=new THREE.Mesh(new THREE.SphereGeometry(0.17,20,12),M.blueclear);tipB.scale.set(1,0.35,1);tipB.position.set(1.83,0.48,0);
+const clipBox=new THREE.Group();clipBox.add(clip,bridge,tipB);cap.add(clipBox);
+const P_cap=part('クリップ+尾栓(透明ブルー)',cap,new THREE.Vector3(1.4,0,0),new THREE.Vector3(5.0,1.85,0));
+// knock button
+const knock=lathe([[5.7,0.001],[5.7,0.2],[6.6,0.19],[6.75,0.16],[6.8,0.1],[6.8,0.001]],M.clear);
+const kg=new THREE.Group();kg.add(knock);
+const P_kn=part('ノックボタン(透明)',kg,new THREE.Vector3(2.7,0,0),new THREE.Vector3(6.6,0.95,0));
+// refill
+const refill=new THREE.Group();
+refill.add(lathe([[-6.65,0.001],[-6.65,0.1],[5.4,0.1],[5.4,0.001]],M.ink,32));
+refill.add(lathe([[-7.25,0.001],[-7.25,0.03],[-7.0,0.07],[-6.6,0.09],[-6.4,0.105],[-6.4,0.001]],M.metal,32));
+const P_ref=part('替芯(インク+金属チップ)',refill,new THREE.Vector3(-0.6,-0.25,1.3),new THREE.Vector3(0.2,-0.55,0));
+// spring
+const hp=[];for(let i=0;i<=400;i++){const u=i/400,a=u*Math.PI*2*12;hp.push(new THREE.Vector3(-5.35+u*1.3,Math.cos(a)*0.16,Math.sin(a)*0.16))}
+const spr=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hp),800,0.022,6),M.spring);spr.castShadow=true;
+const sg=new THREE.Group();sg.add(spr);
+const P_spr=part('スプリング',sg,new THREE.Vector3(-2.6,-0.25,1.3),new THREE.Vector3(-4.7,-0.55,0));
+pen.position.set(-0.3,-0.4,0);
+// state
+let ex=0,exT=0,kn=0,knT=0,auto=false,autoT0=0;
+const ease=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+function apply(e,k){
+ for(const p of parts){p.g.position.copy(p.ex).multiplyScalar(e*0.85)}
+ // knock: button pressed, refill tip out (k = press pulse 0..1, tipOut 0..1)
+ P_kn.g.position.x-=0.35*k.press; P_ref.g.position.x-=0.28*k.out; P_spr.g.scale.x=1-0.25*k.out;
+ P_spr.g.position.x+= (-5.35)*(0.25*k.out)*-1*0; 
+ for(const p of parts){p.el.style.opacity=e>0.7?(e-0.7)/0.3:0}
+}
+function declutter(){ // stack labels vertically in screen space
+ const items=parts.map(p=>({p,r:p.el.getBoundingClientRect()})).filter(o=>o.r.width>0);
+ for(const o of items){o.p.wrap.style.marginTop='0px';o.p.wrap.style.marginLeft='0px'}
+ const rs=parts.map(p=>p.el.getBoundingClientRect());
+ const arr=parts.map((p,i)=>({p,x0:rs[i].left,x1:rs[i].right,y:rs[i].top,h:rs[i].height,off:0,dir:p.lpos.y<0?1:-1}));
+ for(let it=0;it<6;it++)for(let i=0;i<arr.length;i++)for(let j=0;j<arr.length;j++){if(i===j)continue;const a=arr[i],b=arr[j];
+  if(a.dir!==b.dir)continue;
+  if(a.x0<b.x1+4&&b.x0<a.x1+4){const ay=a.y+a.off,by=b.y+b.off;if(Math.abs(ay-by)<a.h+4){
+   // move the one further from pen outward
+   const mv=(a.dir<0?(ay<=by):(ay>=by))?a:b;if(mv!==a)continue;
+   a.off+=a.dir*((a.h+4)-Math.abs(ay-by)+0.5)}}}
+ for(const a of arr){a.p.wrap.style.marginTop=a.off.toFixed(1)+'px';let dx=0;if(a.x1>innerWidth-6)dx=innerWidth-6-a.x1;if(a.x0<6)dx=6-a.x0;a.p.wrap.style.marginLeft=dx.toFixed(1)+'px'}
+}
+function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h);L.setSize(w,h);cam.aspect=w/h;
+ const d=Math.max(30,32/cam.aspect);cam.userData.d=d;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const baseQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0.62,0.1,'YXZ'));
+const userQ=new THREE.Quaternion();let zoom=0.85;
+const ptrs=new Map();let pinch0=0,zoom0=1;
+const el=R.domElement;el.style.touchAction='none';
+el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});auto=false;upd();
+ if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);zoom0=zoom}});
+el.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;
+ if(ptrs.size===1){const dx=e.clientX-p.x,dy=e.clientY-p.y,k=4/Math.min(innerWidth,innerHeight);
+  const camR=new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,0),camU=new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,1);
+  userQ.premultiply(new THREE.Quaternion().setFromAxisAngle(camU,dx*k).multiply(new THREE.Quaternion().setFromAxisAngle(camR,dy*k)))}
+ p.x=e.clientX;p.y=e.clientY;
+ if(ptrs.size===2&&pinch0){const [a,b]=[...ptrs.values()];zoom=Math.min(2.2,Math.max(0.4,zoom0*pinch0/Math.hypot(a.x-b.x,a.y-b.y)))}});
+const up=e=>{ptrs.delete(e.pointerId);pinch0=0};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+el.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.min(2.2,Math.max(0.4,zoom*Math.exp(e.deltaY*0.001)))},{passive:false});
+const box3=new THREE.Box3();
+function fitGround(){pen.updateMatrixWorld(true);box3.setFromObject(pen,true);ground.position.y=box3.min.y-0.04}
+function orbit(ang,elev,z=1){const d=cam.userData.d*z;cam.position.set(Math.sin(ang)*d*Math.cos(elev),0.7+Math.sin(elev)*d,Math.cos(ang)*d*Math.cos(elev));cam.lookAt(0,0.7,0)}
+// deterministic timeline (seconds)
+function timeline(t){
+ const cl=(a,b)=>Math.min(1,Math.max(0,(t-a)/(b-a)));
+ let e=ease(cl(1.0,2.2))-ease(cl(5.4,6.5));
+ let ang=-0.1+0.15*Math.sin(t*0.4);if(t>2.2&&t<5.6){ang+=Math.sin(Math.PI*cl(2.2,5.6))*0.0+ 0.22*Math.sin(2*Math.PI*cl(2.2,5.6))}
+ const pr=t>6.8?Math.max(0,1-Math.abs(t-7.05)/0.15):0;const out=ease(cl(6.9,7.1));
+ return {e,ang,k:{press:pr,out}}
+}
+function frameAt(t){const s=timeline(t);apply(s.e,s.k);pen.quaternion.copy(baseQ);fitGround();orbit(s.ang,0.62,0.8+0.25*s.e);R.render(S,cam);L.render(S,cam);declutter()}
+window.renderFrame=f=>{document.body.classList.add('cap');frameAt(f/30)};
+// interactive
+const btn=id=>document.getElementById(id);
+let curE=0,tgtE=0,knOut=0,press=0;
+btn('bEx').onclick=()=>{auto=false;tgtE=1;upd()};btn('bAs').onclick=()=>{auto=false;tgtE=0;upd()};
+btn('bKn').onclick=()=>{press=1;knOut=knOut?0:1};
+btn('bAuto').onclick=()=>{auto=!auto;autoT0=performance.now();upd()};
+function upd(){btn('bAuto').classList.toggle('on',auto)}
+let outV=0,last=performance.now();
+function loop(now){if(window.__cap)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+ if(auto){const t=((now-autoT0)/1000)%8.5;frameAt(t);}
+ else{curE+=(tgtE-curE)*Math.min(1,dt*4);press=Math.max(0,press-dt*5);outV+=(knOut-outV)*Math.min(1,dt*12);
+  apply(ease(Math.min(1,Math.max(0,curE))),{press,out:outV});pen.quaternion.copy(userQ).multiply(baseQ);fitGround();orbit(-0.1,0.62,zoom*(0.9+0.15*curE));R.render(S,cam);L.render(S,cam);declutter()}
+ requestAnimationFrame(loop)}
+requestAnimationFrame(loop);window.ready=true;
+</script></body></html>
