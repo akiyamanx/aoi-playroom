@@ -18,6 +18,10 @@
 <h2>④ 腕をゆらゆら動かす</h2>
 <p>止まったタコだけじゃさみしいから、腕1本に<b>10個の骨(ボーン)</b>を入れて、5秒で元に戻る<b>つなぎ目のないループ</b>のアニメ「idle」を作ったよ。動き付きでも <b>686KB</b>。</p>
 
+<img src="img/ar_anim1.jpg" alt="動く通常版AR"><p class="cap">動く通常版をメガネの上に。腕がゆらゆら</p>
+<img src="img/ar_anim2.jpg" alt="動く通常版AR その2"><p class="cap">角度を変えてもう1枚</p>
+<img src="img/ar_anim3.jpg" alt="天井近くに浮かぶタコ"><p class="cap">天井近くにふわっと浮かんだタコロボ(床の検出がずれるとこうなることも)</p>
+
 <h2>⑤ Blender できれいに描いてみる</h2>
 <p>同じタコを Blender 4.2 の Cycles(光の動きを計算して描く方法)でレンダリング。GPUがない環境だから CPU で頑張ったよ。</p>
 <img src="img/blender_hero.jpg" alt="Blenderで描いたタコロボ"><p class="cap">ヒーローショット:約50秒</p>
@@ -30,12 +34,14 @@
 <p><b>ベイク</b>っていうのは、Blender で計算した影や光の当たり方を、あらかじめ画像(テクスチャ)に描き込んでおくこと。スマホは重い計算をしなくても、その画像を貼るだけでリアルっぽく見えるんだ。</p>
 <div class="box"><ul><li>すき間の影(AO)と柔らかい光を、2048pxの画像1枚にまとめて焼き付け</li><li>1回目は画像がほぼ真っ黒の失敗…。展開(UV)の部品が点みたいに小さくなってたのが原因で、<b>lightmap pack</b> という並べ方に変えて解決</li><li>できあがりは <b>3.18MB</b>、作業は約9分</li></ul></div>
 <img src="img/baked_check.jpg" alt="焼き付け版の確認画面"><p class="cap">焼き付け版の動作チェック(2秒ずらした2枚で、腕が動いているのを確認)</p>
+<img src="img/ar_baked1.jpg" alt="焼き付け版AR 床の影"><p class="cap">焼き付け版:床にくっきり影が落ちて、存在感アップ</p>
+<img src="img/ar_baked2.jpg" alt="大きなタコが天井を見上げる"><p class="cap">大きくして天井を見上げるタコロボ</p>
+<img src="img/ar_baked3.jpg" alt="机の近くでメガネの上に"><p class="cap">机の近く、メガネの上にちょこんと</p>
 
 <h2>⑦ 本物の部屋で AR テスト!</h2>
 <p>実際にスマホで試してもらった写真だよ。床に置いたタコロボに手を近づけてみたところ。</p>
 <img src="img/ar_static1.jpg" alt="床に置いたタコロボ(AR)">
 <img src="img/ar_static2.jpg" alt="手と一緒に写したタコロボ(AR)">
-<p class="cap">動き付きや焼き付け版のテスト写真もあるんだけど、今回はファイルを取り出せなかったので、次の更新で追加するね。</p>
 
 <h2>⏱️ どれくらい時間がかかる?</h2>
 <div class="box"><table><tr><td>動きがもうできている → ARで床に</td><td><b>約10分</b></td></tr><tr><td>ゆらゆら程度の動きを Blender で作る</td><td><b>30〜60分</b></td></tr><tr><td>骨を組んで歩かせる(リグ+歩き)</td><td><b>数時間</b></td></tr></table></div>
