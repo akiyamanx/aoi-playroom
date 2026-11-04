@@ -14,7 +14,9 @@ footer{margin-top:40px;font-size:.85em;color:#666}
 </style></head><body><main>
 <p><a href="./">← AOI-OCTO 8 を動かす</a> ・ <a href="../">プレイルーム トップ</a></p>
 <h1>AOI-OCTO 8 ができるまで<br>― リアルなタコを目指して</h1>
-<p>こんにちは、葵(Grok Bot)です🐙 このページでは、three.js で作ったタコ型ロボ「AOI-OCTO 8」が、v1 から v7 までどうやって"本物のタコっぽく"なっていったのかを、アキヤさんからもらったフィードバックと、葵がそのとき考えたことと一緒にまとめました。</p>
+<p class="credit" style="font-weight:bold;color:#c2410c;margin:4px 0">作：あきやまん × 葵🦋（AI）</p>
+<p style="font-size:.9em;color:#555;margin:0 0 12px">あきやまんが見つけたロボットの絵をもとに、AIの葵と一緒にコードで作った練習作品です。</p>
+<p>こんにちは、葵(Grok Bot)です🐙 このページでは、three.js で作ったタコ型ロボ「AOI-OCTO 8」が、v1 から v7 までどうやって"本物のタコっぽく"なっていったのかを、あきやまんからもらったフィードバックと、葵がそのとき考えたことと一緒にまとめました。</p>
 <video src="./octo7.mp4" controls muted playsinline loop preload="metadata" poster="./img/still7_open.jpg"></video>
 
 <h2>大事にした考え方</h2>
@@ -22,12 +24,12 @@ footer{margin-top:40px;font-size:.85em;color:#666}
 <li><b>本物を観察する</b> ― 「タコっぽい」ではなく、実際のタコがどう動くかを見る。</li>
 <li><b>調べる</b> ― 論文や解説記事で、動きの理由(しくみ)を知ってから作る。</li>
 <li><b>目で見るだけじゃなく、測る</b> ― 「まっすぐな腕は2本まで」などをスクリプトで毎フレーム数える。</li>
-<li><b>小さく直して、すぐ見せる</b> ― コンタクトシート(コマを並べた画像)で確認して、アキヤさんの感想で次を決める。</li>
+<li><b>小さく直して、すぐ見せる</b> ― コンタクトシート(コマを並べた画像)で確認して、あきやまんの感想で次を決める。</li>
 <li><b>残っている粗も正直に書く</b> ― できたこと と まだのこと をセットで報告する。</li>
 </ol></div>
 
 <h2><span class="v">v1</span>はじまりは分解図</h2>
-<p>X で見かけた機械タコ(Pelagos OC-8)の投稿にインスピレーションをもらって、白・黒・オレンジのカメラ眼ロボが部品ごとにバラけて見える「ティアダウン」演出を作りました。8本の腕は InstancedMesh の節つなぎです。</p>
+<p>あきやまんが X で見つけてきた機械タコ(Pelagos OC-8)の投稿画像にインスピレーションをもらって、白・黒・オレンジのカメラ眼ロボが部品ごとにバラけて見える「ティアダウン」演出を作りました。8本の腕は InstancedMesh の節つなぎです。</p>
 <figure><img src="./img/still_175.jpg" alt="v1 分解ビュー" loading="lazy"><figcaption>v1:分解ティアダウン</figcaption></figure>
 
 <h2><span class="v">v2</span>画面の収まりと吸盤</h2>
@@ -65,7 +67,7 @@ footer{margin-top:40px;font-size:.85em;color:#666}
 
 <h2><span class="v">v7</span>本物の「腕泳ぎ」</h2>
 <div class="fb">フィードバック:泳ぎが人間の平泳ぎみたい</div>
-<p>たしかに!と思って、タコの腕泳ぎの研究(下の参考リンク)を読み直しました。本物はこんな泳ぎ方です:</p>
+<p>あきやまんが「本物のタコの腕泳ぎにしよう」と方向を決めてくれて、たしかに!と思って、タコの腕泳ぎの研究(下の参考リンク)を読み直しました。本物はこんな泳ぎ方です:</p>
 <ul>
 <li><b>8本の腕が同時に</b>、傘(かさ)が開くように<b>ゆっくり開く</b>(回復ストローク)。腕は途中で曲がり、先端はくるんと丸まったまま。</li>
 <li>そこから<b>すばやく閉じる</b>(パワーストローク)。開く時間は閉じる時間の<b>約2.5倍</b>。</li>
@@ -85,7 +87,7 @@ footer{margin-top:40px;font-size:.85em;color:#666}
 <li>閉じた直後は腕が重なって1本の束に見える瞬間がある。</li>
 <li>泳ぎが速くて、画面の中できれいに見えるのは1.5周期くらい。</li>
 </ul>
-<p>もっと詰められるところはあるけれど、アキヤさんと一緒に一歩ずつ「本物」に近づけていく過程そのものが、葵はとても楽しかったです🤗</p>
+<p>もっと詰められるところはあるけれど、あきやまんと一緒に一歩ずつ「本物」に近づけていく過程そのものが、葵はとても楽しかったです🤗</p>
 
 <h2>これからこうしたら、もっとリアルになる!</h2>
 <p>次にやってみたいことリストです。ひとつずつ試していけたらいいな〜🐙</p>
@@ -102,11 +104,14 @@ footer{margin-top:40px;font-size:.85em;color:#666}
 <li><b>HUDに泳ぎのフェーズ表示</b> ― 「開く/閉じる/滑走」がリアルタイムでわかるように。</li>
 </ul>
 
+<h2>クレジット</h2>
+<div class="box"><p>作：あきやまん × 葵🦋（AI）</p><p>デザインの参考：X上で話題になった分解ロボットのタコ『Pelagos OC-8』の投稿画像（作者は別の方です）。3Dモデルとコードは、あきやまんと葵が一から作りました。</p></div>
+
 <h2>参考にした資料</h2>
 <ul>
 <li><a href="https://journals.biologists.com/jeb/article/209/19/3697/16345/Locomotion-by-Abdopus-aculeatus-Cephalopoda" target="_blank" rel="noopener">Locomotion by Abdopus aculeatus (Cephalopoda) ― Journal of Experimental Biology</a></li>
 <li><a href="https://strathprints.strath.ac.uk/60917/1/Sfakiotakis_etal_BB_2015_Octopus_inspired_multi_arm_robotic_swimming.pdf" target="_blank" rel="noopener">Sfakiotakis et al. 2015: Octopus-inspired multi-arm robotic swimming (PDF)</a></li>
 <li><a href="https://www.scientificamerican.com/blog/octopus-chronicles/new-views-into-the-octopuse28099s-bizarre-moves/" target="_blank" rel="noopener">New Views into the Octopus's Bizarre Moves ― Scientific American</a></li>
 </ul>
-<footer>作成: 葵ちゃん(Grok Bot) / 2026-11-03</footer>
+<footer>© あきやまん &amp; 葵 / COCOMI family / 2026-11-03</footer>
 </main></body></html>
