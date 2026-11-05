@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの こし（骨盤）legs-v1.1（全身・長い足）</title>
+<title>ここちゃん 全身 legs-v1.2（こし前後つき）</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,14 +13,15 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.1（身長88cm）</h1>
-<p>v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.2（こしを前後に曲げられる・身長94cm）</h1>
+<p>v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
 <button id="see" class="main">👁 中を見る</button>
 <button id="comBtn" class="main">◎ 重心</button>
 <button id="walk">🚶 歩くデモ（腕＋足）</button>
+<button id="bow">🙇 おじぎ</button>
 <button id="rs">↺ もどす</button>
 </div>
 <div id="stats"></div><div id="sl"></div>
@@ -40,13 +41,15 @@ s.add(new THREE.HemisphereLight(0xffffff,0xccbbee,1.35));
 const dl=new THREE.DirectionalLight(0xffffff,1.6);dl.position.set(400,500,300);s.add(dl);
 const dl2=new THREE.DirectionalLight(0xffffff,.55);dl2.position.set(-300,200,-250);s.add(dl2);
 // CAD: +Z up +Y left +X forward  →  three.js Y-up: (x,y,z)_cad → (x,z,-y)
-const root=new THREE.Group();
-root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+const world=new THREE.Group();
+world.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
   new THREE.Vector3(1,0,0),
   new THREE.Vector3(0,0,-1),
   new THREE.Vector3(0,1,0)
 ));
-s.add(root);
+s.add(world);
+const body=new THREE.Group();world.add(body);   // everything that is the robot (for camera fit)
+const root=new THREE.Group();                    // torso frame (re-parented under the waist pitch pivot below)
 const ctl=new OrbitControls(c,r.domElement);ctl.enableDamping=true;
 
 const lay=await (await fetch('../pelvis-v1/torso/layout.json')).json();
@@ -254,18 +257,22 @@ function legPose(ph){ // hip pitch +30/-10, opposite to same-side arm (arm fwd �
     o['pitch_'+k]=8-20*Math.cos(p);
     o['knee_'+k]=5+55*Math.max(0,Math.sin(p+0.25));        // ~60° in mid-swing
     o['ap_'+k]=20*Math.exp(-((w+0.15)**2)/0.12)-6*Math.max(0,Math.sin(p)); // push-off plantarflexion ~20°, slight toe-up in swing
-  }setJ(o);}
+  }o.wp=5;setJ(o);}
 
 window.setPose=(shDeg,elDeg,wrDeg=0)=>{walking=false;ARMS.forEach(a=>setArm(a,shDeg*D,elDeg*D,wrDeg*D))};
-window.setWalk=(on,ph)=>{walking=!!on;walkPhase=(ph===undefined?null:ph);if(!on){ARMS.forEach(a=>setArm(a,...RELAX));window.setJ&&setJ({pitch_L:0,pitch_R:0,knee_L:0,knee_R:0,ap_L:0,ap_R:0});}else walkT0=performance.now();};
+window.setWalk=(on,ph)=>{walking=!!on;walkPhase=(ph===undefined?null:ph);if(!on){ARMS.forEach(a=>setArm(a,...RELAX));window.setJ&&setJ({wp:0,pitch_L:0,pitch_R:0,knee_L:0,knee_R:0,ap_L:0,ap_R:0});}else walkT0=performance.now();};
 
 
 // ===== pelvis-v1: waist yaw + hips (all dims PLACEHOLDER) =====
 {
-const PJ=(await (await fetch('../pelvis-v1/layout.json')).json());const LG=(await (await fetch('layout.json')).json());window.PL0=PJ;
+const PJ=(await (await fetch('../pelvis-v1/layout.json')).json());const LG=(await (await fetch('layout.json')).json());const WJ=(await (await fetch('waist.json')).json());window.WJ=WJ;const DZ=WJ.summary.params.DZ,ZP=WJ.summary.params.ZP;window.PL0=PJ;
 const piv=(par,parW,w)=>{const g=new THREE.Group();g.position.set(w[0]-parW[0],w[1]-parW[1],w[2]-parW[2]);par.add(g);return g;};
-const F={torso:root};const FW={torso:[0,0,0]};
-F.pelvis=piv(root,[0,0,0],PJ.joints.waist);FW.pelvis=PJ.joints.waist;
+// v1.2 chain (standing robot): pelvis static; waist YAW turns everything above; waist PITCH (above the yaw) bends the torso
+const F={};const FW={};
+F.wyaw=piv(body,[0,0,0],PJ.joints.waist);FW.wyaw=PJ.joints.waist;F.torso=F.wyaw;FW.torso=FW.wyaw;   // waist adapter + yaw servo ride the yaw
+F.wpitch=piv(F.wyaw,FW.wyaw,[0,0,ZP]);FW.wpitch=[0,0,ZP];
+F.wpitch.add(root);root.position.set(0,0,DZ-ZP);   // torso lifted by DZ
+F.pelvis=piv(body,[0,0,0],PJ.joints.waist);FW.pelvis=PJ.joints.waist;
 for(const s of ['L','R']){
   F['yaw_'+s]=piv(F.pelvis,FW.pelvis,PJ.joints['hip_yaw_'+s]);FW['yaw_'+s]=PJ.joints['hip_yaw_'+s];
   F['roll_'+s]=piv(F['yaw_'+s],FW['yaw_'+s],PJ.joints['hip_roll_'+s]);FW['roll_'+s]=PJ.joints['hip_roll_'+s];
@@ -286,20 +293,40 @@ const jobs2=Object.entries(PJ.parts).filter(([n])=>!n.startsWith('thigh_stub')).
   const m=new THREE.Mesh(g,mat(col(n),1,n.includes('_act_')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
   F[p.parent].add(m);M.pelvis.push(m);res();},undefined,()=>res())));
 await Promise.all(jobs2);
-window.J={waist:0,yaw_L:0,yaw_R:0,roll_L:0,roll_R:0,pitch_L:0,pitch_R:0,knee_L:0,knee_R:0,ap_L:0,ap_R:0,ar_L:0,ar_R:0};
+const colW=n=>n.includes('_act')?0x4a505c:n.includes('cable')?0xff4fa3:0x7fb8a8;
+await Promise.all(Object.entries(WJ.parts).filter(([n])=>!n.endsWith('_hw')).map(([n,p])=>new Promise(res=>L.load(n+'.stl',g=>{g.computeVertexNormals();
+  const m=new THREE.Mesh(g,mat(colW(n),1,n.includes('_act')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
+  F[p.parent].add(m);M.pelvis.push(m);res();},undefined,()=>res()))));
+// live whole-body CoM: point masses attached to their moving frames (arms counted with the torso, as hanging)
+const PR=(await (await fetch('../pelvis-v1/results.json')).json()).parts;const LR=(await (await fetch('results.json')).json()).parts;
+const TL=(await (await fetch('../pelvis-v1/torso/layout.json')).json());
+const MS=[{g:root,m:TL.mass_upper_g,c:TL.com_upper_mm}];
+const addP=(m,c,par)=>{const w=FW[par];MS.push({g:F[par],m,c:[c[0]-w[0],c[1]-w[1],c[2]-w[2]]});};
+for(const [n,p] of Object.entries(PR)){if(n.startsWith('thigh_stub'))continue;const par=(PJ.parts[n]||{}).parent||'pelvis';addP(p.mass_g,p.com_mm,par);}
+for(const [n,p] of Object.entries(LR))addP(p.mass_g,p.com_mm,p.parent);
+for(const [n,p] of Object.entries(WJ.parts))addP(p.mass_g,p.com_mm,p.parent);
+window._MS=MS;
+window.liveCom=()=>{body.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(world.matrixWorld).invert();let m=0;const c=new THREE.Vector3();
+  for(const o of MS){const v=new THREE.Vector3(...o.c).applyMatrix4(o.g.matrixWorld).applyMatrix4(inv);c.addScaledVector(v,o.m);m+=o.m;}
+  return [c.x/m,c.y/m,c.z/m,m];};
+{ // residual (small hardware not listed per part) so neutral matches the published total / CoM
+  const [x,y,z,m]=liveCom();const Mt=WJ.summary.total_g,Ct=WJ.summary.com_mm,r=Mt-m;
+  if(r>1){const w=FW.pelvis;MS.push({g:F.pelvis,m:r,c:[(Mt*Ct[0]-m*x)/r-w[0],(Mt*Ct[1]-m*y)/r-w[1],(Mt*Ct[2]-m*z)/r-w[2]]});}
+  window._resid=r;}
+window.J={waist:0,wp:0,yaw_L:0,yaw_R:0,roll_L:0,roll_R:0,pitch_L:0,pitch_R:0,knee_L:0,knee_R:0,ap_L:0,ap_R:0,ar_L:0,ar_R:0};
 // conventions (deg): waist + = turn left; hip yaw + = toe out; roll + = leg out (abduction); pitch + = thigh forward (flexion)
-window.applyJ=()=>{const d=Math.PI/180;F.pelvis.rotation.z=J.waist*d;
+window.applyJ=()=>{const d=Math.PI/180;F.wyaw.rotation.z=J.waist*d;F.wpitch.rotation.y=J.wp*d;
   for(const s of ['L','R']){const sg=s==='L'?1:-1;F['yaw_'+s].rotation.z=sg*J['yaw_'+s]*d;F['roll_'+s].rotation.x=sg*J['roll_'+s]*d;F['pitch_'+s].rotation.y=-J['pitch_'+s]*d;F['knee_'+s].rotation.y=J['knee_'+s]*d;F['apitch_'+s].rotation.y=J['ap_'+s]*d;F['aroll_'+s].rotation.x=sg*J['ar_'+s]*d;}
-  document.querySelectorAll('#sl input').forEach(i=>{i.value=J[i.dataset.k];i.nextSibling.textContent=Math.round(J[i.dataset.k])+'°'});};
+  document.querySelectorAll('#sl input').forEach(i=>{i.value=J[i.dataset.k];i.nextSibling.textContent=Math.round(J[i.dataset.k])+'°'});window.updCom&&updCom();};
 window.setJ=(o)=>{Object.assign(J,o);applyJ();};
-const SL=[['waist','こしひねり',-45,45],['yaw_L','左 足ひねり',-30,30],['yaw_R','右 足ひねり',-30,30],['roll_L','左 横ひらき',-20,30],['roll_R','右 横ひらき',-20,30],['pitch_L','左 前後',-30,90],['pitch_R','右 前後',-30,90],['knee_L','左 ひざ',0,120],['knee_R','右 ひざ',0,120],['ap_L','左 足首 前後(+つま先下)',-25,25],['ap_R','右 足首 前後',-25,25],['ar_L','左 足首 横',-15,15],['ar_R','右 足首 横',-15,15]];
+const SL=[['waist','こしひねり',-45,45],['wp','こし前後（+おじぎ）',-15,60],['yaw_L','左 足ひねり',-30,30],['yaw_R','右 足ひねり',-30,30],['roll_L','左 横ひらき',-20,30],['roll_R','右 横ひらき',-20,30],['pitch_L','左 前後',-30,90],['pitch_R','右 前後',-30,90],['knee_L','左 ひざ',0,120],['knee_R','右 ひざ',0,120],['ap_L','左 足首 前後(+つま先下)',-25,25],['ap_R','右 足首 前後',-25,25],['ar_L','左 足首 横',-15,15],['ar_R','右 足首 横',-15,15]];
 const box=document.getElementById('sl');box.style.cssText='display:grid;grid-template-columns:auto 1fr 34px;gap:1px 6px;font-size:11px;align-items:center;margin:2px 6px';
 for(const [k,lb,lo,hi] of SL){const a=document.createElement('span');a.textContent=lb;const i=document.createElement('input');i.type='range';i.min=lo;i.max=hi;i.step=1;i.value=0;i.dataset.k=k;
   const v=document.createElement('span');v.textContent='0°';i.oninput=()=>{walking=false;J[k]=+i.value;applyJ()};box.append(a,i,v);}
 }
 
 // --- CoM marker ---
-const PL=await (await fetch('layout.json')).json();PL.z_rp=PL.joints.hip_pitch_L[2];
+const PL=await (await fetch('layout.json')).json();const WJ=window.WJ;PL.z_rp=PL.joints.hip_pitch_L[2];
 const com=PL.com_total_mm;
 const comG=new THREE.Group();
 const comBall=new THREE.Mesh(new THREE.SphereGeometry(12,24,24),mat(0xff2244,0.95,0.3));
@@ -307,7 +334,7 @@ comG.add(comBall);
 const comRing=new THREE.Mesh(new THREE.TorusGeometry(18,2,8,32),mat(0xff6688,0.9));
 comRing.rotation.x=Math.PI/2;comG.add(comRing);
 comG.position.fromArray(com);
-root.add(comG);
+world.add(comG);
 // sprite-like label via CSS2D would need extra import; use canvas texture
 function makeLabel(text){
   const cv=document.createElement('canvas');cv.width=256;cv.height=64;
@@ -325,14 +352,17 @@ let comVisible=true;
 
 // hip plate ground helper
 {const fz=PL.floor_z;const gnd=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({color:0xe8dff5,roughness:1,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
- gnd.position.z=fz-0.5;root.add(gnd);
- const grid=new THREE.GridHelper(900,18,0xc8b8e8,0xdcd0f0);grid.rotation.x=Math.PI/2;grid.position.z=fz;root.add(grid);
+ gnd.position.z=fz-0.5;world.add(gnd);
+ const grid=new THREE.GridHelper(900,18,0xc8b8e8,0xdcd0f0);grid.rotation.x=Math.PI/2;grid.position.z=fz;world.add(grid);
  const S=PL.sole,hy=PL.hip_y,x1=S.x0,x2=S.x0+S.l,yo=hy+(S.out||0)+S.w/2;
  const pts=[[x1,yo],[x2,yo],[x2,-yo],[x1,-yo],[x1,yo]].map(p=>new THREE.Vector3(p[0],p[1],fz+1));
- root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x2a9d5a})));
- const proj=new THREE.Mesh(new THREE.CircleGeometry(9,24),new THREE.MeshBasicMaterial({color:0xff2244}));proj.position.set(PL.com_total_mm[0],PL.com_total_mm[1],fz+1.5);root.add(proj);
- const dl_=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...PL.com_total_mm),new THREE.Vector3(PL.com_total_mm[0],PL.com_total_mm[1],fz)]),new THREE.LineDashedMaterial({color:0xff2244,dashSize:8,gapSize:6}));dl_.computeLineDistances();root.add(dl_);
- window.comProj=[proj,dl_];}
+ world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x2a9d5a})));
+ const proj=new THREE.Mesh(new THREE.CircleGeometry(9,24),new THREE.MeshBasicMaterial({color:0xff2244}));proj.position.set(PL.com_total_mm[0],PL.com_total_mm[1],fz+1.5);world.add(proj);
+ const dl_=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...PL.com_total_mm),new THREE.Vector3(PL.com_total_mm[0],PL.com_total_mm[1],fz)]),new THREE.LineDashedMaterial({color:0xff2244,dashSize:8,gapSize:6}));dl_.computeLineDistances();world.add(dl_);
+ window.comProj=[proj,dl_];
+ window.updCom=()=>{const [x,y,z]=liveCom();comG.position.set(x,y,z);proj.position.set(x,y,fz+1.5);
+   dl_.geometry.setFromPoints([new THREE.Vector3(x,y,z),new THREE.Vector3(x,y,fz)]);dl_.computeLineDistances();
+   const st=document.getElementById('stats');if(st&&window._stat)st.textContent=_stat(z-fz,x);};}
 
 // UI toggles
 const pr=document.getElementById('parts');
@@ -366,16 +396,22 @@ document.getElementById('comBtn').onclick=()=>{
   document.getElementById('comBtn').classList.toggle('off',!comVisible);
 };
 
+const bb=document.getElementById('bow');let bowT=null;
+window.setBow=(deg)=>{setWalk(false);document.getElementById('walk').classList.remove('main');if(bowT)cancelAnimationFrame(bowT);const a0=J.wp,t0=performance.now();
+  const st=()=>{const k=Math.min(1,(performance.now()-t0)/900);const e=k<.5?2*k*k:1-2*(1-k)*(1-k);setJ({wp:a0+(deg-a0)*e});if(k<1)bowT=requestAnimationFrame(st);};st();
+  bb.classList.toggle('main',deg>0);};
+window.setBowNow=(deg)=>{setWalk(false);setJ({wp:deg});};
+bb.onclick=()=>setBow(J.wp>20?0:45);
 const wb=document.getElementById('walk');
 wb.onclick=()=>{setWalk(!walking);wb.classList.toggle('main',walking);};
 const stats=document.getElementById('stats');
-stats.textContent=`身長 約 ${Math.round(PL.height)} mm ／ 合計 約 ${Math.round(PL.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(com[2]-PL.floor_z)} mm／ 1歩 約 ${Math.round(2*370*Math.sin(20*Math.PI/180)*0.8)} mm（デモ）（赤い点＝真下、緑の線＝足うらの支える範囲）`;
+const WS=WJ.summary;window._stat=(h,x)=>`身長 約 ${Math.round(WS.total_height_mm)} mm ／ 合計 約 ${Math.round(WS.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(h)} mm・前に ${Math.round(x)} mm ／ こし前後 ${Math.round(J.wp)}°／ 1歩 約 ${Math.round(2*370*Math.sin(20*Math.PI/180)*0.8)} mm（デモ）（赤い点＝真下、緑の線＝足うらの支える範囲）`;updCom();
 
 // camera
 let auto=true,dirV=new THREE.Vector3(0.7,0.35,0.6).normalize(),curD=0;
 ctl.addEventListener('start',()=>{auto=false});
 function goal(){
-  const bx=new THREE.Box3().setFromObject(root);
+  const bx=new THREE.Box3().setFromObject(body);
   const sp=bx.getBoundingSphere(new THREE.Sphere());
   const ui=document.getElementById('ui').offsetHeight,vh=innerHeight-ui-40;
   const fv=Math.tan(c.fov*Math.PI/360);const h=Math.min(fv*vh/innerHeight,fv*c.aspect);
@@ -408,8 +444,8 @@ window.focusCom=()=>{
 };
 window.focusSide=()=>{
   auto=false;
-  root.updateMatrixWorld(true);
-  const bx=new THREE.Box3().setFromObject(root);
+  world.updateMatrixWorld(true);
+  const bx=new THREE.Box3().setFromObject(body);
   const ct=bx.getCenter(new THREE.Vector3());
   ctl.target.copy(ct);
   dirV.set(0.02,0.12,1.0).normalize();
@@ -428,7 +464,7 @@ window.focusHands=()=>{
   M.cover.forEach(m=>m.visible=false);
   M.head.forEach(m=>m.visible=false);
   M.arm.forEach(m=>m.visible=true);
-  root.updateMatrixWorld(true);
+  world.updateMatrixWorld(true);
   const bx=new THREE.Box3();
   M.hands.forEach(m=>{m.updateWorldMatrix(true,true);bx.expandByObject(m)});
   // aim at lower third of hands bbox (world Y) so UI viewOffset still keeps hands on screen
@@ -449,13 +485,13 @@ window.focusTensioners=()=>{
   M.cover.forEach(m=>m.visible=false);
   M.batt.forEach(m=>m.visible=false);
   const p=new THREE.Vector3(20,52,135);
-  root.updateMatrixWorld(true);
-  const wp=p.clone().applyMatrix4(root.matrixWorld);
+  world.updateMatrixWorld(true);
+  const wp=p.clone().applyMatrix4(world.matrixWorld);
   ctl.target.copy(wp);
   dirV.set(0.85,0.25,0.45).normalize();
   curD=120;
   c.position.copy(wp).addScaledVector(dirV,curD);
 };
-window.THREE=THREE;window.M=M;window.root=root;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
+window.THREE=THREE;window.M=M;window.root=world;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
 r.setAnimationLoop(()=>{if(walking)walkPose(walkPhase!==null?walkPhase:(performance.now()-walkT0)/1000*Math.PI*2/1.1);if(auto)fit(0.06);ctl.update();r.render(s,c)});
 </script></body></html>

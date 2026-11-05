@@ -1,0 +1,147 @@
+{
+ "parts": {
+  "waist_pitch_lower_yoke": {
+   "mass_g": 21.468846179400554,
+   "com_mm": [
+    2.1881661381500165e-13,
+    -6.723929076538281e-15,
+    1.8259098134001297
+   ],
+   "valid": true,
+   "parent": "wyaw"
+  },
+  "waist_pitch_act": {
+   "mass_g": 349.0,
+   "com_mm": [
+    2.601762738766162e-15,
+    2.1681356156384687e-15,
+    20.0
+   ],
+   "valid": true,
+   "parent": "wyaw"
+  },
+  "waist_pitch_upper_yoke": {
+   "mass_g": 22.851992740405517,
+   "com_mm": [
+    -4.120825806804362e-15,
+    0.0,
+    42.17082214326295
+   ],
+   "valid": true,
+   "parent": "wpitch"
+  },
+  "waist_pitch_cable_loop": {
+   "mass_g": 15.0,
+   "com_mm": [
+    -17.66213943912144,
+    -46.25,
+    20.114399332938365
+   ],
+   "valid": true,
+   "parent": "wyaw"
+  },
+  "waist_pitch_hw": {
+   "mass_g": 30.0,
+   "com_mm": [
+    0,
+    0,
+    20
+   ],
+   "valid": true,
+   "parent": "wyaw"
+  }
+ },
+ "summary": {
+  "version": "legs-v1.2",
+  "waist_pitch": {
+   "order": "torso\u2192PITCH\u2192yaw\u2192pelvis",
+   "axis_z": 20,
+   "lift_mm": 64,
+   "actuator": "AK45-36",
+   "limits_deg": [
+    -15,
+    60
+   ],
+   "rotating_mass_g": 2547.9,
+   "rotating_com_above_axis_mm": 163.2,
+   "rotating_com_fwd_mm": 9.9,
+   "torque_Nm_and_arm_mm": {
+    "0": [
+     0.25,
+     9.9
+    ],
+    "15": [
+     1.29,
+     51.8
+    ],
+    "30": [
+     2.25,
+     90.1
+    ],
+    "45": [
+     3.06,
+     122.4
+    ],
+    "60": [
+     3.66,
+     146.3
+    ],
+    "-15": [
+     -0.82,
+     -32.7
+    ]
+   },
+   "rated_Nm": 8.0,
+   "peak_Nm": 24.0,
+   "ak45_10_rated_Nm": 2.5,
+   "ak45_10_peak_Nm": 7.0,
+   "module_g": 438.3
+  },
+  "total_height_mm": 943.6,
+  "total_g": 6577.7,
+  "com_mm": [
+   1.9,
+   -0.2,
+   -46.9
+  ],
+  "com_above_floor_mm": 518.1,
+  "com_bow30": [
+   33.0,
+   -57.3
+  ],
+  "com_bow60": [
+   54.8,
+   -81.8
+  ],
+  "sole_x_range": [
+   -52,
+   108
+  ],
+  "params": {
+   "DZ": 64,
+   "ZP": 20,
+   "act": "AK45-36",
+   "act_d": 55,
+   "act_h": 56.5,
+   "m_act": 0.349,
+   "t": 4,
+   "m_loop": 0.015,
+   "m_hw": 0.03,
+   "rho": 0.00124,
+   "pf": 0.5,
+   "lim": [
+    -15,
+    60
+   ]
+  },
+  "com_bow30_inside_sole_x": true,
+  "com_bow60_inside_sole_x": true
+ },
+ "joints": {
+  "waist_pitch": [
+   0,
+   0,
+   20
+  ]
+ }
+}
