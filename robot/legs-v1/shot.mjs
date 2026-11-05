@@ -28,4 +28,9 @@ await pg.evaluate(()=>{setWalk(false);setJ({pitch_L:30,knee_L:60,ap_L:-10,pitch_
 await sh('06_legs_posed.png');
 await pg.evaluate(()=>{setJ({pitch_L:0,knee_L:0,ap_L:0,pitch_R:0,ap_R:0,ar_R:0});setDir(0.2,-0.9,0.5);snapFit()});
 await sh('07_soles_below.png');
+await pg.evaluate(()=>{setJ({});setExplode(true,true);setDir(0.75,0.45,0.5);snapFit()});
+await sh('10_spine_exploded.png');
+await pg.evaluate(()=>{setExplode(false,true);setDir(-0.6,0.5,0.6);snapFit()});
+await sh('11_spine_assembled_back.png');
+console.log('com',await pg.evaluate(()=>liveCom().map(v=>Math.round(v*10)/10)));
 await b.close();
