@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ここちゃんのうで v5（手がうでのまんなか）</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
+#t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none}#t h1{font-size:18px;margin:4px}#t p{font-size:11px;margin:1px}
+#ui{position:fixed;left:0;right:0;bottom:0;padding:6px 8px 8px;background:#ffffffd9;border-radius:16px 16px 0 0;box-shadow:0 -2px 10px #0001}
+.row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:3px 0}
+button{font-size:13px;padding:6px 10px;border-radius:16px;border:2px solid #b48ae8;background:#fff;color:#5a3a8a}
+button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
+.fg{display:grid;grid-template-columns:1fr 1fr;column-gap:4px}.fg .sl{grid-template-columns:3.6em 1fr 2.4em;font-size:12px;margin:0 2px}
+.sl{display:grid;grid-template-columns:4.2em 1fr 3em;align-items:center;gap:6px;font-size:13px;margin:1px 4px}
+input[type=range]{width:100%;accent-color:#b48ae8}#cr{text-align:center;font-size:11px;color:#777;margin-top:2px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="t"><h1>🤖 ここちゃんの「うで」v5</h1><p>手がうでのまんなか！　手のひらが内側向き・指でくるっと回す／2本指でズーム</p></div>
+<div id="ui">
+<div class="row" id="parts"></div>
+<div class="sl"><span>肩</span><input type="range" id="j0" min="-2.8" max="0.8" step="0.01" value="0"><span id="v0"></span></div>
+<div class="sl"><span>ひじ</span><input type="range" id="j1" min="-2.4" max="0" step="0.01" value="0"><span id="v1"></span></div>
+<div class="sl"><span>ひねり</span><input type="range" id="j4" min="-1.57" max="1.57" step="0.01" value="0"><span id="v4"></span></div>
+<div class="sl"><span>手首</span><input type="range" id="j2" min="-1.2" max="1.2" step="0.01" value="0"><span id="v2"></span></div>
+<div id="fs"></div>
+<div class="row"><button id="anim" class="main">▶ デモ</button><button id="g">✊ グー</button><button id="p">🖐 パー</button><button id="pt">👆 指さし</button><button id="sk">🤙 シャカ</button><button id="pc">✌️ ピース</button><button id="both">🤲 両手ではさむ</button><button id="zm">🔍 手アップ</button><button id="rs">↺ もどす</button></div>
+<div id="cr">作：あきやまん × 葵🦋（AI）　※指はかんたん版</div></div>
+<script type="module">
+import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setPixelRatio(Math.min(devicePixelRatio,2));document.body.appendChild(r.domElement);
+const s=new THREE.Scene(),c=new THREE.PerspectiveCamera(45,1,1,5000);
+s.add(new THREE.HemisphereLight(0xffffff,0xccbbee,1.5));const dl=new THREE.DirectionalLight(0xffffff,1.7);dl.position.set(300,300,400);s.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,.6);dl2.position.set(-300,-100,-200);s.add(dl2);
+// CAD: arm toward -X  ->  view: CAD Z = side (X), CAD X = up (Y): arm hangs down
+// Palm -Z = medial (inward). Wrist pitch about Y = flexion toward palm.
+const root=new THREE.Group();root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1),new THREE.Vector3(1,0,0)));s.add(root);
+const G=()=>new THREE.Group();const sh=G(),el=G(),ro=G(),wr=G();root.add(sh);
+const ctl=new OrbitControls(c,r.domElement);ctl.enableDamping=true;
+const lay=await (await fetch('layout.json')).json();
+el.position.fromArray(lay.frames.elbow);sh.add(el);ro.position.fromArray(lay.frames.roll);el.add(ro);wr.position.fromArray(lay.frames.wrist);ro.add(wr);
+const segs=[];
+const FI={thumb:5,index:6,middle:7,ring:8,pinky:9};
+const fl=Object.entries(lay.layout.fingers).concat([['thumb',lay.layout.thumb]]);
+const files=[['actuator_AK45-10_placeholder',0x5a6170,root,'act'],['shoulder_cup',0xffb3d1,root,'cup'],['upper_arm',0x9fd8ff,sh,'up'],['forearm_proximal',0xffd59e,el,'fo'],['forearm_distal',0xffc27a,ro,'fo'],['palm',0xc8f0c0,wr,'hand']];
+for(const [nm,d] of fl){const base=G();base.position.fromArray(d.pos);base.rotation.z=d.yaw*Math.PI/180;wr.add(base);let par=base,x=0;
+  d.segs.forEach((l,i)=>{const g=G();g.position.x=x;par.add(g);segs.push({g,k:[1,1.15,0.9][i]*(nm=='thumb'?0.7:1),f:FI[nm]});files.push([`finger_${nm}_${i+1}`,0xfff3b0,g,'fin']);par=g;x=-l;});}
+const PARTS={act:'モーター',cup:'肩カップ',up:'上うで',fo:'前うで',hand:'手のひら',fin:'指',servo:'サーボ'},M={};for(const k in PARTS)M[k]=[];
+const L=new STLLoader();
+await Promise.all(files.map(([f,col,par,k])=>new Promise(res=>L.load(f+'.stl',g=>{g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:.5,metalness:k=='act'?.5:0}));par.add(m);M[k].push(m);res();}))));
+const sv=(c,dims,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...dims),new THREE.MeshStandardMaterial({color:0x333a44,roughness:.4}));m.position.fromArray(c);par.add(m);M.servo.push(m);return m;};
+sv(lay.frames.elbow_servo_c,[45.2,24.7,35],sh);sv(lay.frames.roll_servo_c,[35,45.2,24.7],el);
+// wrist servo: shaft along Y, body on +Y side
+sv(lay.frames.wrist_servo_c,[45.2,35,24.7],ro);
+{const b=new THREE.Mesh(new THREE.CylinderGeometry(21,21,7,40,1,true),new THREE.MeshStandardMaterial({color:0xb8c0cc,metalness:.6,roughness:.3,side:THREE.DoubleSide}));b.rotation.z=Math.PI/2;b.position.fromArray(lay.frames.bearing_c);el.add(b);M.servo.push(b);}
+// idler pin viz
+{const p=new THREE.Mesh(new THREE.CylinderGeometry(4,4,12,16),new THREE.MeshStandardMaterial({color:0x8899aa,metalness:.5,roughness:.35}));p.rotation.x=Math.PI/2;p.position.fromArray(lay.frames.wrist_idler_c);ro.add(p);M.servo.push(p);}
+lay.frames.tendon_servo_c.forEach(p=>sv(p,[12.2,23,29],ro));
+const pr=document.getElementById('parts');for(const k in PARTS){const b=document.createElement('button');b.textContent=PARTS[k];b.onclick=()=>{const v=!M[k][0].visible;M[k].forEach(m=>m.visible=v);b.classList.toggle('off',!v)};pr.appendChild(b);}
+{const fs=document.getElementById('fs');fs.className='fg';[['親指',5],['人差し指',6],['中指',7],['薬指',8],['小指',9]].forEach(([n,i])=>{fs.insertAdjacentHTML('beforeend',`<div class="sl"><span>${n}</span><input type="range" id="j${i}" min="0" max="1.4" step="0.01" value="0"><span id="v${i}"></span></div>`)})}
+const NJ=10,J=new Array(NJ).fill(0);const IDX=[0,1,2,4,5,6,7,8,9];const sl=IDX.map(i=>document.getElementById('j'+i));
+// v5: wrist = rotation.y (pitch / flexion toward palm -Z); fingers still rotation.y = -value
+function apply(){sh.rotation.z=J[0];el.rotation.z=J[1];ro.rotation.x=J[4];wr.rotation.y=-J[2];segs.forEach(o=>o.g.rotation.y=-J[o.f]*o.k);
+  sl.forEach((e,k)=>{const i=IDX[k];e.value=J[i];document.getElementById('v'+i).textContent=Math.round(J[i]*180/Math.PI*(i==5?0.7:1))+'°'});
+  if(mirrorRoot) syncMirror();}
+sl.forEach((e,k)=>e.oninput=()=>{stop();J[IDX[k]]=+e.value;apply()});
+window.setPose=(a)=>{for(let i=0;i<NJ;i++)J[i]=a[i]||0;apply()};
+const C=1.4,HP={gu:[C,C,C,C,C],pa:[0,0,0,0,0],point:[C,0,C,C,C],shaka:[0,0,C,C,0],peace:[C,0,0,C,C]};
+const withF=(arm,f)=>arm.slice(0,5).concat(f);window.HP=HP;window.withF=withF;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;let tw=null,demo=false,dt0=0;
+function tween(to,dur=900){tw={from:J.slice(),to,t0:performance.now(),dur}}
+const ab=document.getElementById('anim');function stop(){demo=false;ab.textContent='▶ デモ'}
+ab.onclick=()=>{demo=!demo;dt0=performance.now();ab.textContent=demo?'⏸ とめる':'▶ デモ'};
+[['g','gu'],['p','pa'],['pt','point'],['sk','shaka'],['pc','peace']].forEach(([id,k])=>document.getElementById(id).onclick=()=>{stop();tween(withF(J,HP[k]),700)});
+document.getElementById('rs').onclick=()=>{stop();auto=true;zoom=false;zb.classList.remove('main');setBoth(false);bb.classList.remove('main');tween(new Array(NJ).fill(0))};
+let zoom=false;const zb=document.getElementById('zm');zb.onclick=()=>{zoom=!zoom;auto=true;zb.classList.toggle('main',zoom)};window.setZoom=v=>{zoom=!!v;zb.classList.toggle('main',zoom)};
+// --- 両手ではさむ: mirror arm across Z (palm -Z on right faces +Z on left → palms face each other)
+let both=false,mirrorRoot=null,boxMesh=null;
+const bb=document.getElementById('both');
+function syncMirror(){if(!mirrorRoot)return;const mJ=J.slice();
+  // walk mirrored hierarchy: same joint angles (palms face via Z-flip of whole arm)
+  const msh=mirrorRoot.children[0];if(!msh)return;
+  msh.rotation.z=J[0];
+  const mel=msh.children.find(ch=>ch.userData&&ch.userData.role==='el');if(!mel)return;
+  mel.rotation.z=J[1];
+  const mro=mel.children.find(ch=>ch.userData&&ch.userData.role==='ro');if(!mro)return;
+  mro.rotation.x=J[4];
+  const mwr=mro.children.find(ch=>ch.userData&&ch.userData.role==='wr');if(!mwr)return;
+  mwr.rotation.y=-J[2];
+  // finger curls: mirror segs tagged
+  mirrorRoot.traverse(o=>{if(o.userData&&o.userData.seg){const sg=o.userData.seg;o.rotation.y=-J[sg.f]*sg.k;}});
+}
+async function buildMirror(){
+  if(mirrorRoot)return;
+  // Same CAD->view basis as root, so left/right sit side-by-side in view
+  const mirrorWrap=new THREE.Group();
+  mirrorWrap.quaternion.copy(root.quaternion);
+  mirrorRoot=new THREE.Group();
+  // Right palm faces -Z; scale.z=-1 makes left palm face +Z (toward right)
+  mirrorRoot.scale.z=-1;
+  const msh=G();msh.userData.role='sh';mirrorRoot.add(msh);
+  const mel=G();mel.userData.role='el';mel.position.fromArray(lay.frames.elbow);msh.add(mel);
+  const mro=G();mro.userData.role='ro';mro.position.fromArray(lay.frames.roll);mel.add(mro);
+  const mwr=G();mwr.userData.role='wr';mwr.position.fromArray(lay.frames.wrist);mro.add(mwr);
+  const mfiles=[['actuator_AK45-10_placeholder',0x5a6170,mirrorRoot],['shoulder_cup',0xffb3d1,mirrorRoot],['upper_arm',0x9fd8ff,msh],['forearm_proximal',0xffd59e,mel],['forearm_distal',0xffc27a,mro],['palm',0xa8e0c0,mwr]];
+  const msegs=[];
+  for(const [nm,d] of fl){const base=G();base.position.fromArray(d.pos);base.rotation.z=d.yaw*Math.PI/180;mwr.add(base);let par=base,x=0;
+    d.segs.forEach((l,i)=>{const g=G();g.position.x=x;g.userData.seg={k:[1,1.15,0.9][i]*(nm=='thumb'?0.7:1),f:FI[nm]};par.add(g);mfiles.push([`finger_${nm}_${i+1}`,0xffe9a0,g]);par=g;x=-l;});}
+  await Promise.all(mfiles.map(([f,col,par])=>new Promise(res=>L.load(f+'.stl',g=>{g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:.5,metalness:f.startsWith('act')?.5:0}));par.add(m);res();}))));
+  // offset so palms face with a gap for a box (~80mm along Z between palm faces)
+  // After scale.z=-1, world Z of left palm face (+Z local becomes -world after flip...): 
+  // Right arm at z=0, palm face at local -PT/2. Left mirrored: put shoulder so hands meet.
+  // Simpler: offset mirrorRoot in Z by separation so hand heels/palms face.
+  const sep=200; // mm between shoulders along CAD Z
+  mirrorRoot.position.z=sep;
+  root.position.z=-sep/2;
+  mirrorWrap.add(mirrorRoot);
+  s.add(mirrorWrap);
+  window._mirrorWrap=mirrorWrap;
+  boxMesh=new THREE.Mesh(new THREE.BoxGeometry(45,36,50),new THREE.MeshStandardMaterial({color:0xf0a0c8,roughness:.6}));
+  s.add(boxMesh);
+}
+
+function setBoth(on){
+  both=on;
+  if(on){
+    buildMirror().then(()=>{
+      if(window._mirrorWrap)window._mirrorWrap.visible=true;
+      mirrorRoot.visible=true;if(boxMesh)boxMesh.visible=true;
+      // pose: arms angled inward a bit, hands open then fist-ish squeeze
+      const arm=[-0.35,-1.35,0.15,0,0];
+      tween(withF(arm,HP.gu),800);
+      // place box between palms using wrist world positions after a tick
+      setTimeout(()=>{
+        wr.updateWorldMatrix(true,true);
+        const a=new THREE.Vector3();wr.getWorldPosition(a);
+        const b=new THREE.Vector3();
+        const mwr=mirrorRoot.children[0]?.children.find(ch=>ch.userData?.role==='el')?.children.find(ch=>ch.userData?.role==='ro')?.children.find(ch=>ch.userData?.role==='wr');
+        if(mwr){mwr.updateWorldMatrix(true,true);mwr.getWorldPosition(b);boxMesh.position.lerpVectors(a,b,0.5);}
+        else boxMesh.position.copy(a);
+        syncMirror();auto=true;
+      },100);
+    });
+  }else{
+    if(window._mirrorWrap)window._mirrorWrap.visible=false;
+    if(mirrorRoot)mirrorRoot.visible=false;
+    if(boxMesh)boxMesh.visible=false;
+    root.position.z=0;
+  }
+  bb.classList.toggle('main',on);
+}
+bb.onclick=()=>{stop();setBoth(!both)};
+window.setBoth=setBoth;
+const WAVE=[-2.3,-1.0,0,0,0,0,0,0,0,0];
+const A0=[-0.6,-1.6,0,0,0],AR=[-0.6,-1.6,0,0,1.5],AL=[-0.6,-1.6,0,0,-1.5],Z=new Array(NJ).fill(0);
+const K=[[0,Z],[1.6,WAVE],[5.6,WAVE],[7.0,withF(A0,HP.pa)],[8.0,withF(AR,HP.pa)],[9.2,withF(AL,HP.pa)],[10.2,withF(A0,HP.pa)],
+ [11.0,withF(A0,HP.gu)],[11.6,withF(A0,HP.gu)],[12.3,withF(A0,HP.pa)],[13.0,withF(A0,HP.point)],[14.0,withF(A0,HP.point)],[14.7,withF(A0,HP.peace)],[15.7,withF(A0,HP.peace)],
+ [16.4,withF(A0,HP.shaka)],[18.6,withF(A0,HP.shaka)],[20.0,Z]];
+function demoPose(t){t%=K[K.length-1][0];for(let i=0;i<K.length-1;i++){const[a,pa]=K[i],[b,pb]=K[i+1];if(t<=b){const u=ease((t-a)/(b-a));const p=pa.map((v,j)=>v+(pb[j]-v)*u);
+  if(i==1||i==2){const w=i==2?Math.sin((t-1.6)*Math.PI*2*0.75):0;const amp=i==2?Math.min(1,(t-1.6)/0.5,(5.6-t)/0.5):0;p[2]=0.6*w*amp;p[1]+= i==2?0.15*Math.sin((t-1.6)*Math.PI*1.5)*amp:0}return p}}return K[0][1]}
+window.demoAt=t=>{demo=false;setPose(demoPose(t))};
+let auto=true,dirV=new THREE.Vector3(.85,.2,.5).normalize(),curD=0;ctl.addEventListener('start',()=>{auto=false});
+function goal(){const target=both&&mirrorRoot?(()=>{const g=new THREE.Group();g.add(root.clone());g.add(mirrorRoot.clone());return g})(): (zoom?wr:root);
+  // avoid cloning every frame — use box of root (+mirror if both)
+  let bx;
+  if(both&&mirrorRoot&&mirrorRoot.visible){bx=new THREE.Box3().setFromObject(root);bx.expandByObject(mirrorRoot);if(boxMesh&&boxMesh.visible)bx.expandByObject(boxMesh);}
+  else bx=new THREE.Box3().setFromObject(zoom?wr:root);
+  const sp=bx.getBoundingSphere(new THREE.Sphere());const ui=document.getElementById('ui').offsetHeight,vh=innerHeight-ui-40;
+  const fv=Math.tan(c.fov*Math.PI/360);const h=Math.min(fv*vh/innerHeight,fv*c.aspect);return [sp.center,Math.max(sp.radius,zoom?60:170)/h*1.02]}
+function fit(k=1){const ui=document.getElementById('ui').offsetHeight;c.setViewOffset(innerWidth,innerHeight,0,(ui-40)/2,innerWidth,innerHeight);
+  const [ct,d]=goal();ctl.target.lerp(ct,k);curD=curD?curD+(d-curD)*k:d;c.position.copy(ctl.target).addScaledVector(dirV,curD);c.near=curD/50;c.far=curD*10;c.updateProjectionMatrix();}
+window.snapFit=()=>fit(1);window.setDir=(x,y,z)=>{dirV.set(x,y,z).normalize();auto=true};
+function rs(){r.setSize(innerWidth,innerHeight);c.aspect=innerWidth/innerHeight;fit()}addEventListener('resize',rs);apply();rs();
+window.ready=true;
+r.setAnimationLoop(now=>{if(demo){setPose(demoPose((now-dt0)/1000))}else if(tw){const u=Math.min(1,(now-tw.t0)/tw.dur),e=ease(u);for(let i=0;i<NJ;i++)J[i]=tw.from[i]+(tw.to[i]-tw.from[i])*e;apply();if(u>=1)tw=null}
+  if(auto)fit(0.06);ctl.update();r.render(s,c)});
+</script></body></html>
