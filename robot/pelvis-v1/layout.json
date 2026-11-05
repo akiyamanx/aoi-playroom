@@ -1,0 +1,104 @@
+{
+ "joints": {
+  "waist": [
+   0,
+   0,
+   -53.0
+  ],
+  "hip_yaw_L": [
+   0,
+   55,
+   -96.0
+  ],
+  "hip_roll_L": [
+   -50,
+   55,
+   -163.5
+  ],
+  "hip_pitch_L": [
+   0,
+   55,
+   -163.5
+  ],
+  "hip_yaw_R": [
+   0,
+   -55,
+   -96.0
+  ],
+  "hip_roll_R": [
+   -50,
+   -55,
+   -163.5
+  ],
+  "hip_pitch_R": [
+   0,
+   -55,
+   -163.5
+  ]
+ },
+ "z_rp": -163.5,
+ "com_total_mm": [
+  -0.6767126786517171,
+  0.002335224832898332,
+  35.8699038750913
+ ],
+ "total_g": 4928.217353949169,
+ "pelvis_g": 1666.8708236167627,
+ "upper_g": 3261.346530332406,
+ "parts": {
+  "waist_adapter": {
+   "parent": "torso"
+  },
+  "waist_servo_STS3215": {
+   "parent": "torso"
+  },
+  "waist_bearing": {
+   "parent": "pelvis"
+  },
+  "pelvis_block": {
+   "parent": "pelvis"
+  },
+  "hip_yaw_servo_L": {
+   "parent": "pelvis"
+  },
+  "hip_yaw_mount_L": {
+   "parent": "pelvis"
+  },
+  "hip_yaw_yoke_L": {
+   "parent": "yaw_L"
+  },
+  "hip_roll_act_L": {
+   "parent": "yaw_L"
+  },
+  "hip_roll_bracket_L": {
+   "parent": "roll_L"
+  },
+  "hip_pitch_act_L": {
+   "parent": "roll_L"
+  },
+  "thigh_stub_L": {
+   "parent": "pitch_L"
+  },
+  "hip_yaw_servo_R": {
+   "parent": "pelvis"
+  },
+  "hip_yaw_mount_R": {
+   "parent": "pelvis"
+  },
+  "hip_yaw_yoke_R": {
+   "parent": "yaw_R"
+  },
+  "hip_roll_act_R": {
+   "parent": "yaw_R"
+  },
+  "hip_roll_bracket_R": {
+   "parent": "roll_R"
+  },
+  "hip_pitch_act_R": {
+   "parent": "roll_R"
+  },
+  "thigh_stub_R": {
+   "parent": "pitch_R"
+  }
+ }
+}

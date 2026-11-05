@@ -1,0 +1,311 @@
+{
+ "parts": {
+  "waist_adapter": {
+   "volume_cm3": 70.54540984607249,
+   "mass_g": 43.73815410456495,
+   "com_mm": [
+    -9.149525427279234e-16,
+    -4.2350592692633867e-16,
+    -19.7284513723549
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "waist_servo_STS3215": {
+   "volume_cm3": 39.375,
+   "mass_g": 55.0,
+   "com_mm": [
+    -3.337013205444756e-17,
+    3.609105959416381e-17,
+    -35.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "waist_bearing": {
+   "volume_cm3": 13.634512116579703,
+   "mass_g": 45.0,
+   "com_mm": [
+    2.7215776783983728e-14,
+    2.1529117454482322e-16,
+    -56.500000000000014
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "pelvis_block": {
+   "volume_cm3": 128.60679572390777,
+   "mass_g": 79.73621334882282,
+   "com_mm": [
+    -5.431221009977784e-15,
+    2.8110811868049074e-16,
+    -81.93820062032106
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_yaw_servo_L": {
+   "volume_cm3": 39.375,
+   "mass_g": 55.0,
+   "com_mm": [
+    -3.337013205444756e-17,
+    55.0,
+    -113.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "hip_yaw_mount_L": {
+   "volume_cm3": 16.867559999999997,
+   "mass_g": 10.457887199999998,
+   "com_mm": [
+    8.627160791701262e-16,
+    55.0,
+    -113.50000000000003
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_yaw_yoke_L": {
+   "volume_cm3": 26.99999999999999,
+   "mass_g": 16.739999999999995,
+   "com_mm": [
+    -24.855555555555558,
+    54.99999999999999,
+    -139.56111111111113
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_roll_act_L": {
+   "volume_cm3": 99.27825484425446,
+   "mass_g": 260.0,
+   "com_mm": [
+    -50.00000000000001,
+    55.0,
+    -163.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "hip_roll_bracket_L": {
+   "volume_cm3": 34.368,
+   "mass_g": 21.30816,
+   "com_mm": [
+    -35.050279329608955,
+    71.88128491620111,
+    -170.1243016759776
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_pitch_act_L": {
+   "volume_cm3": 99.27825484425448,
+   "mass_g": 260.0,
+   "com_mm": [
+    7.622007387843085e-15,
+    55.00000000000001,
+    -163.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "thigh_stub_L": {
+   "volume_cm3": 85.79384013175395,
+   "mass_g": 53.19218088168745,
+   "com_mm": [
+    -5.585832133047577e-16,
+    49.09356197109484,
+    -238.04698383186417
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_yaw_servo_R": {
+   "volume_cm3": 39.375,
+   "mass_g": 55.0,
+   "com_mm": [
+    -3.337013205444756e-17,
+    -55.0,
+    -113.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "hip_yaw_mount_R": {
+   "volume_cm3": 16.867559999999997,
+   "mass_g": 10.457887199999998,
+   "com_mm": [
+    8.627160791701262e-16,
+    -55.0,
+    -113.50000000000003
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_yaw_yoke_R": {
+   "volume_cm3": 26.99999999999999,
+   "mass_g": 16.739999999999995,
+   "com_mm": [
+    -24.855555555555558,
+    -55.00000000000001,
+    -139.56111111111113
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_roll_act_R": {
+   "volume_cm3": 99.27825484425446,
+   "mass_g": 260.0,
+   "com_mm": [
+    -50.00000000000001,
+    -55.00000000000001,
+    -163.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "hip_roll_bracket_R": {
+   "volume_cm3": 34.368,
+   "mass_g": 21.30816,
+   "com_mm": [
+    -35.050279329608955,
+    -71.88128491620111,
+    -170.1243016759776
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "hip_pitch_act_R": {
+   "volume_cm3": 99.27825484425446,
+   "mass_g": 260.0,
+   "com_mm": [
+    4.397311954524858e-15,
+    -54.999999999999986,
+    -163.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "thigh_stub_R": {
+   "volume_cm3": 85.79384013175395,
+   "mass_g": 53.19218088168745,
+   "com_mm": [
+    -1.3454591627913755e-16,
+    -49.09356197109486,
+    -238.04698383186417
+   ],
+   "bought": false,
+   "valid": true
+  }
+ },
+ "summary": {
+  "version": "pelvis-v1",
+  "coords": "origin=torso hip_plate top centre; +Z up +Y left +X fwd",
+  "joints_mm": {
+   "waist": [
+    0,
+    0,
+    -53.0
+   ],
+   "hip_yaw_L": [
+    0,
+    55,
+    -96.0
+   ],
+   "hip_roll_L": [
+    -50,
+    55,
+    -163.5
+   ],
+   "hip_pitch_L": [
+    0,
+    55,
+    -163.5
+   ],
+   "hip_yaw_R": [
+    0,
+    -55,
+    -96.0
+   ],
+   "hip_roll_R": [
+    -50,
+    -55,
+    -163.5
+   ],
+   "hip_pitch_R": [
+    0,
+    -55,
+    -163.5
+   ]
+  },
+  "joint_order_per_leg": [
+   "hip_yaw (Z, STS3215)",
+   "hip_roll (X, AK45-10 class)",
+   "hip_pitch (Y, AK45-10 class)"
+  ],
+  "pelvis_and_hips_g": 1666.9,
+  "com_pelvis_mm": [
+   -17.0,
+   0.0,
+   -146.2
+  ],
+  "upper_body_g": 3261.3,
+  "com_upper_mm": [
+   7.7,
+   0.0,
+   129.0
+  ],
+  "total_g": 4928.2,
+  "com_total_mm": [
+   -0.7,
+   0.0,
+   35.9
+  ],
+  "com_above_hip_pitch_axis_mm": 199.4,
+  "hardware_misc_g": 90.0,
+  "assumptions": [
+   "ALL dims/masses PLACEHOLDER",
+   "STS3215 45\u00d725\u00d735 mm 55 g",
+   "AK45-10 class 53 dia \u00d7 45 mm 260 g (same as torso-v1 shoulder)",
+   "PLA 1.24 g/cm\u00b3 \u00d7 50% print factor",
+   "waist thin bearing 72/52\u00d77 mm 45 g carries bending; servo torque only",
+   "thigh = stub only; legs below hip pitch not counted",
+   "battery unchanged (torso-v1 tray)",
+   "arms hanging (torso-v1 estimate)"
+  ],
+  "params": {
+   "hip_t": 8,
+   "pad_t": 4,
+   "pad_y": 38,
+   "pad_pcd": 32,
+   "sts": [
+    45.0,
+    25.0,
+    35.0
+   ],
+   "m_sts": 0.055,
+   "act_d": 53,
+   "act_h": 45,
+   "m_act": 0.26,
+   "bearing_od": 72,
+   "bearing_id": 52,
+   "bearing_t": 7,
+   "m_bearing": 0.045,
+   "adapter_t": 6,
+   "pelvis_w": 130,
+   "pelvis_d": 84,
+   "pelvis_h": 36,
+   "hip_y": 55,
+   "roll_x": -50,
+   "thigh": [
+    46,
+    40,
+    80
+   ],
+   "rho": 0.00124,
+   "print_factor": 0.5,
+   "m_horn_hw": 0.01
+  }
+ }
+}

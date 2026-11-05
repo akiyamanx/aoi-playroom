@@ -1,0 +1,23 @@
+import p from 'puppeteer-core';
+const url=process.argv[2]||'http://localhost:8777/pelvis-v1/index.html';
+const b=await p.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const pg=await b.newPage();pg.on('pageerror',e=>console.log('E',e.message));
+pg.on('console',m=>{if(m.type()==='error'||m.type()==='warning')console.log('C',m.text())});
+await pg.setViewport({width:390,height:844,deviceScaleFactor:2});
+await pg.goto(url,{waitUntil:'networkidle0',timeout:120000});
+await pg.waitForFunction('window.ready',{timeout:90000});
+const sh=async(f)=>{await new Promise(r=>setTimeout(r,1800));await pg.screenshot({path:'shots/'+f});console.log('shot',f)};
+await pg.evaluate(()=>{setCovers(true);setCom(true);setAuto(true);setDir(0.35,0.4,0.85);snapFit()});
+await sh('01_front_pelvis.png');
+await pg.evaluate(()=>{setCom(true);focusSide()});
+await sh('02_side_com.png');
+await pg.evaluate(()=>{setCovers(false);setJ({waist:25,yaw_L:15,roll_L:15,pitch_R:45});setAuto(true);setDir(0.75,0.4,0.5);snapFit()});
+await sh('03_joints_posed.png');
+await pg.evaluate(()=>{setCovers(true);setJ({waist:0,yaw_L:0,roll_L:0,pitch_R:0});setWalk(true,0);setAuto(true);setDir(0.05,0.15,1);snapFit()});
+await sh('04_walk_side_phase0.png');
+await pg.evaluate(()=>{setWalk(true,Math.PI)});
+await sh('05_walk_side_phasePI.png');
+// hip close-up from behind-below
+await pg.evaluate(()=>{setWalk(false);M.arm.forEach(m=>m.visible=false);M.cover.forEach(m=>m.visible=false);setAuto(true);setDir(-0.6,-0.1,0.8);snapFit()});
+await sh('06_hips_rear.png');
+await b.close();
