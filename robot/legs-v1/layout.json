@@ -1,0 +1,117 @@
+{
+ "joints": {
+  "knee_L": [
+   0,
+   80,
+   -267.0
+  ],
+  "ankle_pitch_L": [
+   0,
+   80,
+   -339.0
+  ],
+  "ankle_roll_L": [
+   0,
+   80,
+   -339.0
+  ],
+  "knee_R": [
+   0,
+   -80,
+   -267.0
+  ],
+  "ankle_pitch_R": [
+   0,
+   -80,
+   -339.0
+  ],
+  "ankle_roll_R": [
+   0,
+   -80,
+   -339.0
+  ],
+  "hip_pitch_L": [
+   0,
+   80,
+   -195.0
+  ],
+  "hip_pitch_R": [
+   0,
+   -80,
+   -195.0
+  ]
+ },
+ "floor_z": -385.0,
+ "com_total_mm": [
+  2.138087346008968,
+  -0.08343313479731032,
+  -56.26905770575067
+ ],
+ "total_g": 5984.552794438513,
+ "legs_g": 1103.623097640875,
+ "upper_g": 2525.0285774504714,
+ "pelvis_g": 2468.0678776115847,
+ "sole": {
+  "x0": -45,
+  "l": 140,
+  "w": 80
+ },
+ "hip_y": 80,
+ "height": 699.6,
+ "parts": {
+  "thigh_L": {
+   "parent": "pitch_L"
+  },
+  "knee_act_L": {
+   "parent": "pitch_L"
+  },
+  "ankle_servo_Li": {
+   "parent": "knee_L"
+  },
+  "ankle_servo_Lo": {
+   "parent": "knee_L"
+  },
+  "shin_L": {
+   "parent": "knee_L"
+  },
+  "ankle_rods_L": {
+   "parent": "knee_L"
+  },
+  "ankle_cross_L": {
+   "parent": "apitch_L"
+  },
+  "foot_L": {
+   "parent": "aroll_L"
+  },
+  "fsr_L": {
+   "parent": "aroll_L"
+  },
+  "thigh_R": {
+   "parent": "pitch_R"
+  },
+  "knee_act_R": {
+   "parent": "pitch_R"
+  },
+  "ankle_servo_Ro": {
+   "parent": "knee_R"
+  },
+  "ankle_servo_Ri": {
+   "parent": "knee_R"
+  },
+  "shin_R": {
+   "parent": "knee_R"
+  },
+  "ankle_rods_R": {
+   "parent": "knee_R"
+  },
+  "ankle_cross_R": {
+   "parent": "apitch_R"
+  },
+  "foot_R": {
+   "parent": "aroll_R"
+  },
+  "fsr_R": {
+   "parent": "aroll_R"
+  }
+ }
+}

@@ -1,0 +1,283 @@
+{
+ "parts": {
+  "thigh_L": {
+   "mass_g": 19.58721922258075,
+   "com_mm": [
+    2.228391866349273,
+    79.99999999999999,
+    -231.77993715322228
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "pitch_L"
+  },
+  "knee_act_L": {
+   "mass_g": 260.0,
+   "com_mm": [
+    9.380932169653027e-15,
+    80.0,
+    -267.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "pitch_L"
+  },
+  "ankle_servo_Li": {
+   "mass_g": 55.0,
+   "com_mm": [
+    42.0,
+    62.0,
+    -275.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_L"
+  },
+  "ankle_servo_Lo": {
+   "mass_g": 55.0,
+   "com_mm": [
+    42.0,
+    98.0,
+    -275.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_L"
+  },
+  "shin_L": {
+   "mass_g": 40.11075493596321,
+   "com_mm": [
+    17.190665339104985,
+    79.99999999999994,
+    -291.7517483812054
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "knee_L"
+  },
+  "ankle_rods_L": {
+   "mass_g": 10.1073675045781,
+   "com_mm": [
+    34.00000000000002,
+    80.0,
+    -307.75000000000006
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "knee_L"
+  },
+  "ankle_cross_L": {
+   "mass_g": 6.978348042698986,
+   "com_mm": [
+    -2.9474701843163697e-13,
+    79.99999999999994,
+    -338.9999999999996
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "apitch_L"
+  },
+  "foot_L": {
+   "mass_g": 77.02785911461646,
+   "com_mm": [
+    22.708592202911515,
+    79.99999999999997,
+    -376.2951935711798
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "aroll_L"
+  },
+  "fsr_L": {
+   "mass_g": 8.0,
+   "com_mm": [
+    24.999999999999996,
+    80.0,
+    -384.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "aroll_L"
+  },
+  "thigh_R": {
+   "mass_g": 19.587219222580746,
+   "com_mm": [
+    2.2283918663492734,
+    -80.00000000000006,
+    -231.77993715322225
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "pitch_R"
+  },
+  "knee_act_R": {
+   "mass_g": 260.0,
+   "com_mm": [
+    6.4493908666364575e-15,
+    -80.0,
+    -267.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "pitch_R"
+  },
+  "ankle_servo_Ro": {
+   "mass_g": 55.0,
+   "com_mm": [
+    42.0,
+    -98.0,
+    -275.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_R"
+  },
+  "ankle_servo_Ri": {
+   "mass_g": 55.0,
+   "com_mm": [
+    42.0,
+    -62.0,
+    -275.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_R"
+  },
+  "shin_R": {
+   "mass_g": 40.1107549359632,
+   "com_mm": [
+    17.19066533910499,
+    -80.00000000000001,
+    -291.7517483812055
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "knee_R"
+  },
+  "ankle_rods_R": {
+   "mass_g": 10.107367504578102,
+   "com_mm": [
+    34.000000000000014,
+    -80.0,
+    -307.75
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "knee_R"
+  },
+  "ankle_cross_R": {
+   "mass_g": 6.978348042698986,
+   "com_mm": [
+    -2.9464601194850356e-13,
+    -80.00000000000003,
+    -338.9999999999996
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "apitch_R"
+  },
+  "foot_R": {
+   "mass_g": 77.02785911461646,
+   "com_mm": [
+    22.70859220291153,
+    -80.00000000000006,
+    -376.2951935711798
+   ],
+   "bought": false,
+   "valid": true,
+   "parent": "aroll_R"
+  },
+  "fsr_R": {
+   "mass_g": 8.0,
+   "com_mm": [
+    24.999999999999993,
+    -79.99999999999999,
+    -383.99999999999994
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "aroll_R"
+  },
+  "hardware_L": {
+   "mass_g": 20.0,
+   "com_mm": [
+    0,
+    80,
+    -267.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_L"
+  },
+  "hardware_R": {
+   "mass_g": 20.0,
+   "com_mm": [
+    0,
+    -80,
+    -267.0
+   ],
+   "bought": true,
+   "valid": true,
+   "parent": "knee_R"
+  }
+ },
+ "summary": {
+  "version": "legs-v1",
+  "total_height_mm": 699.6,
+  "floor_z": -385.0,
+  "thigh_mm": 72,
+  "shin_mm": 72,
+  "ankle_height_mm": 46,
+  "hip_to_floor_mm": 190.0,
+  "total_g": 5984.6,
+  "legs_g": 1103.6,
+  "one_leg_g": 551.8,
+  "one_leg_com_below_hip_mm": 92.8,
+  "com_mm": [
+   2.1,
+   -0.1,
+   -56.3
+  ],
+  "com_above_floor_mm": 328.7,
+  "sole_mm": [
+   140,
+   80,
+   10
+  ],
+  "sole_x_range": [
+   -45,
+   95
+  ],
+  "com_inside_double_support": true,
+  "stance_width_outer_mm": 240,
+  "params": {
+   "head_top": 314.6,
+   "thigh": 72,
+   "shin": 72,
+   "ankle_h": 46,
+   "act_d": 53,
+   "act_h": 45,
+   "m_act": 0.26,
+   "sts": [
+    45.0,
+    25.0,
+    35.0
+   ],
+   "m_sts": 0.055,
+   "sole_l": 140,
+   "sole_w": 80,
+   "sole_t": 10,
+   "sole_x0": -45,
+   "fsr_d": 14,
+   "fsr_t": 2,
+   "m_fsr": 0.002,
+   "rod_r": 1.5,
+   "crank": 16,
+   "rod_x": 34,
+   "rod_dy": 34,
+   "rho": 0.00124,
+   "print_factor": 0.5,
+   "m_hw": 0.02
+  }
+ }
+}
