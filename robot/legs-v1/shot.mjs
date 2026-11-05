@@ -32,5 +32,15 @@ await pg.evaluate(()=>{setJ({});setExplode(true,true);setDir(0.75,0.45,0.5);snap
 await sh('10_spine_exploded.png');
 await pg.evaluate(()=>{setExplode(false,true);setDir(-0.6,0.5,0.6);snapFit()});
 await sh('11_spine_assembled_back.png');
+await pg.evaluate(()=>{setCovers(false);setCom(false);M.arm.forEach(m=>m.visible=false);setDir(-1,0.35,0.25);focusOn(tray,1000)});
+await sh('12_tray_close_back.png');
+await pg.evaluate(()=>{setDir(-0.25,1,0.2);focusOn(tray,1000)});
+await sh('13_tray_close_side.png');
+await pg.evaluate(()=>{setTray(24)});console.log('tray24 com',await pg.evaluate(()=>liveCom().map(v=>Math.round(v*10)/10)));
+await sh('14_tray_low24_side.png');
+await pg.evaluate(()=>{setTray(32);setCovers(true);setDir(-1,0.3,0.15);focusOn(tray,1100)});
+await sh('15_tray_back_covers_off.png');
+await pg.evaluate(()=>{setCovers(false);setDir(0.35,0.25,-1);focusIMU(800)});
+await sh('16_pelvis_imu_below.png');
 console.log('com',await pg.evaluate(()=>liveCom().map(v=>Math.round(v*10)/10)));
 await b.close();

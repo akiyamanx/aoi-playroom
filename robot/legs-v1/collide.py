@@ -1,4 +1,4 @@
-# whole-body interference check: pelvis-v1.2 (minus thigh stubs) + legs-v1.1. Overlaps > 0.5 cm³ reported.
+# whole-body interference check (v1.4: + aluminium spine, electronics tray, pelvis IMU / foot-sensor board): pelvis-v1.2 (minus thigh stubs) + legs-v1.1. Overlaps > 0.5 cm³ reported.
 # Ignored pairs: designed contacts (rod↔foot ball-joint ears, cross↔foot clevis/shin, actuator↔its own plates).
 import json, itertools, cadquery as cq
 PLy=json.load(open('../pelvis-v1/layout.json')); LL=json.load(open('layout.json'))
@@ -11,8 +11,14 @@ WJ=json.load(open('waist.json')); DZ=WJ['summary']['params']['DZ']; ZP=WJ['summa
 for n,p in WJ['parts'].items():
     if n.endswith('_hw'): continue
     P[n]=cq.importers.importStep(n+'.step').val(); PAR[n]=p['parent']
-for n in ['hip_plate','spine_frame','electronics_bay','servo_bay_L','servo_bay_R','cover_front','cover_back']:
+for n in ['hip_plate','servo_bay_L','servo_bay_R']:
     P['torso_'+n]=cq.importers.importStep('../pelvis-v1/torso/'+n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wpitch'
+# v1.3 spine + v1.4 electronics (torso frame, local files); intra-torso pairs are checked in build_spine/build_elec
+SPJ=json.load(open('spine.json'));EJ=json.load(open('elec.json'))
+for n in [k for k in SPJ['parts'] if k!='spine_hw']+['cover_front_v13','cover_back_v14']+[k for k,v in EJ['parts'].items() if v['frame']=='torso' and k not in ('elec_wiring','elec_hw')]:
+    P['torso_'+n]=cq.importers.importStep(n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wpitch'
+for n,v in EJ['parts'].items():
+    if v['frame']=='pelvis': P[n]=cq.importers.importStep(n+'.step').val(); PAR[n]='pelvis'
 for n,p in LL['parts'].items():
     P[n]=cq.importers.importStep(n+'.step').val(); PAR[n]=p['parent']
 ORDER=['aroll','apitch','knee','pitch','roll','yaw']
@@ -34,7 +40,7 @@ def pose(n,Q):
         if a: s=s.rotate(cq.Vector(*j),cq.Vector(*j)+cq.Vector(*AX[c]),a)
     return s
 DESIGNED={frozenset(p) for p in [('waist_pitch_lower_yoke','waist_adapter'),('waist_pitch_lower_yoke','waist_pitch_act'),('waist_pitch_upper_yoke','waist_pitch_act'),
-  ('waist_pitch_upper_yoke','torso_hip_plate'),('waist_pitch_upper_yoke','waist_pitch_lower_yoke'),('waist_adapter','waist_servo_STS3215'),('waist_servo_STS3215','waist_bearing'),('waist_adapter','waist_bearing')]}
+  ('waist_pitch_upper_yoke','torso_hip_plate'),('waist_pitch_upper_yoke','waist_pitch_lower_yoke'),('waist_adapter','waist_servo_STS3215'),('waist_servo_STS3215','waist_bearing'),('waist_adapter','waist_bearing'),('pelvis_imu_cup','pelvis_block'),('pelvis_footsensor_board','pelvis_block')]}
 def ok_pair(a,b):
     if frozenset((a,b)) in DESIGNED: return True
     sa=a[-1] if a[-2]!='_' else a[-1]

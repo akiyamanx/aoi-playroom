@@ -1,0 +1,274 @@
+{
+ "summary": {
+  "version": "legs-v1.4",
+  "params": {
+   "TZ": 32,
+   "TZ_range": [
+    24,
+    36
+   ],
+   "plate_x": [
+    -12,
+    -8
+   ],
+   "plate_y": 56,
+   "plate_h": 134,
+   "ring_h": 16,
+   "ring_dz": [
+    8,
+    80
+   ],
+   "comp": [
+    30,
+    100,
+    80
+   ],
+   "m_comp": 0.175,
+   "drv": [
+    15,
+    55,
+    42
+   ],
+   "m_drv": 0.035,
+   "pwr": [
+    22,
+    50,
+    42
+   ],
+   "m_pwr": 0.06,
+   "estop_c": [
+    -58,
+    0,
+    178
+   ],
+   "m_estop": 0.045,
+   "m_wire": 0.03,
+   "imu": [
+    25,
+    20,
+    5
+   ],
+   "m_imu": 0.005,
+   "pad_t": 2.0,
+   "m_pad": 0.001,
+   "fsb": [
+    40,
+    30,
+    10
+   ],
+   "m_fsb": 0.012,
+   "rho": 0.00127,
+   "pf": 0.5
+  },
+  "removed_g": 167.1621231443155,
+  "added_g": 432.8,
+  "delta_g": 265.6,
+  "total_g": 6812.6,
+  "com_mm": [
+   1.4,
+   -0.3,
+   -41.5
+  ],
+  "com_above_floor_mm": 523.5,
+  "rotating_mass_g": 2761.3,
+  "rotating_com_above_axis_mm": 159.3,
+  "rotating_com_fwd_mm": 8.3,
+  "torque_Nm": {
+   "0": 0.22,
+   "15": 1.33,
+   "30": 2.35,
+   "45": 3.21,
+   "60": 3.85,
+   "-15": -0.9
+  },
+  "torso_hits": [],
+  "pelvis_hits": [],
+  "removed": [
+   [
+    42.1621231443155,
+    [
+     -22.770772399526095,
+     -8.258598490923282e-16,
+     117.35512646390619
+    ]
+   ],
+   [
+    60,
+    [
+     -25,
+     0,
+     120
+    ]
+   ],
+   [
+    30,
+    [
+     -25,
+     30,
+     95
+    ]
+   ],
+   [
+    30,
+    [
+     -25,
+     -30,
+     95
+    ]
+   ],
+   [
+    5,
+    [
+     0,
+     0,
+     53
+    ]
+   ]
+  ]
+ },
+ "parts": {
+  "elec_tray": {
+   "mass_g": 31.989434325441895,
+   "com_mm": [
+    -10.000000000000005,
+    9.230683084811832e-16,
+    98.65698674479918
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_clamp_lo": {
+   "mass_g": 11.142918994788054,
+   "com_mm": [
+    22.743582744094496,
+    0.006146794743476657,
+    47.999999999999986
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_clamp_hi": {
+   "mass_g": 11.142918994788054,
+   "com_mm": [
+    22.743582744094503,
+    0.006146794743476242,
+    119.99999999999997
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_computer": {
+   "mass_g": 175.0,
+   "com_mm": [
+    -27.5,
+    1.3490838076298435e-15,
+    76.0
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_driver_CAN_bus": {
+   "mass_g": 35.0,
+   "com_mm": [
+    -20.0,
+    31.5,
+    141.0
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_power_dcdc": {
+   "mass_g": 60.0,
+   "com_mm": [
+    -23.5,
+    -29.0,
+    141.0
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_estop": {
+   "mass_g": 45.0,
+   "com_mm": [
+    -56.82242990654205,
+    3.8706010052006154e-16,
+    178.0
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": false
+  },
+  "pelvis_imu_cup": {
+   "mass_g": 3.510582251783841,
+   "com_mm": [
+    3.8909720676859754e-14,
+    -1.4382905363204017e-14,
+    -120.6347023524129
+   ],
+   "valid": true,
+   "frame": "pelvis",
+   "tray": false
+  },
+  "pelvis_imu_pad": {
+   "mass_g": 1.0,
+   "com_mm": [
+    1.4432899320127036e-16,
+    1.0658141036401502e-16,
+    -117.00000000000001
+   ],
+   "valid": true,
+   "frame": "pelvis",
+   "tray": false
+  },
+  "pelvis_imu": {
+   "mass_g": 5.0,
+   "com_mm": [
+    1.0436096431476473e-16,
+    1.4210854715202007e-17,
+    -120.5
+   ],
+   "valid": true,
+   "frame": "pelvis",
+   "tray": false
+  },
+  "pelvis_footsensor_board": {
+   "mass_g": 12.0,
+   "com_mm": [
+    -48.0,
+    -3.7680296593338647e-16,
+    -121.70219435736676
+   ],
+   "valid": true,
+   "frame": "pelvis",
+   "tray": false
+  },
+  "elec_wiring": {
+   "mass_g": 30.0,
+   "com_mm": [
+    -25,
+    0,
+    92
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  },
+  "elec_hw": {
+   "mass_g": 12.0,
+   "com_mm": [
+    0,
+    0,
+    82
+   ],
+   "valid": true,
+   "frame": "torso",
+   "tray": true
+  }
+ }
+}

@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃん 全身 legs-v1.3（アルミ背骨）</title>
+<title>ここちゃん 全身 legs-v1.4（電装トレイ）</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.3（背骨＝アルミパイプ×2・こし前後・身長94cm）</h1>
-<p>v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.4（電装トレイ・IMUは骨盤・背骨＝アルミパイプ×2・こし前後・身長94cm）</h1>
+<p>v1.4：背骨パイプに割りリングで電装トレイ（コンピュータ・CAN/バス基板・電源基板、高さ調整可）＋背中に非常停止ボタン／IMUは骨盤のまん中（こし関節の下・ゲルパッド）＋足うらセンサー読み取り基板／v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -23,6 +23,7 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 <button id="walk">🚶 歩くデモ（腕＋足）</button>
 <button id="bow">🙇 おじぎ</button>
 <button id="expl">💥 背骨を分解</button>
+<label style="font-size:12px">トレイ高さ <input id="tz" type="range" min="24" max="36" step="1" value="32"> <span id="tzv">32</span>mm</label>
 <button id="rs">↺ もどす</button>
 </div>
 <div id="stats"></div><div id="sl"></div>
@@ -61,10 +62,10 @@ const GROUPS={
   batt:{label:'バッテリー',color:0x5ecf7a,files:[]},
   servo:{label:'指モーター',color:0xff8c42,files:[]},
   tens:{label:'テンショナー',color:0xffd24a,files:[]},
-  brain:{label:'頭脳・センサー',color:0xb07cff,files:['electronics_bay']},
+  brain:{label:'電装・センサー',color:0xb07cff,files:[]},
   spine:{label:'背骨クランプ',color:0x9b7fd1,files:[]},
   pipe:{label:'アルミパイプ',color:0xd8dde3,files:[]},
-  cover:{label:'カバー',color:0xa8e4ff,files:['cover_front','cover_back'],opacity:0.35},
+  cover:{label:'カバー',color:0xa8e4ff,files:['cover_front','cover_back_v14'],opacity:0.35},
   arm:{label:'うで',color:0xffb3d1,files:[]},
   // hands filled at runtime for close-ups
 
@@ -94,7 +95,7 @@ async function loadSTL(url,par,col,key,op=1,metal=0){
 const jobs=[];
 for(const [key,g] of Object.entries(GROUPS)){
   for(const f of g.files){
-    jobs.push(loadSTL((f==='cover_front'?'cover_front_v13':'../pelvis-v1/torso/'+f)+'.stl',root,g.color,key,g.opacity||1, key==='frame'?0.15:0));
+    jobs.push(loadSTL((f==='cover_front'?'cover_front_v13':f==='cover_back_v14'?f:'../pelvis-v1/torso/'+f)+'.stl',root,g.color,key,g.opacity||1, key==='frame'?0.15:0));
   }
 }
 
@@ -102,6 +103,14 @@ for(const [key,g] of Object.entries(GROUPS)){
 const SPJ=(await (await fetch('spine.json')).json());window.SPJ=SPJ;
 for(const [n,p] of Object.entries(SPJ.parts)){if(n==='spine_hw')continue;const pipe=n.includes('pipe');
   jobs.push(loadSTL(n+'.stl',root,pipe?0xd8dde3:0x9b7fd1,pipe?'pipe':'spine',1,pipe?0.85:0.05).then(m=>{if(m){m.userData.ex=p.explode;}}));}
+// --- v1.4 electronics tray (torso frame, slides along the pipes) ---
+const EJ=(await (await fetch('elec.json')).json());window.EJ=EJ;const TZ0=EJ.summary.params.TZ;
+const tray=new THREE.Group();root.add(tray);window.tray=tray;M.elec=[];M.pel=[];
+const ECOL={elec_tray:0x9b7fd1,elec_clamp_lo:0x9b7fd1,elec_clamp_hi:0x9b7fd1,elec_computer:0x2e8b57,elec_driver_CAN_bus:0x3b6fd6,elec_power_dcdc:0xd68a2e,elec_estop:0xe03030,pelvis_imu_cup:0x9b7fd1,pelvis_imu_pad:0x333333,pelvis_imu:0x3b6fd6,pelvis_footsensor_board:0x2e8b57};
+const pelvisElec=[];
+for(const [n,p] of Object.entries(EJ.parts)){if(n==='elec_wiring'||n==='elec_hw')continue;
+  if(p.frame==='pelvis'){pelvisElec.push(n);continue;}
+  jobs.push(loadSTL(n+'.stl',p.tray?tray:root,ECOL[n]||0x888888,'brain',1,0));}
 let explodeK=0,explodeT=null;
 window.setExplode=(on,instant)=>{const tgt=on?1:0;const a0=explodeK,t0=performance.now();
   const st=()=>{const k=instant?1:Math.min(1,(performance.now()-t0)/700);explodeK=a0+(tgt-a0)*k;
@@ -153,12 +162,7 @@ function boxAt(c,dims,col,key){
   const m=new THREE.Mesh(new THREE.BoxGeometry(...dims),mat(col,1,0.1));
   m.position.fromArray(c);root.add(m);M[key].push(m);return m;
 }
-boxAt(e.rpi_c,[85,56,17],0x7a5cff,'brain');
-e.drivers.forEach(d=>boxAt(d,[65,45,12],0x9b7cff,'brain'));
-boxAt(e.imu_c,[25,20,5],0xff66aa,'brain');
-// IMU label peg
-{const peg=new THREE.Mesh(new THREE.SphereGeometry(4,12,12),mat(0xff3388,1,0.3));
- peg.position.fromArray(e.imu_c);root.add(peg);M.brain.push(peg);}
+// v1.4: old RPi/driver/IMU boxes replaced by elec.json parts (tray + pelvis IMU)
 
 // Bowden guide tubes (simple cylinders toward shoulders)
 const shY=lay.shoulder.y, shZ=lay.shoulder.z;
@@ -326,6 +330,14 @@ window.liveCom=()=>{body.updateMatrixWorld(true);const inv=new THREE.Matrix4().c
   const [x,y,z,m]=liveCom();const Mt=WJ.summary.total_g,Ct=WJ.summary.com_mm,r=Mt-m;
   if(r>1){const w=FW.pelvis;MS.push({g:F.pelvis,m:r,c:[(Mt*Ct[0]-m*x)/r-w[0],(Mt*Ct[1]-m*y)/r-w[1],(Mt*Ct[2]-m*z)/r-w[2]]});}
   window._resid=r;}
+{ // v1.4: old bay/RPi/drivers/IMU removed; tray (moves with slider) + E-stop + pelvis IMU/foot board added
+  for(const [g,c] of EJ.summary.removed)MS.push({g:root,m:-g,c});
+  const w=FW.pelvis;const pg=new THREE.Group();window.F_pelvis=F.pelvis;pg.position.set(-w[0],-w[1],-w[2]);F.pelvis.add(pg);
+  for(const n of pelvisElec)loadSTL(n+'.stl',pg,ECOL[n],'brain',1,0);
+  for(const p of Object.values(EJ.parts))MS.push({g:p.frame==='pelvis'?F.pelvis:(p.tray?tray:root),m:p.mass_g,c:p.frame==='pelvis'?[p.com_mm[0]-w[0],p.com_mm[1]-w[1],p.com_mm[2]-w[2]]:p.com_mm});
+  tray.position.set(0,0,0);
+  const tz=document.getElementById('tz');window.setTray=(v)=>{tray.position.z=v-TZ0;tz.value=v;document.getElementById('tzv').textContent=v;if(window.updCom)updCom();};
+  tz.oninput=()=>setTray(+tz.value);}
 { // v1.3: printed spine_frame removed, pipes + clamps + hardware added (torso frame)
   const SS=SPJ.summary;MS.push({g:root,m:-SS.removed_spine_frame_g,c:SS.old_spine_com_torso_mm});
   for(const p of Object.values(SPJ.parts))MS.push({g:root,m:p.mass_g,c:p.com_mm});}
@@ -422,7 +434,7 @@ bb.onclick=()=>setBow(J.wp>20?0:45);
 const wb=document.getElementById('walk');
 wb.onclick=()=>{setWalk(!walking);wb.classList.toggle('main',walking);};
 const stats=document.getElementById('stats');
-const WS=WJ.summary;window._stat=(h,x)=>`身長 約 ${Math.round(WS.total_height_mm)} mm ／ 合計 約 ${Math.round(SPJ.summary.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(h)} mm・前に ${Math.round(x)} mm ／ こし前後 ${Math.round(J.wp)}°／ 1歩 約 ${Math.round(2*370*Math.sin(20*Math.PI/180)*0.8)} mm（デモ）（赤い点＝真下、緑の線＝足うらの支える範囲）`;updCom();
+const WS=WJ.summary;window._stat=(h,x)=>`身長 約 ${Math.round(WS.total_height_mm)} mm ／ 合計 約 ${Math.round(EJ.summary.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(h)} mm・前に ${Math.round(x)} mm ／ こし前後 ${Math.round(J.wp)}°／ 1歩 約 ${Math.round(2*370*Math.sin(20*Math.PI/180)*0.8)} mm（デモ）（赤い点＝真下、緑の線＝足うらの支える範囲）`;updCom();
 
 // camera
 let auto=true,dirV=new THREE.Vector3(0.7,0.35,0.6).normalize(),curD=0;
@@ -447,6 +459,8 @@ addEventListener('resize',rs);rs();
 document.getElementById('rs').onclick=()=>{auto=true;dirV.set(0.7,0.35,0.6).normalize();setCovers(true);comVisible=true;comG.visible=true;document.getElementById('comBtn').classList.remove('off');fit(1)};
 
 window.snapFit=()=>fit(1);
+window.focusOn=(obj,d)=>{auto=false;body.updateMatrixWorld(true);const ct=new THREE.Box3().setFromObject(obj).getCenter(new THREE.Vector3());ctl.target.copy(ct);curD=d;c.position.copy(ct).addScaledVector(dirV,d);c.near=d/50;c.far=d*12;c.updateProjectionMatrix();ctl.update&&ctl.update();};
+window.focusIMU=(d)=>{const o=M.brain.find(m=>m.parent&&m.parent.parent===window.F_pelvis);focusOn(o||body,d)};
 window.setDir=(x,y,z)=>{dirV.set(x,y,z).normalize();auto=true};
 window.setCovers=setCovers;
 window.setCom=v=>{comVisible=!!v;comG.visible=comVisible};

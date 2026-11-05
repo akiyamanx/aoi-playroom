@@ -13,7 +13,7 @@ m=lambda v:' '.join(f'{x/1000:.4f}' for x in v)
 fr={'torso':[0,0,ZP],'wpitch':[0,0,ZP],'wyaw':J['waist'],'pelvis':J['waist']}
 for s in 'LR':
     for f,j in (('yaw','hip_yaw'),('roll','hip_roll'),('pitch','hip_pitch'),('knee','knee'),('apitch','ankle_pitch'),('aroll','ankle_roll')): fr[f+'_'+s]=J[j+'_'+s]
-out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
+out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3) + electronics tray / pelvis IMU (legs-v1.4), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
 def link(name,f):
     ps=[n for n in R if R[n]['parent']==(f if f!='torso' else 'wpitch')]; mm=sum(R[n]['mass_g'] for n in ps)/1000
     c=[sum(R[n]['mass_g']*R[n]['com_mm'][i] for n in ps)/1000/max(mm,1e-9) for i in range(3)]
@@ -21,6 +21,13 @@ def link(name,f):
         mu=PL['upper_g']/1000;cu=list(json.load(open('../pelvis-v1/torso/layout.json'))['com_upper_mm']);cu[2]+=DZ;
         SP=json.load(open('spine.json'));SS=SP['summary'];mo=SS['removed_spine_frame_g'];oc=SS['old_spine_com_torso_mm']   # v1.3 aluminium spine
         cu=[(mu*1000*cu[i]-mo*(oc[i]+(DZ if i==2 else 0))+sum(p['mass_g']*(p['com_mm'][i]+(DZ if i==2 else 0)) for p in SP['parts'].values()))/(mu*1000-mo+SS['new_spine_g']) for i in range(3)];mu=(mu*1000-mo+SS['new_spine_g'])/1000;c=[(mm*c[i]+mu*cu[i])/(mm+mu) for i in range(3)];mm+=mu
+    # v1.4 electronics: torso items (minus removed bay/RPi/drivers/old IMU) into torso, pelvis IMU/foot board into pelvis (body frame)
+    EJ=json.load(open('elec.json'));pts=[]
+    if f=='torso':
+        pts=[(-g,[cc[0],cc[1],cc[2]+DZ]) for g,cc in EJ['summary']['removed']]+[(p['mass_g'],[p['com_mm'][0],p['com_mm'][1],p['com_mm'][2]+DZ]) for p in EJ['parts'].values() if p['frame']=='torso']
+    if f=='pelvis': pts=[(p['mass_g'],p['com_mm']) for p in EJ['parts'].values() if p['frame']=='pelvis']
+    if pts:
+        dm=sum(g for g,_ in pts)/1000;c=[(mm*c[i]+sum(g*cc[i] for g,cc in pts)/1000)/(mm+dm) for i in range(3)];mm+=dm
     o=fr[f]
     out.append(f'  <link name="{name}"><inertial><origin xyz="{m([c[i]-o[i] for i in range(3)])}"/><mass value="{mm:.4f}"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>')
     for n in ps:
