@@ -69,23 +69,23 @@
   "removed_g": 167.1621231443155,
   "added_g": 442.5,
   "delta_g": 275.3,
-  "total_g": 6743.8,
+  "total_g": 6806.0,
   "com_mm": [
-   1.6,
-   2.2,
-   -60.3
+   1.4,
+   0.0,
+   -47.2
   ],
-  "com_above_floor_mm": 504.7,
-  "rotating_mass_g": 2775.9,
-  "rotating_com_above_axis_mm": 160.3,
-  "rotating_com_fwd_mm": 8.3,
+  "com_above_floor_mm": 517.8,
+  "rotating_mass_g": 3006.0,
+  "rotating_com_above_axis_mm": 184.7,
+  "rotating_com_fwd_mm": 7.6,
   "torque_Nm": {
-   "0": 0.23,
-   "15": 1.35,
-   "30": 2.38,
-   "45": 3.25,
-   "60": 3.89,
-   "-15": -0.91
+   "0": 0.22,
+   "15": 1.63,
+   "30": 2.92,
+   "45": 4.01,
+   "60": 4.83,
+   "-15": -1.19
   },
   "torso_hits": [],
   "pelvis_hits": [],

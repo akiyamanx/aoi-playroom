@@ -79,7 +79,7 @@ res['spine_hw']=dict(mass_g=hw_g,com_mm=[px,0,110],valid=True,explode=[0,0,0])
 others={f.split('/')[-1][:-5]:cq.importers.importStep(f).val() for f in glob.glob('../pelvis-v1/torso/*.step')
         if not any(k in f for k in ('spine_frame','pulley','tensioner'))}
 WJ=json.load(open('waist.json'));DZ=WJ['summary']['params']['DZ']
-others['waist_pitch_upper_yoke']=cq.importers.importStep('waist_pitch_upper_yoke.step').val().translate(cq.Vector(0,0,-DZ))
+others['waist_yaw_skirt']=cq.importers.importStep('waist_yaw_skirt.step').val().translate(cq.Vector(0,0,-DZ))
 L=json.load(open('../pelvis-v1/torso/layout.json'))
 for i,f in enumerate(L['finger_servos']):   # finger servo bodies 23(x)×12.2(y)×(z 12.2 band) PLACEHOLDER
     others[f'finger_servo_{i}']=box(f['servo_c'],[23,12.2,12.2]).val()

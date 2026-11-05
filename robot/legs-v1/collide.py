@@ -4,19 +4,20 @@ import json, itertools, cadquery as cq
 PLy=json.load(open('../pelvis-v1/layout.json')); LL=json.load(open('layout.json'))
 J=dict(PLy['joints']); J.update(LL['joints'])
 P={};PAR={}
+WJ=json.load(open('waist.json'))
 for n,p in PLy['parts'].items():
-    if n.startswith('thigh_stub') or n=='waist_adapter': continue   # v1.6: adapter replaced by waist_yaw_carrier
+    if n.startswith('thigh_stub') or n in WJ.get('removed_pelvis',[]): continue   # v1.7: old pelvis yaw stack replaced
     P[n]=cq.importers.importStep('../pelvis-v1/'+n+'.step').val(); PAR[n]='wyaw' if p['parent']=='torso' else p['parent']
 WJ=json.load(open('waist.json')); DZ=WJ['summary']['params']['DZ']; ZP=WJ['summary']['params']['ZP']
 for n,p in WJ['parts'].items():
     if n.endswith('_hw'): continue
     P[n]=cq.importers.importStep(n+'.step').val(); PAR[n]=p['parent']
 for n in ['hip_plate','servo_bay_L','servo_bay_R']:
-    P['torso_'+n]=cq.importers.importStep('../pelvis-v1/torso/'+n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wpitch'
+    P['torso_'+n]=cq.importers.importStep('../pelvis-v1/torso/'+n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wyaw'
 # v1.3 spine + v1.4 electronics (torso frame, local files); intra-torso pairs are checked in build_spine/build_elec
 SPJ=json.load(open('spine.json'));EJ=json.load(open('elec.json'))
 for n in [k for k in SPJ['parts'] if k!='spine_hw']+['cover_front_v13','cover_back_v14']+[k for k,v in EJ['parts'].items() if v['frame']=='torso' and k not in ('elec_wiring','elec_hw')]:
-    P['torso_'+n]=cq.importers.importStep(n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wpitch'
+    P['torso_'+n]=cq.importers.importStep(n+'.step').val().translate(cq.Vector(0,0,DZ)); PAR['torso_'+n]='wyaw'
 for n,v in EJ['parts'].items():
     if v['frame']=='pelvis': P[n]=cq.importers.importStep(n+'.step').val(); PAR[n]='pelvis'
 for n,p in LL['parts'].items():
@@ -30,8 +31,8 @@ def pose(n,Q):
     par=PAR[n]
     if par in ('wyaw','wpitch'):
         s=P[n]; w=Q.get('W',{})
-        if par=='wpitch' and w.get('pitch'): s=s.rotate(cq.Vector(0,0,ZP),cq.Vector(0,1,ZP),w['pitch'])
-        if w.get('yaw'): s=s.rotate(cq.Vector(*J['waist']),cq.Vector(*J['waist'])+cq.Vector(0,0,1),w['yaw'])
+        if par=='wyaw' and w.get('yaw'): s=s.rotate(cq.Vector(0,0,0),cq.Vector(0,0,1),w['yaw'])   # v1.7: yaw ABOVE pitch
+        if w.get('pitch'): s=s.rotate(cq.Vector(0,0,ZP),cq.Vector(0,1,ZP),w['pitch'])
         return s
     if '_' not in par: return P[n]
     k,side=par.rsplit('_',1); s=P[n]; q=Q.get(side,{}); sg=1 if side=='L' else -1
@@ -39,8 +40,7 @@ def pose(n,Q):
         j=J[f'{JN[c]}_{side}']; a=ang(c,q,sg)
         if a: s=s.rotate(cq.Vector(*j),cq.Vector(*j)+cq.Vector(*AX[c]),a)
     return s
-DESIGNED={frozenset(p) for p in [('waist_yaw_carrier','waist_pitch_act'),('waist_yaw_carrier','waist_servo_STS3215'),('waist_yaw_carrier','waist_bearing'),('waist_yaw_carrier','waist_pitch_upper_yoke'),('waist_pitch_upper_yoke','waist_pitch_act'),
-  ('waist_pitch_upper_yoke','torso_hip_plate'),('waist_pitch_upper_yoke','waist_pitch_lower_yoke'),('waist_adapter','waist_servo_STS3215'),('waist_servo_STS3215','waist_bearing'),('waist_adapter','waist_bearing'),('pelvis_imu_cup','pelvis_block'),('pelvis_footsensor_board','pelvis_block')]}
+DESIGNED={frozenset(p) for p in [('waist_pitch_bracket','waist_pitch_act'),('waist_pitch_bracket','pelvis_block'),('waist_pitch_carrier','waist_pitch_act'),('waist_pitch_carrier','waist_yaw_bearing'),('waist_pitch_carrier','waist_yaw_servo'),('waist_yaw_bearing','waist_yaw_skirt'),('waist_yaw_servo','waist_yaw_skirt'),('waist_yaw_skirt','torso_hip_plate'),('waist_pitch_carrier','waist_pitch_cable_loop'),('pelvis_imu_cup','pelvis_block'),('pelvis_footsensor_board','pelvis_block')]}
 def ok_pair(a,b):
     if frozenset((a,b)) in DESIGNED: return True
     sa=a[-1] if a[-2]!='_' else a[-1]
@@ -53,7 +53,7 @@ POSES=[('neutral',{}),('walk swing L: hip30 knee60 / R stance push-off ankle20',
  ('hip roll 20 + ankle roll -20',both({'roll':20,'aroll':-20})),('hip roll -7 (adduct) BOTH',both({'roll':-7})),
  ('hip yaw 15 + knee 45 BOTH (toes out)',both({'yaw':15,'knee':45})),('hip yaw -30 + knee 60 BOTH (toes in)',both({'yaw':-30,'knee':60})),('hip yaw -30 L / +30 R',{'L':{'yaw':-30},'R':{'yaw':30}}),('hip -30 knee 0',both({'pitch':-30})),
  ('BOW waist pitch +60',{'W':{'pitch':60}}),('waist pitch -15 (lean back)',{'W':{'pitch':-15}}),('waist pitch +30 & yaw 45',{'W':{'pitch':30,'yaw':45}}),
- ('waist pitch +60 & yaw -45',{'W':{'pitch':60,'yaw':-45}}),('bow 45 + hips 30 knees 30',{'W':{'pitch':45},'L':{'pitch':30,'knee':30},'R':{'pitch':30,'knee':30}}),('waist yaw +45',{'W':{'yaw':45}}),('waist yaw -45 + lean back -15',{'W':{'yaw':-45,'pitch':-15}}),('bow 60 & yaw +45',{'W':{'pitch':60,'yaw':45}})]
+ ('waist pitch +60 & yaw -45',{'W':{'pitch':60,'yaw':-45}}),('bow 45 + hips 30 knees 30',{'W':{'pitch':45},'L':{'pitch':30,'knee':30},'R':{'pitch':30,'knee':30}}),('waist yaw +45',{'W':{'yaw':45}}),('waist yaw -45 + lean back -15',{'W':{'yaw':-45,'pitch':-15}}),('bow 60 & yaw +45',{'W':{'pitch':60,'yaw':45}}),('bow 60 & yaw -45 + squat-ish hips 30',{'W':{'pitch':60,'yaw':-45},'L':{'pitch':30,'knee':30},'R':{'pitch':30,'knee':30}}),('lean back -15 & yaw +45',{'W':{'pitch':-15,'yaw':45}})]
 allok=True
 for name,Q in POSES:
     S={n:pose(n,Q) for n in P}; hits=[]
