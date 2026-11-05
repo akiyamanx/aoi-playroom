@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ここちゃんのうで v1</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif}
+#ui{position:fixed;left:0;right:0;bottom:0;padding:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;background:#ffffffcc}
+button{font-size:15px;padding:10px 14px;border-radius:20px;border:2px solid #b48ae8;background:#fff;color:#5a3a8a}
+button.off{opacity:.4}#t{position:fixed;top:8px;left:0;right:0;text-align:center;color:#5a3a8a}
+#t h1{font-size:19px;margin:4px}#t p{font-size:12px;margin:2px}#cr{width:100%;text-align:center;font-size:12px;color:#777}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="t"><h1>🤖 ここちゃんの「うで」v1</h1><p>指でくるっと回す・2本指でズーム</p></div>
+<div id="ui"><button data-p="act">モーター</button><button data-p="cup">肩カップ</button><button data-p="arm">上うで</button><button id="anim">▶ うでを動かす</button><div id="cr">作：あきやまん × 葵🦋（AI）</div></div>
+<script type="module">
+import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setPixelRatio(Math.min(devicePixelRatio,2));document.body.appendChild(r.domElement);
+const s=new THREE.Scene(),c=new THREE.PerspectiveCamera(40,1,1,3000);c.position.set(150,260,420);
+s.add(new THREE.HemisphereLight(0xffffff,0xccbbee,1.6));const d=new THREE.DirectionalLight(0xffffff,1.8);d.position.set(100,-200,300);s.add(d);
+const root=new THREE.Group();root.rotation.x=-Math.PI/2;s.add(root); // CAD Z-up -> view
+const joint=new THREE.Group();root.add(joint);
+const ctl=new OrbitControls(c,r.domElement);ctl.target.set(-50,-10,0);ctl.enableDamping=true;
+const P={act:['actuator_AK45-10_placeholder.stl',0x555c66,root],cup:['shoulder_cup.stl',0xffb3d1,root],arm:['upper_arm_link.stl',0x9fd8ff,joint]},M={};
+const L=new STLLoader();let n=0;
+for(const k in P){L.load(P[k][0],g=>{g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:P[k][1],roughness:.55,metalness:k=='act'?.5:0}));P[k][2].add(m);M[k]=m;if(++n==3){fit();window.ready=true;}});}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const m=M[b.dataset.p];m.visible=!m.visible;b.classList.toggle('off',!m.visible)});
+let an=false,t=0;const ab=document.getElementById('anim');ab.onclick=()=>{an=!an;ab.textContent=an?'⏸ とめる':'▶ うでを動かす'};
+function fit(){const b=new THREE.Box3().setFromObject(root),sp=b.getBoundingSphere(new THREE.Sphere());const h=Math.tan(c.fov*Math.PI/360)*Math.min(1,c.aspect);const dist=sp.radius/h*1.15;ctl.target.copy(sp.center);c.position.copy(sp.center).add(new THREE.Vector3(.45,.6,.75).normalize().multiplyScalar(dist));c.near=dist/50;c.far=dist*10;c.updateProjectionMatrix();ctl.update();}
+window.setAngle=a=>joint.rotation.z=a;
+function rs(){r.setSize(innerWidth,innerHeight);c.aspect=innerWidth/innerHeight;c.fov=c.aspect<1?55:40;c.updateProjectionMatrix()}addEventListener('resize',rs);rs();
+r.setAnimationLoop(()=>{if(an){t+=.02;joint.rotation.z=Math.sin(t)*1.0}ctl.update();r.render(s,c)});
+</script></body></html>
