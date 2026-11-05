@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!-- COCOMI / ここちゃん arm v2 (auto-generated). PLA mass = ~50% printed estimate; servos/actuator added as boxes.
+     STS3215 55 g x2, grip servo 13.4 g, AK45-10 placeholder 260 g. Units m/kg/rad.
+     finger_grip is SIMPLIFIED: one link holds all finger segments (open pose); real fingers are tendon-driven pin joints. -->
+<robot name="cocomi_arm_v2">
+ <link name="shoulder_base">
+  <inertial><origin xyz="3.7728e-10 0.00039949 -0.023343"/><mass value="0.27900"/>
+   <inertia ixx="1.1966e-04" ixy="-8.6654e-13" ixz="-8.3695e-13" iyy="1.1667e-04" iyz="2.3620e-06" izz="1.3768e-04"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="shoulder_cup.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="actuator_AK45-10_placeholder.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <link name="upper_arm">
+  <inertial><origin xyz="-0.088002 -5.6798e-12 0.019498"/><mass value="0.09141"/>
+   <inertia ixx="1.7332e-05" ixy="3.6248e-14" ixz="1.6594e-05" iyy="1.4181e-04" iyz="5.4687e-15" izz="1.3773e-04"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="upper_arm.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="upper_arm.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="forearm">
+  <inertial><origin xyz="-0.085902 1.2409e-10 0.017393"/><mass value="0.08222"/>
+   <inertia ixx="1.4997e-05" ixy="-1.1324e-13" ixz="9.9105e-06" iyy="8.1888e-05" iyz="-9.7500e-14" izz="7.7475e-05"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="forearm.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="forearm.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="hand">
+  <inertial><origin xyz="-0.034709 0.0002925 0.010736"/><mass value="0.08155"/>
+   <inertia ixx="3.1481e-05" ixy="-1.4148e-07" ixz="-5.7969e-07" iyy="4.6549e-05" iyz="-6.2895e-09" izz="7.2147e-05"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="palm.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="palm.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="fingers_simplified">
+  <inertial><origin xyz="-0.022259 0.0020589 -1.1346e-10"/><mass value="0.02604"/>
+   <inertia ixx="1.9676e-05" ixy="-1.2377e-05" ixz="-4.4090e-14" iyy="2.4278e-05" iyz="1.0397e-14" izz="4.3312e-05"/></inertial>
+  <visual><origin xyz="0 0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_index_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.026 0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_index_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.044 0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_index_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0 0 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_middle_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.028 0 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_middle_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.048 0 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_middle_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0 -0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_ring_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.026 -0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_ring_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.044 -0.017 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_ring_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0 -0.034 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_pinky_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.021 -0.034 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_pinky_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="-0.036 -0.034 0" rpy="0 0 0.0000"/><geometry><mesh filename="finger_pinky_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0.048411 0.028777 0" rpy="0 0 -0.9599"/><geometry><mesh filename="finger_thumb_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0.034646 0.048436 0" rpy="0 0 -0.9599"/><geometry><mesh filename="finger_thumb_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="shoulder_pitch" type="revolute"><parent link="shoulder_base"/><child link="upper_arm"/>
+  <origin xyz="0 0 0"/><axis xyz="0 0 1"/><limit lower="-2.8" upper="0.8" effort="3" velocity="5"/></joint>
+ <joint name="elbow" type="revolute"><parent link="upper_arm"/><child link="forearm"/>
+  <origin xyz="-0.12 0 0.047"/><axis xyz="0 0 1"/><limit lower="-2.4" upper="0" effort="1.5" velocity="4"/></joint>
+ <joint name="wrist" type="revolute"><parent link="forearm"/><child link="hand"/>
+  <origin xyz="-0.11 0 0.044"/><axis xyz="0 0 1"/><limit lower="-1.2" upper="1.2" effort="1.5" velocity="4"/></joint>
+ <joint name="finger_grip" type="revolute"><parent link="hand"/><child link="fingers_simplified"/>
+  <origin xyz="-0.079 0.0085 0.011"/><axis xyz="0 1 0"/><limit lower="0" upper="1.4" effort="0.2" velocity="3"/></joint>
+</robot>

@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ここちゃんのうで v2（肩から手まで）</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
+#t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none}#t h1{font-size:18px;margin:4px}#t p{font-size:11px;margin:1px}
+#ui{position:fixed;left:0;right:0;bottom:0;padding:6px 8px 8px;background:#ffffffd9;border-radius:16px 16px 0 0;box-shadow:0 -2px 10px #0001}
+.row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:3px 0}
+button{font-size:13px;padding:6px 10px;border-radius:16px;border:2px solid #b48ae8;background:#fff;color:#5a3a8a}
+button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
+.sl{display:grid;grid-template-columns:4.2em 1fr 3em;align-items:center;gap:6px;font-size:13px;margin:1px 4px}
+input[type=range]{width:100%;accent-color:#b48ae8}#cr{text-align:center;font-size:11px;color:#777;margin-top:2px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body><div id="t"><h1>🤖 ここちゃんの「うで」v2</h1><p>肩から手まで・指でくるっと回す／2本指でズーム</p></div>
+<div id="ui">
+<div class="row" id="parts"></div>
+<div class="sl"><span>肩</span><input type="range" id="j0" min="-2.8" max="0.8" step="0.01" value="0"><span id="v0"></span></div>
+<div class="sl"><span>ひじ</span><input type="range" id="j1" min="-2.4" max="0" step="0.01" value="0"><span id="v1"></span></div>
+<div class="sl"><span>手首</span><input type="range" id="j2" min="-1.2" max="1.2" step="0.01" value="0"><span id="v2"></span></div>
+<div class="sl"><span>ぐーぱー</span><input type="range" id="j3" min="0" max="1.4" step="0.01" value="0"><span id="v3"></span></div>
+<div class="row"><button id="anim" class="main">▶ デモ（バイバイ＆グーパー）</button><button id="g">✊ グー</button><button id="p">🖐 パー</button><button id="rs">↺ もどす</button></div>
+<div id="cr">作：あきやまん × 葵🦋（AI）　※指はかんたん版</div></div>
+<script type="module">
+import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setPixelRatio(Math.min(devicePixelRatio,2));document.body.appendChild(r.domElement);
+const s=new THREE.Scene(),c=new THREE.PerspectiveCamera(45,1,1,5000);
+s.add(new THREE.HemisphereLight(0xffffff,0xccbbee,1.5));const dl=new THREE.DirectionalLight(0xffffff,1.7);dl.position.set(300,300,400);s.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,.6);dl2.position.set(-300,-100,-200);s.add(dl2);
+// CAD: joint axis Z, arm toward -X  ->  view: CAD Z = side (X), CAD X = up (Y): arm hangs down
+const root=new THREE.Group();root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1),new THREE.Vector3(1,0,0)));s.add(root);
+const G=()=>new THREE.Group();const sh=G(),el=G(),wr=G();root.add(sh);
+const ctl=new OrbitControls(c,r.domElement);ctl.enableDamping=true;
+const lay=await (await fetch('layout.json')).json();
+el.position.fromArray(lay.frames.elbow);sh.add(el);wr.position.fromArray(lay.frames.wrist);el.add(wr);
+const segs=[];// {g, k}
+const fingerGroups=[];
+const fl=Object.entries(lay.layout.fingers).concat([['thumb',lay.layout.thumb]]);
+const files=[['actuator_AK45-10_placeholder',0x5a6170,root,'act'],['shoulder_cup',0xffb3d1,root,'cup'],['upper_arm',0x9fd8ff,sh,'up'],['forearm',0xffd59e,el,'fo'],['palm',0xc8f0c0,wr,'hand']];
+for(const [nm,d] of fl){const base=G();base.position.fromArray(d.pos);base.rotation.z=d.yaw*Math.PI/180;wr.add(base);let par=base,x=0;
+  d.segs.forEach((l,i)=>{const g=G();g.position.x=x;par.add(g);segs.push({g,k:[1,1.15,0.9][i]*(nm=='thumb'?0.7:1)});files.push([`finger_${nm}_${i+1}`,0xfff3b0,g,'fin']);par=g;x=-l;});}
+const PARTS={act:'モーター',cup:'肩カップ',up:'上うで',fo:'前うで',hand:'手のひら',fin:'指',servo:'サーボ'},M={};for(const k in PARTS)M[k]=[];
+const L=new STLLoader();let n=0;const mats={};
+await Promise.all(files.map(([f,col,par,k])=>new Promise(res=>L.load(f+'.stl',g=>{g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:col,roughness:.5,metalness:k=='act'?.5:0}));par.add(m);M[k].push(m);res();}))));
+// servo boxes (for looks)
+const sv=(c,dims,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...dims),new THREE.MeshStandardMaterial({color:0x333a44,roughness:.4}));m.position.fromArray(c);par.add(m);M.servo.push(m);};
+sv(lay.frames.elbow_servo_c,[45.2,24.7,35],sh);sv(lay.frames.wrist_servo_c,[45.2,24.7,35],el);sv(lay.frames.grip_servo_c,[22.5,22.8,12.2],wr);
+const pr=document.getElementById('parts');for(const k in PARTS){const b=document.createElement('button');b.textContent=PARTS[k];b.onclick=()=>{const v=!M[k][0].visible;M[k].forEach(m=>m.visible=v);b.classList.toggle('off',!v)};pr.appendChild(b);}
+const J=[0,0,0,0];const sl=[0,1,2,3].map(i=>document.getElementById('j'+i));
+function apply(){sh.rotation.z=J[0];el.rotation.z=J[1];wr.rotation.z=J[2];segs.forEach(o=>o.g.rotation.y=J[3]*o.k);
+  sl.forEach((e,i)=>{e.value=J[i];document.getElementById('v'+i).textContent=Math.round(J[i]*180/Math.PI)+'°'})}
+sl.forEach((e,i)=>e.oninput=()=>{stop();J[i]=+e.value;apply()});
+window.setPose=(a)=>{for(let i=0;i<4;i++)J[i]=a[i];apply()};
+// --- eased tween / demo
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;let tw=null,demo=false,dt0=0;
+function tween(to,dur=900){tw={from:J.slice(),to,t0:performance.now(),dur}}
+const ab=document.getElementById('anim');function stop(){demo=false;ab.textContent='▶ デモ（バイバイ＆グーパー）'}
+ab.onclick=()=>{demo=!demo;dt0=performance.now();ab.textContent=demo?'⏸ とめる':'▶ デモ（バイバイ＆グーパー）'};
+document.getElementById('g').onclick=()=>{stop();tween([J[0],J[1],J[2],1.4])};document.getElementById('p').onclick=()=>{stop();tween([J[0],J[1],J[2],0])};
+document.getElementById('rs').onclick=()=>{stop();auto=true;tween([0,0,0,0])};
+const WAVE=[-2.3,-1.0,0,0];
+// keyframes [time s, pose]; wave segment handled specially
+const K=[[0,[0,0,0,0]],[1.6,WAVE],[5.6,WAVE],[7.0,[-0.6,-1.6,0,0]],[7.8,[-0.6,-1.6,0,1.4]],[8.6,[-0.6,-1.6,0,0]],[9.4,[-0.6,-1.6,0,1.4]],[10.2,[-0.6,-1.6,0,0]],[11.6,[0,0,0,0]]];
+function demoPose(t){t%=K[K.length-1][0];for(let i=0;i<K.length-1;i++){const[a,pa]=K[i],[b,pb]=K[i+1];if(t<=b){const u=ease((t-a)/(b-a));const p=pa.map((v,j)=>v+(pb[j]-v)*u);
+  if(i==1&&false);if(i==1||i==2){/* wave wrist */const w=i==2?Math.sin((t-1.6)*Math.PI*2*0.75):0;const amp=i==2?Math.min(1,(t-1.6)/0.5,(5.6-t)/0.5):0;p[2]=0.6*w*amp;p[1]+= i==2?0.15*Math.sin((t-1.6)*Math.PI*1.5)*amp:0}return p}}return K[0][1]}
+window.demoAt=t=>{demo=false;setPose(demoPose(t))};
+let auto=true,dirV=new THREE.Vector3(.85,.2,.5).normalize(),curD=0;ctl.addEventListener('start',()=>{auto=false});
+function goal(){const bx=new THREE.Box3().setFromObject(root),sp=bx.getBoundingSphere(new THREE.Sphere());const ui=document.getElementById('ui').offsetHeight,vh=innerHeight-ui-40;
+  const fv=Math.tan(c.fov*Math.PI/360);const h=Math.min(fv*vh/innerHeight,fv*c.aspect);return [sp.center,Math.max(sp.radius,170)/h*1.02]}
+function fit(k=1){const ui=document.getElementById('ui').offsetHeight;c.setViewOffset(innerWidth,innerHeight,0,(ui-40)/2,innerWidth,innerHeight);
+  const [ct,d]=goal();ctl.target.lerp(ct,k);curD=curD?curD+(d-curD)*k:d;c.position.copy(ctl.target).addScaledVector(dirV,curD);c.near=curD/50;c.far=curD*10;c.updateProjectionMatrix();}
+window.snapFit=()=>fit(1);
+function rs(){r.setSize(innerWidth,innerHeight);c.aspect=innerWidth/innerHeight;fit()}addEventListener('resize',rs);apply();rs();
+window.ready=true;
+r.setAnimationLoop(now=>{if(demo){setPose(demoPose((now-dt0)/1000))}else if(tw){const u=Math.min(1,(now-tw.t0)/tw.dur),e=ease(u);for(let i=0;i<4;i++)J[i]=tw.from[i]+(tw.to[i]-tw.from[i])*e;apply();if(u>=1)tw=null}
+  if(auto)fit(0.06);ctl.update();r.render(s,c)});
+</script></body></html>
