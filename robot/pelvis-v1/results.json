@@ -34,12 +34,12 @@
    "valid": true
   },
   "pelvis_block": {
-   "volume_cm3": 128.60679572390777,
-   "mass_g": 79.73621334882282,
+   "volume_cm3": 131.7291872895207,
+   "mass_g": 81.67209611950283,
    "com_mm": [
-    -5.431221009977784e-15,
-    2.8110811868049074e-16,
-    -81.93820062032106
+    1.208248347121808e-16,
+    0.0,
+    -83.59477554933811
    ],
    "bought": false,
    "valid": true
@@ -49,7 +49,7 @@
    "mass_g": 55.0,
    "com_mm": [
     -3.337013205444756e-17,
-    55.0,
+    80.0,
     -113.5
    ],
    "bought": true,
@@ -60,41 +60,41 @@
    "mass_g": 10.457887199999998,
    "com_mm": [
     8.627160791701262e-16,
-    55.0,
+    80.00000000000001,
     -113.50000000000003
    ],
    "bought": false,
    "valid": true
   },
   "hip_yaw_yoke_L": {
-   "volume_cm3": 26.99999999999999,
-   "mass_g": 16.739999999999995,
+   "volume_cm3": 35.52000000000001,
+   "mass_g": 22.022400000000005,
    "com_mm": [
-    -24.855555555555558,
-    54.99999999999999,
-    -139.56111111111113
+    -38.76351351351351,
+    80.0,
+    -141.43243243243242
    ],
    "bought": false,
    "valid": true
   },
   "hip_roll_act_L": {
-   "volume_cm3": 99.27825484425446,
+   "volume_cm3": 99.27825484425443,
    "mass_g": 260.0,
    "com_mm": [
-    -50.00000000000001,
-    55.0,
-    -163.5
+    -52.00000000000001,
+    80.00000000000003,
+    -175.00000000000006
    ],
    "bought": true,
    "valid": true
   },
   "hip_roll_bracket_L": {
-   "volume_cm3": 34.368,
-   "mass_g": 21.30816,
+   "volume_cm3": 16.713000000000008,
+   "mass_g": 10.362060000000005,
    "com_mm": [
-    -35.050279329608955,
-    71.88128491620111,
-    -170.1243016759776
+    -17.38938251660384,
+    80.0,
+    -192.15140908274986
    ],
    "bought": false,
    "valid": true
@@ -103,20 +103,20 @@
    "volume_cm3": 99.27825484425448,
    "mass_g": 260.0,
    "com_mm": [
-    7.622007387843085e-15,
-    55.00000000000001,
-    -163.5
+    7.0356991272397714e-15,
+    80.0,
+    -174.99999999999997
    ],
    "bought": true,
    "valid": true
   },
   "thigh_stub_L": {
-   "volume_cm3": 85.79384013175395,
-   "mass_g": 53.19218088168745,
+   "volume_cm3": 90.45992193738924,
+   "mass_g": 56.08515160118133,
    "com_mm": [
-    -5.585832133047577e-16,
-    49.09356197109484,
-    -238.04698383186417
+    1.0328632754739873e-14,
+    79.99999999999999,
+    -254.20180044196468
    ],
    "bought": false,
    "valid": true
@@ -126,7 +126,7 @@
    "mass_g": 55.0,
    "com_mm": [
     -3.337013205444756e-17,
-    -55.0,
+    -80.0,
     -113.5
    ],
    "bought": true,
@@ -137,19 +137,19 @@
    "mass_g": 10.457887199999998,
    "com_mm": [
     8.627160791701262e-16,
-    -55.0,
+    -80.00000000000006,
     -113.50000000000003
    ],
    "bought": false,
    "valid": true
   },
   "hip_yaw_yoke_R": {
-   "volume_cm3": 26.99999999999999,
-   "mass_g": 16.739999999999995,
+   "volume_cm3": 35.52000000000001,
+   "mass_g": 22.022400000000005,
    "com_mm": [
-    -24.855555555555558,
-    -55.00000000000001,
-    -139.56111111111113
+    -38.76351351351351,
+    -80.0,
+    -141.43243243243242
    ],
    "bought": false,
    "valid": true
@@ -158,20 +158,20 @@
    "volume_cm3": 99.27825484425446,
    "mass_g": 260.0,
    "com_mm": [
-    -50.00000000000001,
-    -55.00000000000001,
-    -163.5
+    -52.00000000000001,
+    -80.0,
+    -175.0
    ],
    "bought": true,
    "valid": true
   },
   "hip_roll_bracket_R": {
-   "volume_cm3": 34.368,
-   "mass_g": 21.30816,
+   "volume_cm3": 16.713000000000008,
+   "mass_g": 10.362060000000005,
    "com_mm": [
-    -35.050279329608955,
-    -71.88128491620111,
-    -170.1243016759776
+    -17.38938251660384,
+    -80.0,
+    -192.15140908274986
    ],
    "bought": false,
    "valid": true
@@ -181,26 +181,26 @@
    "mass_g": 260.0,
    "com_mm": [
     4.397311954524858e-15,
-    -54.999999999999986,
-    -163.5
+    -80.0,
+    -175.0
    ],
    "bought": true,
    "valid": true
   },
   "thigh_stub_R": {
-   "volume_cm3": 85.79384013175395,
-   "mass_g": 53.19218088168745,
+   "volume_cm3": 90.45992193738924,
+   "mass_g": 56.08515160118133,
    "com_mm": [
-    -1.3454591627913755e-16,
-    -49.09356197109486,
-    -238.04698383186417
+    1.0888155399382053e-14,
+    -80.00000000000001,
+    -254.20180044196468
    ],
    "bought": false,
    "valid": true
   }
  },
  "summary": {
-  "version": "pelvis-v1",
+  "version": "pelvis-v1.1",
   "coords": "origin=torso hip_plate top centre; +Z up +Y left +X fwd",
   "joints_mm": {
    "waist": [
@@ -210,33 +210,33 @@
    ],
    "hip_yaw_L": [
     0,
-    55,
+    80,
     -96.0
    ],
    "hip_roll_L": [
-    -50,
-    55,
-    -163.5
+    -52,
+    80,
+    -175.0
    ],
    "hip_pitch_L": [
     0,
-    55,
-    -163.5
+    80,
+    -175.0
    ],
    "hip_yaw_R": [
     0,
-    -55,
+    -80,
     -96.0
    ],
    "hip_roll_R": [
-    -50,
-    -55,
-    -163.5
+    -52,
+    -80,
+    -175.0
    ],
    "hip_pitch_R": [
     0,
-    -55,
-    -163.5
+    -80,
+    -175.0
    ]
   },
   "joint_order_per_leg": [
@@ -244,25 +244,25 @@
    "hip_roll (X, AK45-10 class)",
    "hip_pitch (Y, AK45-10 class)"
   ],
-  "pelvis_and_hips_g": 1666.9,
+  "pelvis_and_hips_g": 1663.3,
   "com_pelvis_mm": [
-   -17.0,
+   -17.5,
    0.0,
-   -146.2
+   -155.1
   ],
-  "upper_body_g": 3261.3,
+  "upper_body_g": 3193.3,
   "com_upper_mm": [
-   7.7,
+   0.5,
    0.0,
-   129.0
+   100.7
   ],
-  "total_g": 4928.2,
+  "total_g": 4856.6,
   "com_total_mm": [
-   -0.7,
+   -5.6,
    0.0,
-   35.9
+   13.1
   ],
-  "com_above_hip_pitch_axis_mm": 199.4,
+  "com_above_hip_pitch_axis_mm": 188.1,
   "hardware_misc_g": 90.0,
   "assumptions": [
    "ALL dims/masses PLACEHOLDER",
@@ -271,8 +271,8 @@
    "PLA 1.24 g/cm\u00b3 \u00d7 50% print factor",
    "waist thin bearing 72/52\u00d77 mm 45 g carries bending; servo torque only",
    "thigh = stub only; legs below hip pitch not counted",
-   "battery unchanged (torso-v1 tray)",
-   "arms hanging (torso-v1 estimate)"
+   "torso = torso-v1.3-low: spine/shoulders \u221230 mm, battery on thin strap tray at z=2, x=\u221235 behind spine",
+   "arms hanging (torso estimate, shoulders z=220)"
   ],
   "params": {
    "hip_t": 8,
@@ -293,11 +293,14 @@
    "bearing_t": 7,
    "m_bearing": 0.045,
    "adapter_t": 6,
-   "pelvis_w": 130,
+   "pelvis_w": 110,
    "pelvis_d": 84,
    "pelvis_h": 36,
-   "hip_y": 55,
-   "roll_x": -50,
+   "wing_w": 200,
+   "wing_d": 64,
+   "wing_t": 6,
+   "hip_y": 80,
+   "roll_x": -52,
    "thigh": [
     46,
     40,

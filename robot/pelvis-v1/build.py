@@ -1,10 +1,10 @@
-# pelvis-v1 — waist yaw + pelvis + 2x 3-axis hip (yaw/roll/pitch) + thigh stubs
+# pelvis-v1.1 — waist yaw + pelvis + 2x 3-axis hip (yaw/roll/pitch) + thigh stubs
 # Units mm. Frame = torso-v1: origin hip-plate TOP centre, +Z up, +Y left, +X forward.
 # ALL dimensions / masses are PLACEHOLDERS (no datasheet check yet).
 import json, math, cadquery as cq
 from cadquery import exporters
 W = lambda: cq.Workplane("XY")
-TORSO = json.load(open('../torso-v1/layout.json'))
+TORSO = json.load(open('torso/layout.json'))  # torso-v1.3-low (built in ./torso from published torso-v1 v1.2)
 
 A = dict(
   # interface (from torso-v1 hip_plate): plate bottom z=-8, motor pads to z=-12 at y=±38, 4×M3 on PCD32 (r16)
@@ -13,9 +13,10 @@ A = dict(
   act_d=53, act_h=45, m_act=0.260,              # AK45-10-class pancake placeholder
   bearing_od=72, bearing_id=52, bearing_t=7, m_bearing=0.045,  # waist crossed-roller/thin bearing PLACEHOLDER
   adapter_t=6,
-  pelvis_w=130, pelvis_d=84, pelvis_h=36,       # pelvis block (Y × X × Z)
-  hip_y=55,                                     # leg spacing (hip yaw axes at Y=±55)
-  roll_x=-50,                                   # roll actuator centre (behind pitch)
+  pelvis_w=110, pelvis_d=84, pelvis_h=36,       # pelvis block (Y × X × Z); pitch actuators sit OUTSIDE ±55
+  wing_w=200, wing_d=64, wing_t=6,             # pelvis floor wings carrying hip-yaw servos
+  hip_y=80,                                     # leg line: yaw axis, pitch actuator centre (Y=±80)
+  roll_x=-52,                                   # roll actuator centre (behind pitch)
   thigh=(46, 40, 80),                           # stub thigh top (X × Y × Z)
   rho=0.00124, print_factor=0.5,
   m_horn_hw=0.010,                              # horns+screws per STS joint PLACEHOLDER
@@ -29,7 +30,7 @@ z_pel_top = z_waist - A['bearing_t']           # -60
 z_pel_bot = z_pel_top - A['pelvis_h']          # -96
 z_hipyaw = z_pel_bot                           # hip yaw joint (servo body sits under pelvis? no: inside pocket)
 z_yawout = z_pel_bot - sH                      # -131 yaw servo output face
-z_rp = z_yawout - 6 - A['act_d']/2             # roll/pitch axis height
+z_rp = z_yawout - 6 - 38   # roll/pitch axis height: 38 mm under yoke so a ±30° rolled pitch actuator clears it
 J = dict(waist=[0,0,z_waist])
 for s,n in ((1,'L'),(-1,'R')):
     J['hip_yaw_'+n]=[0,s*A['hip_y'],z_pel_bot]
@@ -55,34 +56,44 @@ parts['waist_adapter']=ad
 parts['waist_servo_STS3215']=box([0,0,z_ad_bot-sH/2],[sL,sW,sH])
 # bearing ring (carries pelvis bending loads, servo only gives torque)
 parts['waist_bearing']=cyl([0,0,z_waist-A['bearing_t']/2],A['bearing_od']/2,A['bearing_t']).cut(cyl([0,0,z_waist-A['bearing_t']/2],A['bearing_id']/2,A['bearing_t']+2))
-# 2. pelvis block: hollow box, horn boss on top, two hip-yaw servo pockets underneath
+# 2. pelvis block: hollow box + floor wings that reach out to the hip-yaw servos
 pw,pd,ph=A['pelvis_w'],A['pelvis_d'],A['pelvis_h']
 pel = box([0,0,(z_pel_top+z_pel_bot)/2],[pd,pw,ph]).edges('|Z').fillet(12)
-pel = pel.cut(box([0,0,(z_pel_top+z_pel_bot)/2-2],[pd-8,pw-8,ph]).edges('|Z').fillet(8))   # open-bottom shell
-pel = pel.union(box([0,0,z_pel_bot+3],[pd,pw,6]).edges('|Z').fillet(12))                      # floor
-for s in (1,-1):
-    pel = pel.cut(cyl([0,s*A['hip_y'],z_pel_bot+3],6,8))                                      # yaw shaft bore
+pel = pel.cut(box([0,0,(z_pel_top+z_pel_bot)/2-2],[pd-8,pw-8,ph]).edges('|Z').fillet(8))
+pel = pel.union(box([0,0,z_pel_bot+A['wing_t']/2],[A['wing_d'],A['wing_w'],A['wing_t']]).edges('|Z').fillet(10))
+for s_ in (1,-1):
+    pel = pel.cut(cyl([0,s_*A['hip_y'],z_pel_bot+3],6,8))
+    pel = pel.cut(box([0,s_*(pw/2+ (A['wing_w']/2-pw/2)/2),z_pel_bot+A['wing_t']/2],[A['wing_d']-30,18,10]))  # lightening
 pel = pel.cut(cyl([0,0,z_pel_top-2],10,6))
 parts['pelvis_block']=pel
+ad_=A['act_d']; ah=A['act_h']; r_=ad_/2
 for s,n in ((1,'L'),(-1,'R')):
     y=s*A['hip_y']
-    # hip yaw: STS3215 hung under pelvis floor (body fixed to pelvis), output downward
+    # hip yaw: STS3215 hung under the wing, output downward (axis Z at y=±hip_y)
     parts['hip_yaw_servo_'+n]=box([0,y,z_pel_bot-sH/2],[sL,sW,sH])
     parts['hip_yaw_mount_'+n]=box([0,y,z_pel_bot-sH/2],[sL+8,sW+8,sH-6]).cut(box([0,y,z_pel_bot-sH/2],[sL+0.6,sW+0.6,sH]))
-    # yaw output yoke → holds roll actuator (axis X) behind
-    yk = box([A['roll_x']/2,y,z_yawout-3],[abs(A['roll_x'])+30,40,6])
-    yk = yk.union(box([A['roll_x']+A['act_h']/2+3,y,(z_yawout+z_rp)/2-3],[6,40,z_yawout-z_rp+6]))
+    # yaw output yoke → roll actuator (axis X) behind the leg line; its axis passes the leg line
+    xr=A['roll_x']; xback=xr-ah/2
+    yk = box([(xr+20)/2-3,y,z_yawout-3],[abs(xr)+46,40,6])
+    yk = yk.union(box([xback-3,y,(z_yawout+z_rp)/2-3],[6,40,z_yawout-z_rp+6]))
     parts['hip_yaw_yoke_'+n]=yk
-    parts['hip_roll_act_'+n]=cyl(J['hip_roll_'+n],A['act_d']/2,A['act_h'],'X')
-    # roll output L-bracket → pitch actuator (axis Y) on leg line
-    rb = box([(A['roll_x']-A['act_h']/2)-3,y,z_rp],[6,44,44])
-    rb = rb.union(box([(A['roll_x']-A['act_h']/2-6+A['act_d']/2)/2,y+s*(A['act_h']/2+3),z_rp-A['act_d']/2+4],[abs(A['roll_x']-A['act_h']/2-6)+A['act_d']/2,6,20]))
-    rb = rb.union(box([0,y+s*(A['act_h']/2+3),z_rp],[A['act_d']-6,6,A['act_d']-6]))
+    parts['hip_roll_act_'+n]=cyl(J['hip_roll_'+n],r_,ah,'X')
+    # roll output (front face x=xr+ah/2) → plate tangent to back of pitch stator + cradle under it
+    xf=xr+ah/2
+    rb = box([xf+1.5,y,z_rp],[3,ah+8,44])
+    rb = rb.union(box([(xf+10)/2,y,z_rp-r_-3],[10-xf,ah-4,6]))   # under-cradle
     parts['hip_roll_bracket_'+n]=rb
-    parts['hip_pitch_act_'+n]=cyl(J['hip_pitch_'+n],A['act_d']/2,A['act_h'],'Y')
-    tx,ty,tz=A['thigh']
-    th = box([0,y-s*(A['act_h']/2+3),z_rp-tz/2+10],[tx,6,tz]).union(box([0,y,z_rp-tz+10+4],[tx,A['act_h']+12,8]))
-    th = th.union(box([0,y,z_rp-tz+10-30],[30,26,60]).edges('|Z').fillet(6))   # stub of thigh tube
+    # pitch actuator: axis Y, OUTSIDE the pelvis block (|y| 57.5..102.5 vs block ±55)
+    parts['hip_pitch_act_'+n]=cyl(J['hip_pitch_'+n],r_,ah,'Y')
+    # thigh stub: two side plates on the actuator faces (outer=rotor flange, inner=idler) + tube
+    tx,ty,tz=A['thigh']; pt=4
+    th=None
+    for yy in (y+s*(ah/2+pt/2+1), y-s*(ah/2+pt/2+1)):
+        pl = cq.Workplane('XZ',origin=(0,yy+pt/2,0)).center(0,z_rp).circle(20).extrude(pt)
+        pl = pl.union(box([0,yy,z_rp-tz/2],[36,pt,tz]))
+        th = pl if th is None else th.union(pl)
+    th = th.union(box([0,y,z_rp-tz+4],[36,ah+2*pt+2,8]))
+    th = th.union(box([0,y,z_rp-tz-26],[30,30,60]).edges('|Z').fillet(6))
     parts['thigh_stub_'+n]=th
 
 BOUGHT={'waist_servo_STS3215':A['m_sts'],'waist_bearing':A['m_bearing'],
@@ -103,7 +114,7 @@ def comb(bs):
 mp,cp = comb(bodies)
 mu,cu = TORSO['mass_upper_g']/1000, TORSO['com_upper_mm']
 mt,ct = comb(bodies+[(mu,cu)])
-summary=dict(version='pelvis-v1',coords='origin=torso hip_plate top centre; +Z up +Y left +X fwd',
+summary=dict(version='pelvis-v1.1',coords='origin=torso hip_plate top centre; +Z up +Y left +X fwd',
   joints_mm=J, joint_order_per_leg=['hip_yaw (Z, STS3215)','hip_roll (X, AK45-10 class)','hip_pitch (Y, AK45-10 class)'],
   pelvis_and_hips_g=round(mp*1000,1), com_pelvis_mm=[round(x,1) for x in cp],
   upper_body_g=round(mu*1000,1), com_upper_mm=[round(x,1) for x in cu],
@@ -112,7 +123,7 @@ summary=dict(version='pelvis-v1',coords='origin=torso hip_plate top centre; +Z u
   hardware_misc_g=hw_g,
   assumptions=['ALL dims/masses PLACEHOLDER','STS3215 45×25×35 mm 55 g','AK45-10 class 53 dia × 45 mm 260 g (same as torso-v1 shoulder)',
     'PLA 1.24 g/cm³ × 50% print factor','waist thin bearing 72/52×7 mm 45 g carries bending; servo torque only',
-    'thigh = stub only; legs below hip pitch not counted','battery unchanged (torso-v1 tray)','arms hanging (torso-v1 estimate)'],
+    'thigh = stub only; legs below hip pitch not counted','torso = torso-v1.3-low: spine/shoulders −30 mm, battery on thin strap tray at z=2, x=−35 behind spine','arms hanging (torso estimate, shoulders z=220)'],
   params=A)
 json.dump(dict(parts=res,summary=summary),open('results.json','w'),indent=1)
 json.dump(dict(joints=J,z_rp=z_rp,com_total_mm=ct,total_g=mt*1000,pelvis_g=mp*1000,upper_g=mu*1000,

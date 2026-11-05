@@ -1,5 +1,5 @@
 import p from 'puppeteer-core';
-const url=process.argv[2]||'http://localhost:8777/pelvis-v1/index.html';
+const url=process.argv[2]||'http://localhost:8779/pelvis-v1/index.html';
 const b=await p.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const pg=await b.newPage();pg.on('pageerror',e=>console.log('E',e.message));
 pg.on('console',m=>{if(m.type()==='error'||m.type()==='warning')console.log('C',m.text())});

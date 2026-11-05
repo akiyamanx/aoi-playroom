@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの こし（骨盤）pelvis-v1</title>
+<title>ここちゃんの こし（骨盤）pelvis-v1.1</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃんの こし（骨盤）pelvis-v1</h1>
-<p>こしひねり（STS3215）＋ 足のつけね3軸×2（ひねり・横ひらき・前後）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃんの こし（骨盤）pelvis-v1.1</h1>
+<p>v1.1：胴を30mm低く・バッテリー腰プレート直上・ももの付け根モーターを外側へ　／　こしひねり（STS3215）＋ 足のつけね3軸×2（ひねり・横ひらき・前後）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -49,8 +49,8 @@ root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
 s.add(root);
 const ctl=new OrbitControls(c,r.domElement);ctl.enableDamping=true;
 
-const lay=await (await fetch('../torso-v1/layout.json')).json();
-const res=await (await fetch('../torso-v1/results.json')).json();
+const lay=await (await fetch('torso/layout.json')).json();
+const res=await (await fetch('torso/results.json')).json();
 const L=new STLLoader();
 const GROUPS={
   frame:{label:'フレーム',color:0x8aa0b8,files:['hip_plate','spine_frame','shoulder_bracket_L','shoulder_bracket_R','bowden_exit_L','bowden_exit_R']},
@@ -87,7 +87,7 @@ async function loadSTL(url,par,col,key,op=1,metal=0){
 const jobs=[];
 for(const [key,g] of Object.entries(GROUPS)){
   for(const f of g.files){
-    jobs.push(loadSTL('../torso-v1/'+f+'.stl',root,g.color,key,g.opacity||1, key==='frame'?0.15:0));
+    jobs.push(loadSTL('torso/'+f+'.stl',root,g.color,key,g.opacity||1, key==='frame'?0.15:0));
   }
 }
 
@@ -97,10 +97,10 @@ for(const [key,g] of Object.entries(GROUPS)){
 // --- finger servos, pulleys, tensioners (instances) ---
 const servoGeo=new THREE.BoxGeometry(23,12.2,29);
 const servoMat=mat(0xff8c42);
-const pulGeo=await new Promise(res=>L.load('../torso-v1/pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
-const tensGeo=await new Promise(res=>L.load('../torso-v1/tensioner_arm.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
-const tpGeo=await new Promise(res=>L.load('../torso-v1/tensioner_pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
-const bayJobs=[loadSTL('../torso-v1/servo_bay_L.stl',root,0xd9a07a,'servo'),loadSTL('../torso-v1/servo_bay_R.stl',root,0xd9a07a,'servo')];
+const pulGeo=await new Promise(res=>L.load('torso/pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const tensGeo=await new Promise(res=>L.load('torso/tensioner_arm.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const tpGeo=await new Promise(res=>L.load('torso/tensioner_pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const bayJobs=[loadSTL('torso/servo_bay_L.stl',root,0xd9a07a,'servo'),loadSTL('torso/servo_bay_R.stl',root,0xd9a07a,'servo')];
 
 const banks=lay.finger_servos||[];
 for(const b of banks){

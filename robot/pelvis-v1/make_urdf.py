@@ -4,12 +4,12 @@ m=lambda v:' '.join(f'{x/1000:.4f}' for x in v)
 frames={'torso':[0,0,0],'pelvis':J['waist']}
 for s in 'LR':
     frames['yaw_'+s]=J['hip_yaw_'+s];frames['roll_'+s]=J['hip_roll_'+s];frames['pitch_'+s]=J['hip_pitch_'+s]
-out=['<?xml version="1.0"?>','<!-- pelvis-v1 (PLACEHOLDER dims/masses). torso_link = torso-v1 upper body lumped. -->','<robot name="cocomi_pelvis_v1">']
+out=['<?xml version="1.0"?>','<!-- pelvis-v1.1 (PLACEHOLDER dims/masses). torso_link = torso-v1.3-low upper body (+waist adapter) lumped. -->','<robot name="cocomi_pelvis_v1_1">']
 def link(name,fr,extra=''):
     ps=[n for n in P if P[n]['parent']==fr]
     mm=sum(R[n]['mass_g'] for n in ps)/1000; c=[sum(R[n]['mass_g']*R[n]['com_mm'][i] for n in ps)/1000/max(mm,1e-9) for i in range(3)]
     if fr=='torso':
-        mu=L['upper_g']/1000;cu=json.load(open('../torso-v1/layout.json'))['com_upper_mm']
+        mu=L['upper_g']/1000;cu=json.load(open('torso/layout.json'))['com_upper_mm']
         c=[(mm*c[i]+mu*cu[i])/(mm+mu) for i in range(3)];mm+=mu
     o=frames[fr];rel=[c[i]-o[i] for i in range(3)]
     out.append(f'  <link name="{name}"><inertial><origin xyz="{m(rel)}"/><mass value="{mm:.4f}"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>')
