@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ここちゃんの「からだ」中身 v1</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
+#t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
+#t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
+#ui{position:fixed;left:0;right:0;bottom:0;padding:6px 8px 8px;background:#ffffffd9;border-radius:16px 16px 0 0;box-shadow:0 -2px 10px #0001;z-index:2;max-height:42vh;overflow:auto}
+.row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:3px 0}
+button{font-size:12px;padding:6px 9px;border-radius:16px;border:2px solid #b48ae8;background:#fff;color:#5a3a8a}
+button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
+#leg{font-size:10px;line-height:1.35;color:#666;text-align:center;margin:2px 4px}
+#cr{text-align:center;font-size:11px;color:#777;margin-top:2px}
+#stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<div id="t"><h1>🤖 ここちゃんの「からだ」中身 v1</h1>
+<p>指サーボは胴のなか・ボーデンでうでへ　／　ひっぱって回す・2本指でズーム</p></div>
+<div id="ui">
+<div class="row" id="parts"></div>
+<div class="row">
+<button id="see" class="main">👁 中を見る</button>
+<button id="comBtn" class="main">◎ 重心</button>
+<button id="rs">↺ もどす</button>
+</div>
+<div id="stats"></div>
+<div id="leg">灰青＝フレーム　緑＝バッテリー　橙＝指モーター　黄＝テンショナー　紫＝頭脳・センサ　水色＝カバー　桃＝うで　赤＝重心</div>
+<div id="cr">作：あきやまん × 葵🦋（AI）</div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+r.setPixelRatio(Math.min(devicePixelRatio,2));
+document.body.appendChild(r.domElement);
+const s=new THREE.Scene(),c=new THREE.PerspectiveCamera(45,1,1,8000);
+s.add(new THREE.HemisphereLight(0xffffff,0xccbbee,1.35));
+const dl=new THREE.DirectionalLight(0xffffff,1.6);dl.position.set(400,500,300);s.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,.55);dl2.position.set(-300,200,-250);s.add(dl2);
+// CAD: +Z up +Y left +X forward  →  three.js Y-up: (x,y,z)_cad → (x,z,-y)
+const root=new THREE.Group();
+root.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+  new THREE.Vector3(1,0,0),
+  new THREE.Vector3(0,0,-1),
+  new THREE.Vector3(0,1,0)
+));
+s.add(root);
+const ctl=new OrbitControls(c,r.domElement);ctl.enableDamping=true;
+
+const lay=await (await fetch('layout.json')).json();
+const res=await (await fetch('results.json')).json();
+const L=new STLLoader();
+const GROUPS={
+  frame:{label:'フレーム',color:0x8aa0b8,files:['hip_plate','spine_frame','shoulder_bracket_L','shoulder_bracket_R','bowden_exit_L','bowden_exit_R']},
+  batt:{label:'バッテリー',color:0x5ecf7a,files:['battery_tray','battery_pack']},
+  servo:{label:'指モーター',color:0xff8c42,files:[]},
+  tens:{label:'テンショナー',color:0xffd24a,files:[]},
+  brain:{label:'頭脳・センサー',color:0xb07cff,files:['electronics_bay']},
+  cover:{label:'カバー',color:0xa8e4ff,files:['cover_front','cover_back'],opacity:0.35},
+  arm:{label:'うで',color:0xffb3d1,files:[]},
+  head:{label:'あたま',color:0xffcce0,files:['head_placeholder']},
+};
+const M={};for(const k in GROUPS)M[k]=[];
+
+function mat(col,op=1,metal=0){
+  return new THREE.MeshStandardMaterial({
+    color:col,roughness:.45,metalness:metal,
+    transparent:op<1,opacity:op,depthWrite:op>=1
+  });
+}
+async function loadSTL(url,par,col,key,op=1,metal=0){
+  return new Promise(res=>{
+    L.load(url,g=>{
+      g.computeVertexNormals();
+      const m=new THREE.Mesh(g,mat(col,op,metal));
+      par.add(m);M[key].push(m);res(m);
+    },undefined,e=>{console.warn('STL fail',url,e);res(null)});
+  });
+}
+
+// --- torso structural meshes ---
+const jobs=[];
+for(const [key,g] of Object.entries(GROUPS)){
+  for(const f of g.files){
+    jobs.push(loadSTL(f+'.stl',root,g.color,key,g.opacity||1, key==='frame'?0.15:0));
+  }
+}
+
+// battery pack slightly greener / denser look
+// (loaded via batt group already)
+
+// --- finger servos, pulleys, tensioners (instances) ---
+const servoGeo=new THREE.BoxGeometry(23,12.2,29);
+const servoMat=mat(0xff8c42);
+const pulGeo=await new Promise(res=>L.load('pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const tensGeo=await new Promise(res=>L.load('tensioner_arm.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const tpGeo=await new Promise(res=>L.load('tensioner_pulley.stl',g=>{g.computeVertexNormals();res(g)},()=>res(null),()=>res(null)));
+const bayJobs=[loadSTL('servo_bay_L.stl',root,0xd9a07a,'servo'),loadSTL('servo_bay_R.stl',root,0xd9a07a,'servo')];
+
+const banks=lay.finger_servos||[];
+for(const b of banks){
+  const sv=new THREE.Mesh(servoGeo,servoMat);
+  sv.position.fromArray(b.servo_c);root.add(sv);M.servo.push(sv);
+  if(pulGeo){
+    const p=new THREE.Mesh(pulGeo,mat(0xffaa66,1,0.2));
+    p.position.fromArray(b.pulley_c);
+    p.rotation.y=Math.PI/2;
+    root.add(p);M.servo.push(p);
+  }
+  if(tensGeo){
+    const t=new THREE.Mesh(tensGeo,mat(0xffd24a));
+    t.position.fromArray(b.tens_c);
+    // mirror-ish for right side
+    if(b.side<0)t.scale.y=-1;
+    root.add(t);M.tens.push(t);
+  }
+  if(tpGeo){
+    const tp=new THREE.Mesh(tpGeo,mat(0xe8c020,1,0.25));
+    tp.position.set(b.tens_c[0]+10,b.tens_c[1]+(b.side>0?12:-12),b.tens_c[2]);
+    root.add(tp);M.tens.push(tp);
+  }
+  // tiny spring viz
+  const spring=new THREE.Mesh(new THREE.CylinderGeometry(1.8,1.8,12,8),mat(0xc0c8d0,1,0.4));
+  spring.position.set(b.tens_c[0]+4,b.tens_c[1]+(b.side>0?6:-6),b.tens_c[2]-8);
+  root.add(spring);M.tens.push(spring);
+}
+
+// electronics boxes
+const e=lay.electronics;
+function boxAt(c,dims,col,key){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(...dims),mat(col,1,0.1));
+  m.position.fromArray(c);root.add(m);M[key].push(m);return m;
+}
+boxAt(e.rpi_c,[85,56,17],0x7a5cff,'brain');
+e.drivers.forEach(d=>boxAt(d,[65,45,12],0x9b7cff,'brain'));
+boxAt(e.imu_c,[25,20,5],0xff66aa,'brain');
+// IMU label peg
+{const peg=new THREE.Mesh(new THREE.SphereGeometry(4,12,12),mat(0xff3388,1,0.3));
+ peg.position.fromArray(e.imu_c);root.add(peg);M.brain.push(peg);}
+
+// Bowden guide tubes (simple cylinders toward shoulders)
+const shY=lay.shoulder.y, shZ=lay.shoulder.z;
+for(const side of [1,-1]){
+  const bank=banks.filter(b=>b.side===side);
+  bank.forEach((b,i)=>{
+    const start=new THREE.Vector3(b.pulley_c[0]+8,b.pulley_c[1]+side*8,b.pulley_c[2]);
+    const end=new THREE.Vector3(8,side*(shY-18),shZ-8+(i-2)*4);
+    const dir=end.clone().sub(start);const len=dir.length();
+    const tube=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,len,8),mat(0xdde3ea,0.85));
+    tube.position.copy(start).add(end).multiplyScalar(0.5);
+    tube.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize());
+    root.add(tube);M.tens.push(tube);
+  });
+}
+
+await Promise.all([...jobs,...bayJobs]);
+
+// --- Arms (reuse arm-v5 STLs via relative path) ---
+const ARM='../arm-v5/';
+const armLay=await (await fetch(ARM+'layout.json')).json();
+const armFiles=[
+  ['actuator_AK45-10_placeholder',0x5a6170],
+  ['shoulder_cup',0xffb3d1],
+  ['upper_arm',0x9fd8ff],
+  ['forearm_proximal',0xffd59e],
+  ['forearm_distal',0xffc27a],
+  ['palm',0xc8f0c0],
+];
+const fl=Object.entries(armLay.layout.fingers).concat([['thumb',armLay.layout.thumb]]);
+
+function buildArm(side){
+  // side=+1 left (torso +Y), -1 right. Right-handed basis only (no mirror).
+  // Arm CAD extends -X; flange/actuator along Z. Hang: arm -X → torso -Z.
+  const wrap=new THREE.Group();
+  wrap.position.set(0, side*shY, shZ);
+  // arm +X → +Z (up), so distal -X hangs down.
+  // arm +Z → outboard ±Y; arm +Y chosen so det=+1 (palm -Z → medial).
+  const basis=new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(0,0,1),                 // arm X → +Z up
+    new THREE.Vector3(side>0?1:-1, 0, 0),     // arm Y → ±X forward/back
+    new THREE.Vector3(0, side, 0)             // arm Z → outboard Y
+  );
+  wrap.quaternion.setFromRotationMatrix(basis);
+
+  const G=()=>new THREE.Group();
+  const sh=G(),el=G(),ro=G(),wr=G();
+  wrap.add(sh);
+  el.position.fromArray(armLay.frames.elbow);sh.add(el);
+  ro.position.fromArray(armLay.frames.roll);el.add(ro);
+  wr.position.fromArray(armLay.frames.wrist);ro.add(wr);
+
+  // relaxed: both arms hang, elbows slightly bent
+  sh.rotation.z=-0.25;
+  el.rotation.z=-0.9;
+
+  const loads=[];
+  for(const [f,col] of armFiles){
+    const par=f.includes('actuator')||f.includes('shoulder_cup')?wrap: f.includes('upper')?sh: f.includes('proximal')?el: f.includes('distal')?ro:wr;
+    loads.push(new Promise(res=>L.load(ARM+f+'.stl',g=>{
+      g.computeVertexNormals();
+      const m=new THREE.Mesh(g,mat(col));
+      par.add(m);M.arm.push(m);res();
+    },undefined,()=>res())));
+  }
+  for(const [nm,d] of fl){
+    const base=G();base.position.fromArray(d.pos);base.rotation.z=d.yaw*Math.PI/180;wr.add(base);
+    let par=base,x=0;
+    d.segs.forEach((l,i)=>{
+      const g=G();g.position.x=x;par.add(g);
+      loads.push(new Promise(res=>L.load(ARM+`finger_${nm}_${i+1}.stl`,geo=>{
+        geo.computeVertexNormals();
+        const m=new THREE.Mesh(geo,mat(0xfff3b0));
+        g.add(m);M.arm.push(m);res();
+      },undefined,()=>res())));
+      par=g;x=-l;
+    });
+  }
+  // note: forearm still shows empty servo pockets — intentional (servos moved to torso)
+  root.add(wrap);
+  return Promise.all(loads);
+}
+await Promise.all([buildArm(1),buildArm(-1)]);
+
+// --- CoM marker ---
+const com=lay.com_upper_mm;
+const comG=new THREE.Group();
+const comBall=new THREE.Mesh(new THREE.SphereGeometry(12,24,24),mat(0xff2244,0.95,0.3));
+comG.add(comBall);
+const comRing=new THREE.Mesh(new THREE.TorusGeometry(18,2,8,32),mat(0xff6688,0.9));
+comRing.rotation.x=Math.PI/2;comG.add(comRing);
+comG.position.fromArray(com);
+root.add(comG);
+// sprite-like label via CSS2D would need extra import; use canvas texture
+function makeLabel(text){
+  const cv=document.createElement('canvas');cv.width=256;cv.height=64;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.roundRect(8,8,240,48,12);ctx.fill();
+  ctx.strokeStyle='#ff2244';ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle='#c01030';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(text,128,34);
+  const tex=new THREE.CanvasTexture(cv);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+  sp.scale.set(60,15,1);sp.position.set(0,0,28);return sp;
+}
+comG.add(makeLabel('重心'));
+let comVisible=true;
+
+// hip plate ground helper
+{const gnd=new THREE.Mesh(new THREE.CircleGeometry(90,48),new THREE.MeshStandardMaterial({color:0xe8dff5,roughness:1,transparent:true,opacity:0.5}));
+ gnd.rotation.x=-Math.PI/2;gnd.position.z=-0.5;root.add(gnd);}
+
+// UI toggles
+const pr=document.getElementById('parts');
+const showOrder=['frame','batt','servo','tens','brain','cover','arm','head'];
+for(const k of showOrder){
+  const b=document.createElement('button');
+  b.textContent=GROUPS[k]?.label||k;
+  b.onclick=()=>{
+    if(!M[k].length)return;
+    const v=!M[k][0].visible;M[k].forEach(m=>m.visible=v);b.classList.toggle('off',!v);
+  };
+  pr.appendChild(b);
+}
+const see=document.getElementById('see');
+let coversOff=true;
+function setCovers(off){
+  coversOff=off;
+  M.cover.forEach(m=>m.visible=!off);
+  // sync cover button state
+  [...pr.querySelectorAll('button')].forEach(btn=>{
+    if(btn.textContent==='カバー')btn.classList.toggle('off',off);
+  });
+  see.textContent=off?'👁 中を見る':'🛡 カバーつける';
+  see.classList.toggle('main',off);
+}
+setCovers(true);
+see.onclick=()=>setCovers(!coversOff);
+
+document.getElementById('comBtn').onclick=()=>{
+  comVisible=!comVisible;comG.visible=comVisible;
+  document.getElementById('comBtn').classList.toggle('off',!comVisible);
+};
+
+const stats=document.getElementById('stats');
+stats.textContent=`上半身 約 ${Math.round(lay.mass_upper_g)} g　／　重心高さ 腰から ${Math.round(lay.com_height_above_hip_mm)} mm`;
+
+// camera
+let auto=true,dirV=new THREE.Vector3(0.7,0.35,0.6).normalize(),curD=0;
+ctl.addEventListener('start',()=>{auto=false});
+function goal(){
+  const bx=new THREE.Box3().setFromObject(root);
+  const sp=bx.getBoundingSphere(new THREE.Sphere());
+  const ui=document.getElementById('ui').offsetHeight,vh=innerHeight-ui-40;
+  const fv=Math.tan(c.fov*Math.PI/360);const h=Math.min(fv*vh/innerHeight,fv*c.aspect);
+  return [sp.center,Math.max(sp.radius,220)/h*1.05];
+}
+function fit(k=1){
+  const ui=document.getElementById('ui').offsetHeight;
+  c.setViewOffset(innerWidth,innerHeight,0,(ui-40)/2,innerWidth,innerHeight);
+  const [ct,d]=goal();ctl.target.lerp(ct,k);curD=curD?curD+(d-curD)*k:d;
+  c.position.copy(ctl.target).addScaledVector(dirV,curD);
+  c.near=curD/50;c.far=curD*12;c.updateProjectionMatrix();
+}
+function rs(){r.setSize(innerWidth,innerHeight);c.aspect=innerWidth/innerHeight;fit()}
+addEventListener('resize',rs);rs();
+
+document.getElementById('rs').onclick=()=>{auto=true;dirV.set(0.7,0.35,0.6).normalize();setCovers(true);comVisible=true;comG.visible=true;document.getElementById('comBtn').classList.remove('off');fit(1)};
+
+window.snapFit=()=>fit(1);
+window.setDir=(x,y,z)=>{dirV.set(x,y,z).normalize();auto=true};
+window.setCovers=setCovers;
+window.setCom=v=>{comVisible=!!v;comG.visible=comVisible};
+window.focusCom=()=>{
+  auto=false;
+  comG.updateWorldMatrix(true,true);
+  const wp=new THREE.Vector3();comG.getWorldPosition(wp);
+  ctl.target.copy(wp);
+  dirV.set(0.05,0.15,1.0).normalize();
+  c.position.copy(wp).addScaledVector(dirV,320);
+  curD=320;
+};
+window.focusSide=()=>{
+  auto=false;
+  root.updateMatrixWorld(true);
+  const bx=new THREE.Box3().setFromObject(root);
+  const ct=bx.getCenter(new THREE.Vector3());
+  ctl.target.copy(ct);
+  dirV.set(0.02,0.12,1.0).normalize();
+  curD=Math.max(bx.getSize(new THREE.Vector3()).length()*0.9,420);
+  c.position.copy(ct).addScaledVector(dirV,curD);
+};
+window.focusTensioners=()=>{
+  auto=false;
+  M.arm.forEach(m=>m.visible=false);
+  M.head.forEach(m=>m.visible=false);
+  M.cover.forEach(m=>m.visible=false);
+  M.batt.forEach(m=>m.visible=false);
+  const p=new THREE.Vector3(20,52,135);
+  root.updateMatrixWorld(true);
+  const wp=p.clone().applyMatrix4(root.matrixWorld);
+  ctl.target.copy(wp);
+  dirV.set(0.85,0.25,0.45).normalize();
+  curD=120;
+  c.position.copy(wp).addScaledVector(dirV,curD);
+};
+window.M=M;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
+r.setAnimationLoop(()=>{if(auto)fit(0.06);ctl.update();r.render(s,c)});
+</script></body></html>
