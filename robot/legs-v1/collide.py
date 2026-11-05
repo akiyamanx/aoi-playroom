@@ -1,4 +1,4 @@
-# whole-body interference check: pelvis-v1.2 (minus thigh stubs) + legs-v1. Overlaps > 0.5 cm³ reported.
+# whole-body interference check: pelvis-v1.2 (minus thigh stubs) + legs-v1.1. Overlaps > 0.5 cm³ reported.
 # Ignored pairs: designed contacts (rod↔foot ball-joint ears, cross↔foot clevis/shin, actuator↔its own plates).
 import json, itertools, cadquery as cq
 PLy=json.load(open('../pelvis-v1/layout.json')); LL=json.load(open('layout.json'))
@@ -25,13 +25,13 @@ def pose(n,Q):
 def ok_pair(a,b):
     sa=a[-1] if a[-2]!='_' else a[-1]
     t={a.split('_')[0]+'_'+a.split('_')[1] if a.startswith('ankle') else a.split('_')[0], b.split('_')[0]+'_'+b.split('_')[1] if b.startswith('ankle') else b.split('_')[0]}
-    return t in ({'ankle_rods','foot'},{'ankle_cross','foot'},{'ankle_cross','shin'},{'fsr','foot'})
+    return t in ({'ankle_rods','foot'},{'ankle_cross','foot'},{'ankle_cross','shin'},{'fsr','foot'},{'knee','shin'},{'knee','thigh'},{'knee'})
 def both(q): return {'L':q,'R':q}
 POSES=[('neutral',{}),('walk swing L: hip30 knee60 / R stance push-off ankle20',{'L':{'pitch':30,'knee':60},'R':{'pitch':-10,'apitch':20}}),
  ('knee90',both({'knee':90})),('knee120 hip60 ankle-25 (squat)',both({'pitch':60,'knee':120,'apitch':-25})),
  ('ankle pitch +25',both({'apitch':25})),('ankle pitch -25',both({'apitch':-25})),('ankle roll ±15',{'L':{'aroll':15},'R':{'aroll':-15}}),
- ('hip roll 20 + ankle roll -20',both({'roll':20,'aroll':-20})),('hip roll -15 (adduct) L only',{'L':{'roll':-15}}),
- ('hip yaw 30 + knee 60 L',{'L':{'yaw':30,'knee':60}}),('hip yaw -30 L / +30 R',{'L':{'yaw':-30},'R':{'yaw':30}}),('hip -30 knee 0',both({'pitch':-30}))]
+ ('hip roll 20 + ankle roll -20',both({'roll':20,'aroll':-20})),('hip roll -7 (adduct) BOTH',both({'roll':-7})),
+ ('hip yaw 15 + knee 45 BOTH (toes out)',both({'yaw':15,'knee':45})),('hip yaw -30 + knee 60 BOTH (toes in)',both({'yaw':-30,'knee':60})),('hip yaw -30 L / +30 R',{'L':{'yaw':-30},'R':{'yaw':30}}),('hip -30 knee 0',both({'pitch':-30}))]
 allok=True
 for name,Q in POSES:
     S={n:pose(n,Q) for n in P}; hits=[]

@@ -3,32 +3,42 @@
   "knee_L": [
    0,
    80,
-   -267.0
+   -360.0
   ],
   "ankle_pitch_L": [
    0,
    80,
-   -339.0
+   -520.0
   ],
   "ankle_roll_L": [
    0,
    80,
-   -339.0
+   -520.0
+  ],
+  "knee_motor_L": [
+   0,
+   80,
+   -269.0
   ],
   "knee_R": [
    0,
    -80,
-   -267.0
+   -360.0
   ],
   "ankle_pitch_R": [
    0,
    -80,
-   -339.0
+   -520.0
   ],
   "ankle_roll_R": [
    0,
    -80,
-   -339.0
+   -520.0
+  ],
+  "knee_motor_R": [
+   0,
+   -80,
+   -269.0
   ],
   "hip_pitch_L": [
    0,
@@ -41,28 +51,32 @@
    -195.0
   ]
  },
- "floor_z": -385.0,
+ "floor_z": -565.0,
  "com_total_mm": [
-  2.138087346008968,
-  -0.08343313479731032,
-  -56.26905770575067
+  2.109583311762957,
+  -0.08132857695068416,
+  -78.00285167148165
  ],
- "total_g": 5984.552794438513,
- "legs_g": 1103.623097640875,
+ "total_g": 6139.416410824139,
+ "legs_g": 1258.4867140265017,
  "upper_g": 2525.0285774504714,
  "pelvis_g": 2468.0678776115847,
  "sole": {
-  "x0": -45,
-  "l": 140,
-  "w": 80
+  "x0": -52,
+  "l": 160,
+  "w": 72,
+  "out": 8
  },
  "hip_y": 80,
- "height": 699.6,
+ "height": 879.6,
  "parts": {
   "thigh_L": {
    "parent": "pitch_L"
   },
   "knee_act_L": {
+   "parent": "pitch_L"
+  },
+  "knee_belt_L": {
    "parent": "pitch_L"
   },
   "ankle_servo_Li": {
@@ -92,10 +106,13 @@
   "knee_act_R": {
    "parent": "pitch_R"
   },
-  "ankle_servo_Ro": {
-   "parent": "knee_R"
+  "knee_belt_R": {
+   "parent": "pitch_R"
   },
   "ankle_servo_Ri": {
+   "parent": "knee_R"
+  },
+  "ankle_servo_Ro": {
    "parent": "knee_R"
   },
   "shin_R": {

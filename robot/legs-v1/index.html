@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの こし（骨盤）legs-v1（全身）</title>
+<title>ここちゃんの こし（骨盤）legs-v1.1（全身・長い足）</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃん 全身 legs-v1</h1>
-<p>足：もも＋ひざ（AK45-10仮）＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.1（身長88cm）</h1>
+<p>v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -251,7 +251,7 @@ function walkPose(ph){ // ph in radians; left arm uses ph, right arm ph+π
 function legPose(ph){ // hip pitch +30/-10, opposite to same-side arm (arm fwd ⇒ same-side leg back)
   const o={};for(const [k,p] of [['L',ph],['R',ph+Math.PI]]){
     const w=Math.atan2(Math.sin(p),Math.cos(p));          // -π..π ; swing ≈ 0..π (hip flexing)
-    o['pitch_'+k]=10-20*Math.cos(p);
+    o['pitch_'+k]=8-20*Math.cos(p);
     o['knee_'+k]=5+55*Math.max(0,Math.sin(p+0.25));        // ~60° in mid-swing
     o['ap_'+k]=20*Math.exp(-((w+0.15)**2)/0.12)-6*Math.max(0,Math.sin(p)); // push-off plantarflexion ~20°, slight toe-up in swing
   }setJ(o);}
@@ -277,7 +277,7 @@ for(const s of ['L','R']){
   F['apitch_'+s]=piv(F['knee_'+s],FW['knee_'+s],LG.joints['ankle_pitch_'+s]);FW['apitch_'+s]=LG.joints['ankle_pitch_'+s];
   F['aroll_'+s]=piv(F['apitch_'+s],FW['apitch_'+s],LG.joints['ankle_roll_'+s]);FW['aroll_'+s]=LG.joints['ankle_roll_'+s];
 }
-const colL=n=>n.includes('knee_act')?0x4a505c:n.includes('servo')?0xff8c42:n.includes('rods')?0x9aa3ad:n.includes('fsr')?0xff2266:n.includes('foot')?0xf4f4fa:n.includes('cross')?0xc0c8d0:0xffb3d1;
+const colL=n=>n.includes('knee_act')?0x4a505c:n.includes('belt')?0x333333:n.includes('servo')?0xff8c42:n.includes('rods')?0x9aa3ad:n.includes('fsr')?0xff2266:n.includes('foot')?0xf4f4fa:n.includes('cross')?0xc0c8d0:0xffb3d1;
 const jobs3=Object.entries(LG.parts).map(([n,p])=>new Promise(res=>L.load(n+'.stl',g=>{g.computeVertexNormals();
   const m=new THREE.Mesh(g,mat(colL(n),1,n.includes('_act')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
   F[p.parent].add(m);M.legs.push(m);res();},undefined,()=>res())));
@@ -324,10 +324,10 @@ comG.add(makeLabel('重心'));
 let comVisible=true;
 
 // hip plate ground helper
-{const fz=PL.floor_z;const gnd=new THREE.Mesh(new THREE.PlaneGeometry(700,700),new THREE.MeshStandardMaterial({color:0xe8dff5,roughness:1,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
+{const fz=PL.floor_z;const gnd=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({color:0xe8dff5,roughness:1,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
  gnd.position.z=fz-0.5;root.add(gnd);
- const grid=new THREE.GridHelper(700,14,0xc8b8e8,0xdcd0f0);grid.rotation.x=Math.PI/2;grid.position.z=fz;root.add(grid);
- const S=PL.sole,hy=PL.hip_y,x1=S.x0,x2=S.x0+S.l,yo=hy+S.w/2;
+ const grid=new THREE.GridHelper(900,18,0xc8b8e8,0xdcd0f0);grid.rotation.x=Math.PI/2;grid.position.z=fz;root.add(grid);
+ const S=PL.sole,hy=PL.hip_y,x1=S.x0,x2=S.x0+S.l,yo=hy+(S.out||0)+S.w/2;
  const pts=[[x1,yo],[x2,yo],[x2,-yo],[x1,-yo],[x1,yo]].map(p=>new THREE.Vector3(p[0],p[1],fz+1));
  root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x2a9d5a})));
  const proj=new THREE.Mesh(new THREE.CircleGeometry(9,24),new THREE.MeshBasicMaterial({color:0xff2244}));proj.position.set(PL.com_total_mm[0],PL.com_total_mm[1],fz+1.5);root.add(proj);
@@ -369,7 +369,7 @@ document.getElementById('comBtn').onclick=()=>{
 const wb=document.getElementById('walk');
 wb.onclick=()=>{setWalk(!walking);wb.classList.toggle('main',walking);};
 const stats=document.getElementById('stats');
-stats.textContent=`身長 約 ${Math.round(PL.height)} mm ／ 合計 約 ${Math.round(PL.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(com[2]-PL.floor_z)} mm（赤い点＝真下、緑の線＝足うらの支える範囲）`;
+stats.textContent=`身長 約 ${Math.round(PL.height)} mm ／ 合計 約 ${Math.round(PL.total_g)} g（あし ${Math.round(PL.legs_g)} g）／ 重心 床から ${Math.round(com[2]-PL.floor_z)} mm／ 1歩 約 ${Math.round(2*370*Math.sin(20*Math.PI/180)*0.8)} mm（デモ）（赤い点＝真下、緑の線＝足うらの支える範囲）`;
 
 // camera
 let auto=true,dirV=new THREE.Vector3(0.7,0.35,0.6).normalize(),curD=0;

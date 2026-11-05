@@ -9,7 +9,7 @@ m=lambda v:' '.join(f'{x/1000:.4f}' for x in v)
 fr={'torso':[0,0,0],'pelvis':J['waist']}
 for s in 'LR':
     for f,j in (('yaw','hip_yaw'),('roll','hip_roll'),('pitch','hip_pitch'),('knee','knee'),('apitch','ankle_pitch'),('aroll','ankle_roll')): fr[f+'_'+s]=J[j+'_'+s]
-out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
+out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
 def link(name,f):
     ps=[n for n in R if R[n]['parent']==f]; mm=sum(R[n]['mass_g'] for n in ps)/1000
     c=[sum(R[n]['mass_g']*R[n]['com_mm'][i] for n in ps)/1000/max(mm,1e-9) for i in range(3)]
