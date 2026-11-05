@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの「からだ」中身 v1.1</title>
+<title>ここちゃんの「からだ」中身 v1.2</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,13 +13,14 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃんの「からだ」中身 v1.1</h1>
-<p>改訂：親指向き修正　／　指サーボは胴のなか・ボーデンでうでへ　／　ひっぱって回す・2本指でズーム</p></div>
+<div id="t"><h1>🤖 ここちゃんの「からだ」中身 v1.2</h1>
+<p>v1.2：ひじの向き修正・腕ふりデモ　／　親指向き修正　／　指サーボは胴のなか・ボーデンでうでへ　／　ひっぱって回す・2本指でズーム</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
 <button id="see" class="main">👁 中を見る</button>
 <button id="comBtn" class="main">◎ 重心</button>
+<button id="walk">🚶 歩くときの腕ふり</button>
 <button id="rs">↺ もどす</button>
 </div>
 <div id="stats"></div>
@@ -171,6 +172,9 @@ const armFiles=[
 ];
 const fl=Object.entries(armLay.layout.fingers).concat([['thumb',armLay.layout.thumb]]);
 
+const ARMS=[];
+// pose: sh = shoulder pitch (+ forward), el = elbow flexion (+ hand forward/up), wr = wrist flexion (+ toward palm)
+function setArm(a,sh,el,wr=0){a.sh.rotation.z=-sh;a.el.rotation.z=-el;a.wr.rotation.y=-wr;a.ro.rotation.x=0;}
 function buildArm(side){
   // side=+1 left (torso +Y), -1 right.
   // Arm CAD is a left hand: extends -X, thumb at +Y, palm faces -Z.
@@ -194,11 +198,12 @@ function buildArm(side){
   ro.position.fromArray(armLay.frames.roll);el.add(ro);
   wr.position.fromArray(armLay.frames.wrist);ro.add(wr);
 
-  // relaxed: both arms hang, elbows slightly bent (negate Z rotations when Y-mirrored)
-  const zSign=side>0?1:-1;
-  sh.rotation.z=-0.25*zSign;
-  el.rotation.z=-0.9*zSign;
-
+  // v1.2: joint signs are the SAME for both arms. The right arm's Y-mirror composed with its
+  // basis is a pure lateral (left/right) mirror, so rotation about the lateral elbow/shoulder
+  // axis already looks identical. v1.1 negated Z here, which made the right elbow bend backward.
+  // Convention (same as arm-v5): flexion f>0 → rotation.z=-f (forearm toward thumb = forward),
+  // wrist flexion w>0 → rotation.y=-w (toward palm, medial).
+  ARMS.push({sh,el,ro,wr,side});
   const loads=[];
   // DoubleSide: negative scale flips winding; keep faces lit
   for(const [f,col] of armFiles){
@@ -231,6 +236,17 @@ function buildArm(side){
   return Promise.all(loads);
 }
 await Promise.all([buildArm(1),buildArm(-1)]);
+const D=Math.PI/180;
+const RELAX=[0.25,0.9];
+ARMS.forEach(a=>setArm(a,...RELAX));
+// walking arm swing (Murray 1967): elbow ~30° held, shoulder ~+8° fwd / -24° back, antiphase
+let walking=false,walkT0=0,walkPhase=null;
+function walkPose(ph){ // ph in radians; left arm uses ph, right arm ph+π
+  ARMS.forEach(a=>{const p=ph+(a.side>0?0:Math.PI);const sh=(-8+16*Math.cos(p))*D; // range -24..+8
+    setArm(a,sh,30*D,0);});
+}
+window.setPose=(shDeg,elDeg,wrDeg=0)=>{walking=false;ARMS.forEach(a=>setArm(a,shDeg*D,elDeg*D,wrDeg*D))};
+window.setWalk=(on,ph)=>{walking=!!on;walkPhase=(ph===undefined?null:ph);if(!on)ARMS.forEach(a=>setArm(a,...RELAX));else walkT0=performance.now();};
 
 // --- CoM marker ---
 const com=lay.com_upper_mm;
@@ -292,6 +308,8 @@ document.getElementById('comBtn').onclick=()=>{
   document.getElementById('comBtn').classList.toggle('off',!comVisible);
 };
 
+const wb=document.getElementById('walk');
+wb.onclick=()=>{setWalk(!walking);wb.classList.toggle('main',walking);};
 const stats=document.getElementById('stats');
 stats.textContent=`上半身 約 ${Math.round(lay.mass_upper_g)} g　／　重心高さ 腰から ${Math.round(lay.com_height_above_hip_mm)} mm`;
 
@@ -381,5 +399,5 @@ window.focusTensioners=()=>{
   c.position.copy(wp).addScaledVector(dirV,curD);
 };
 window.THREE=THREE;window.M=M;window.root=root;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
-r.setAnimationLoop(()=>{if(auto)fit(0.06);ctl.update();r.render(s,c)});
+r.setAnimationLoop(()=>{if(walking)walkPose(walkPhase!==null?walkPhase:(performance.now()-walkT0)/1000*Math.PI*2/1.1);if(auto)fit(0.06);ctl.update();r.render(s,c)});
 </script></body></html>
