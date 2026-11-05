@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの こし（骨盤）pelvis-v1.1</title>
+<title>ここちゃんの こし（骨盤）pelvis-v1.2</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃんの こし（骨盤）pelvis-v1.1</h1>
-<p>v1.1：胴を30mm低く・バッテリー腰プレート直上・ももの付け根モーターを外側へ　／　こしひねり（STS3215）＋ 足のつけね3軸×2（ひねり・横ひらき・前後）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃんの こし（骨盤）pelvis-v1.2</h1>
+<p>v1.2：バッテリーを こしの箱の中（こしひねりの下）へ・こしのケーブルにゆとりループ　／　こしひねり（STS3215）＋ 足のつけね3軸×2（ひねり・横ひらき・前後）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -54,7 +54,7 @@ const res=await (await fetch('torso/results.json')).json();
 const L=new STLLoader();
 const GROUPS={
   frame:{label:'フレーム',color:0x8aa0b8,files:['hip_plate','spine_frame','shoulder_bracket_L','shoulder_bracket_R','bowden_exit_L','bowden_exit_R']},
-  batt:{label:'バッテリー',color:0x5ecf7a,files:['battery_tray','battery_pack']},
+  batt:{label:'バッテリー',color:0x5ecf7a,files:[]},
   servo:{label:'指モーター',color:0xff8c42,files:[]},
   tens:{label:'テンショナー',color:0xffd24a,files:[]},
   brain:{label:'頭脳・センサー',color:0xb07cff,files:['electronics_bay']},
@@ -265,7 +265,7 @@ for(const s of ['L','R']){
   F['roll_'+s]=piv(F['yaw_'+s],FW['yaw_'+s],PJ.joints['hip_roll_'+s]);FW['roll_'+s]=PJ.joints['hip_roll_'+s];
   F['pitch_'+s]=piv(F['roll_'+s],FW['roll_'+s],PJ.joints['hip_pitch_'+s]);FW['pitch_'+s]=PJ.joints['hip_pitch_'+s];
 }
-const col=n=>n.includes('_act_')?0x4a505c:n.includes('servo')?0xff8c42:n.includes('bearing')?0xc0c8d0:n.includes('thigh')?0xffb3d1:0x7fb8a8;
+const col=n=>n.includes('battery_pack')?0x5ecf7a:n.includes('cable_loop')?0xff4fa3:n.includes('_act_')?0x4a505c:n.includes('servo')?0xff8c42:n.includes('bearing')?0xc0c8d0:n.includes('thigh')?0xffb3d1:0x7fb8a8;
 const jobs2=Object.entries(PJ.parts).map(([n,p])=>new Promise(res=>L.load(n+'.stl',g=>{g.computeVertexNormals();
   const m=new THREE.Mesh(g,mat(col(n),1,n.includes('_act_')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
   F[p.parent].add(m);M.pelvis.push(m);res();},undefined,()=>res())));
@@ -313,7 +313,7 @@ let comVisible=true;
 
 // UI toggles
 const pr=document.getElementById('parts');
-const showOrder=['frame','batt','servo','tens','brain','cover','arm','head','pelvis'];
+const showOrder=['frame','servo','tens','brain','cover','arm','head','pelvis'];
 for(const k of showOrder){
   const b=document.createElement('button');
   b.textContent=GROUPS[k]?.label||k;

@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
 <!-- pelvis-v1.1 (PLACEHOLDER dims/masses). torso_link = torso-v1.3-low upper body (+waist adapter) lumped. -->
-<robot name="cocomi_pelvis_v1_1">
-  <link name="torso_link"><inertial><origin xyz="0.0005 0.0000 0.0969"/><mass value="3.2920"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
+<robot name="cocomi_pelvis_v1_2">
+  <link name="torso_link"><inertial><origin xyz="0.0094 0.0000 0.1130"/><mass value="2.6630"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
     <visual><origin xyz="0.0000 0.0000 0.0000"/><geometry><mesh filename="waist_adapter.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0000"/><geometry><mesh filename="waist_servo_STS3215.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
-  <link name="pelvis_link"><inertial><origin xyz="0.0000 -0.0000 -0.0411"/><mass value="0.2576"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
+  <link name="pelvis_link"><inertial><origin xyz="0.0012 -0.0006 -0.0394"/><mass value="1.0231"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_bearing.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="pelvis_block.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="pelvis_battery_pack.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="pelvis_battery_strap.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_cable_loop.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="hip_yaw_servo_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="hip_yaw_mount_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="hip_yaw_servo_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
@@ -15,31 +18,31 @@
   </link>
   <joint name="waist_yaw" type="revolute"><parent link="torso_link"/><child link="pelvis_link"/><origin xyz="0.0000 0.0000 -0.0530"/><axis xyz="0 0 1"/><limit lower="-0.79" upper="0.79" effort="2.9" velocity="6"/></joint>
   <link name="hip_yaw_link_L"><inertial><origin xyz="-0.0510 0.0000 -0.0764"/><mass value="0.2820"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 -0.0800 0.0960"/><geometry><mesh filename="hip_yaw_yoke_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
-    <visual><origin xyz="0.0000 -0.0800 0.0960"/><geometry><mesh filename="hip_roll_act_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 -0.0800 0.1160"/><geometry><mesh filename="hip_yaw_yoke_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 -0.0800 0.1160"/><geometry><mesh filename="hip_roll_act_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
   <link name="hip_roll_link_L"><inertial><origin xyz="0.0513 0.0000 -0.0007"/><mass value="0.2704"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0520 -0.0800 0.1750"/><geometry><mesh filename="hip_roll_bracket_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
-    <visual><origin xyz="0.0520 -0.0800 0.1750"/><geometry><mesh filename="hip_pitch_act_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0520 -0.0800 0.1950"/><geometry><mesh filename="hip_roll_bracket_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0520 -0.0800 0.1950"/><geometry><mesh filename="hip_pitch_act_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
   <link name="thigh_stub_L"><inertial><origin xyz="0.0000 -0.0000 -0.0792"/><mass value="0.0561"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 -0.0800 0.1750"/><geometry><mesh filename="thigh_stub_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 -0.0800 0.1950"/><geometry><mesh filename="thigh_stub_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
-  <joint name="hip_yaw_L" type="revolute"><parent link="pelvis_link"/><child link="hip_yaw_link_L"/><origin xyz="0.0000 0.0800 -0.0430"/><axis xyz="0 0 1"/><limit lower="-0.52" upper="0.52" effort="2.9" velocity="6"/></joint>
+  <joint name="hip_yaw_L" type="revolute"><parent link="pelvis_link"/><child link="hip_yaw_link_L"/><origin xyz="0.0000 0.0800 -0.0630"/><axis xyz="0 0 1"/><limit lower="-0.52" upper="0.52" effort="2.9" velocity="6"/></joint>
   <joint name="hip_roll_L" type="revolute"><parent link="hip_yaw_link_L"/><child link="hip_roll_link_L"/><origin xyz="-0.0520 0.0000 -0.0790"/><axis xyz="1 0 0"/><limit lower="-0.52" upper="0.52" effort="12" velocity="6"/></joint>
   <joint name="hip_pitch_L" type="revolute"><parent link="hip_roll_link_L"/><child link="thigh_stub_L"/><origin xyz="0.0520 0.0000 0.0000"/><axis xyz="0 1 0"/><limit lower="-1.57" upper="0.52" effort="12" velocity="6"/></joint>
   <link name="hip_yaw_link_R"><inertial><origin xyz="-0.0510 0.0000 -0.0764"/><mass value="0.2820"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 0.0800 0.0960"/><geometry><mesh filename="hip_yaw_yoke_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
-    <visual><origin xyz="0.0000 0.0800 0.0960"/><geometry><mesh filename="hip_roll_act_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0800 0.1160"/><geometry><mesh filename="hip_yaw_yoke_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0800 0.1160"/><geometry><mesh filename="hip_roll_act_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
   <link name="hip_roll_link_R"><inertial><origin xyz="0.0513 -0.0000 -0.0007"/><mass value="0.2704"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0520 0.0800 0.1750"/><geometry><mesh filename="hip_roll_bracket_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
-    <visual><origin xyz="0.0520 0.0800 0.1750"/><geometry><mesh filename="hip_pitch_act_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0520 0.0800 0.1950"/><geometry><mesh filename="hip_roll_bracket_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0520 0.0800 0.1950"/><geometry><mesh filename="hip_pitch_act_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
   <link name="thigh_stub_R"><inertial><origin xyz="0.0000 0.0000 -0.0792"/><mass value="0.0561"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 0.0800 0.1750"/><geometry><mesh filename="thigh_stub_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0800 0.1950"/><geometry><mesh filename="thigh_stub_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
-  <joint name="hip_yaw_R" type="revolute"><parent link="pelvis_link"/><child link="hip_yaw_link_R"/><origin xyz="0.0000 -0.0800 -0.0430"/><axis xyz="0 0 1"/><limit lower="-0.52" upper="0.52" effort="2.9" velocity="6"/></joint>
+  <joint name="hip_yaw_R" type="revolute"><parent link="pelvis_link"/><child link="hip_yaw_link_R"/><origin xyz="0.0000 -0.0800 -0.0630"/><axis xyz="0 0 1"/><limit lower="-0.52" upper="0.52" effort="2.9" velocity="6"/></joint>
   <joint name="hip_roll_R" type="revolute"><parent link="hip_yaw_link_R"/><child link="hip_roll_link_R"/><origin xyz="-0.0520 0.0000 -0.0790"/><axis xyz="1 0 0"/><limit lower="-0.52" upper="0.52" effort="12" velocity="6"/></joint>
   <joint name="hip_pitch_R" type="revolute"><parent link="hip_roll_link_R"/><child link="thigh_stub_R"/><origin xyz="0.0520 0.0000 0.0000"/><axis xyz="0 1 0"/><limit lower="-1.57" upper="0.52" effort="12" velocity="6"/></joint>
 </robot>

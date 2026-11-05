@@ -1,12 +1,12 @@
 {
  "parts": {
   "waist_adapter": {
-   "volume_cm3": 70.54540984607249,
-   "mass_g": 43.73815410456495,
+   "volume_cm3": 133.90540984607247,
+   "mass_g": 83.02135410456492,
    "com_mm": [
-    -9.149525427279234e-16,
-    -4.2350592692633867e-16,
-    -19.7284513723549
+    -5.16876404653713e-15,
+    -1.144426052428233e-16,
+    -17.491090840791625
    ],
    "bought": false,
    "valid": true
@@ -34,14 +34,47 @@
    "valid": true
   },
   "pelvis_block": {
-   "volume_cm3": 131.7291872895207,
-   "mass_g": 81.67209611950283,
+   "volume_cm3": 267.3314675881562,
+   "mass_g": 165.74550990465687,
    "com_mm": [
-    1.208248347121808e-16,
-    0.0,
-    -83.59477554933811
+    3.4659144632663015,
+    -1.741887296354968e-15,
+    -96.6560196458497
    ],
    "bought": false,
+   "valid": true
+  },
+  "pelvis_battery_pack": {
+   "volume_cm3": 348.75,
+   "mass_g": 650.0,
+   "com_mm": [
+    -3.1540202548462234e-16,
+    1.3039350563052735e-16,
+    -87.5
+   ],
+   "bought": true,
+   "valid": true
+  },
+  "pelvis_battery_strap": {
+   "volume_cm3": 10.396800000000013,
+   "mass_g": 6.446016000000008,
+   "com_mm": [
+    1.3996532806600909e-14,
+    -6.29843976297041e-16,
+    -78.61191135734074
+   ],
+   "bought": false,
+   "valid": true
+  },
+  "waist_cable_loop": {
+   "volume_cm3": 2.249798827113065,
+   "mass_g": 25.0,
+   "com_mm": [
+    27.898921717333046,
+    -23.960564578519648,
+    -44.05236666602837
+   ],
+   "bought": true,
    "valid": true
   },
   "hip_yaw_servo_L": {
@@ -50,7 +83,7 @@
    "com_mm": [
     -3.337013205444756e-17,
     80.0,
-    -113.5
+    -133.5
    ],
    "bought": true,
    "valid": true
@@ -61,7 +94,7 @@
    "com_mm": [
     8.627160791701262e-16,
     80.00000000000001,
-    -113.50000000000003
+    -133.49999999999994
    ],
    "bought": false,
    "valid": true
@@ -72,7 +105,7 @@
    "com_mm": [
     -38.76351351351351,
     80.0,
-    -141.43243243243242
+    -161.43243243243242
    ],
    "bought": false,
    "valid": true
@@ -83,7 +116,7 @@
    "com_mm": [
     -52.00000000000001,
     80.00000000000003,
-    -175.00000000000006
+    -195.00000000000006
    ],
    "bought": true,
    "valid": true
@@ -94,7 +127,7 @@
    "com_mm": [
     -17.38938251660384,
     80.0,
-    -192.15140908274986
+    -212.15140908274992
    ],
    "bought": false,
    "valid": true
@@ -105,18 +138,18 @@
    "com_mm": [
     7.0356991272397714e-15,
     80.0,
-    -174.99999999999997
+    -195.00000000000006
    ],
    "bought": true,
    "valid": true
   },
   "thigh_stub_L": {
-   "volume_cm3": 90.45992193738924,
-   "mass_g": 56.08515160118133,
+   "volume_cm3": 90.45992193738925,
+   "mass_g": 56.08515160118134,
    "com_mm": [
-    1.0328632754739873e-14,
-    79.99999999999999,
-    -254.20180044196468
+    1.0325456478300326e-14,
+    79.99999999999997,
+    -274.2018004419647
    ],
    "bought": false,
    "valid": true
@@ -127,7 +160,7 @@
    "com_mm": [
     -3.337013205444756e-17,
     -80.0,
-    -113.5
+    -133.5
    ],
    "bought": true,
    "valid": true
@@ -138,7 +171,7 @@
    "com_mm": [
     8.627160791701262e-16,
     -80.00000000000006,
-    -113.50000000000003
+    -133.49999999999994
    ],
    "bought": false,
    "valid": true
@@ -149,7 +182,7 @@
    "com_mm": [
     -38.76351351351351,
     -80.0,
-    -141.43243243243242
+    -161.43243243243242
    ],
    "bought": false,
    "valid": true
@@ -160,7 +193,7 @@
    "com_mm": [
     -52.00000000000001,
     -80.0,
-    -175.0
+    -195.0
    ],
    "bought": true,
    "valid": true
@@ -171,7 +204,7 @@
    "com_mm": [
     -17.38938251660384,
     -80.0,
-    -192.15140908274986
+    -212.15140908274992
    ],
    "bought": false,
    "valid": true
@@ -182,25 +215,26 @@
    "com_mm": [
     4.397311954524858e-15,
     -80.0,
-    -175.0
+    -195.0
    ],
    "bought": true,
    "valid": true
   },
   "thigh_stub_R": {
-   "volume_cm3": 90.45992193738924,
-   "mass_g": 56.08515160118133,
+   "volume_cm3": 90.45992193738925,
+   "mass_g": 56.08515160118134,
    "com_mm": [
-    1.0888155399382053e-14,
-    -80.00000000000001,
-    -254.20180044196468
+    1.0682247265372903e-14,
+    -80.0,
+    -274.2018004419647
    ],
    "bought": false,
    "valid": true
   }
  },
  "summary": {
-  "version": "pelvis-v1.1",
+  "battery_below_waist_yaw_g": 650.0,
+  "version": "pelvis-v1.2",
   "coords": "origin=torso hip_plate top centre; +Z up +Y left +X fwd",
   "joints_mm": {
    "waist": [
@@ -211,32 +245,32 @@
    "hip_yaw_L": [
     0,
     80,
-    -96.0
+    -116.0
    ],
    "hip_roll_L": [
     -52,
     80,
-    -175.0
+    -195.0
    ],
    "hip_pitch_L": [
     0,
     80,
-    -175.0
+    -195.0
    ],
    "hip_yaw_R": [
     0,
     -80,
-    -96.0
+    -116.0
    ],
    "hip_roll_R": [
     -52,
     -80,
-    -175.0
+    -195.0
    ],
    "hip_pitch_R": [
     0,
     -80,
-    -175.0
+    -195.0
    ]
   },
   "joint_order_per_leg": [
@@ -244,25 +278,25 @@
    "hip_roll (X, AK45-10 class)",
    "hip_pitch (Y, AK45-10 class)"
   ],
-  "pelvis_and_hips_g": 1663.3,
+  "pelvis_and_hips_g": 2468.1,
   "com_pelvis_mm": [
-   -17.5,
-   0.0,
-   -155.1
+   -11.3,
+   -0.2,
+   -143.5
   ],
-  "upper_body_g": 3193.3,
+  "upper_body_g": 2525.0,
   "com_upper_mm": [
-   0.5,
+   9.9,
    0.0,
-   100.7
+   120.5
   ],
-  "total_g": 4856.6,
+  "total_g": 4993.1,
   "com_total_mm": [
-   -5.6,
-   0.0,
-   13.1
+   -0.5,
+   -0.1,
+   -10.0
   ],
-  "com_above_hip_pitch_axis_mm": 188.1,
+  "com_above_hip_pitch_axis_mm": 185.0,
   "hardware_misc_g": 90.0,
   "assumptions": [
    "ALL dims/masses PLACEHOLDER",
@@ -271,7 +305,9 @@
    "PLA 1.24 g/cm\u00b3 \u00d7 50% print factor",
    "waist thin bearing 72/52\u00d77 mm 45 g carries bending; servo torque only",
    "thigh = stub only; legs below hip pitch not counted",
-   "torso = torso-v1.3-low: spine/shoulders \u221230 mm, battery on thin strap tray at z=2, x=\u221235 behind spine",
+   "torso = torso-v1.3-low-nobatt: spine/shoulders \u221230 mm, NO battery (moved to pelvis box below waist yaw in v1.2)",
+   "battery 6S 5000 mAh 650 g PLACEHOLDER in pelvis box, rear hatch",
+   "waist cable service loop 300\u00b0 arc r45 PLACEHOLDER 25 g",
    "arms hanging (torso estimate, shoulders z=220)"
   ],
   "params": {
@@ -294,8 +330,14 @@
    "m_bearing": 0.045,
    "adapter_t": 6,
    "pelvis_w": 110,
-   "pelvis_d": 84,
-   "pelvis_h": 36,
+   "pelvis_d": 172,
+   "pelvis_h": 56,
+   "batt_l": 155,
+   "batt_w": 50,
+   "batt_h": 45,
+   "m_batt": 0.65,
+   "floor_t": 6,
+   "m_loop": 0.025,
    "wing_w": 200,
    "wing_d": 64,
    "wing_t": 6,

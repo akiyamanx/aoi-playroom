@@ -469,8 +469,6 @@ parts = {
     'spine_frame': spine,
     'shoulder_bracket_L': bracket_L,
     'shoulder_bracket_R': bracket_R,
-    'battery_tray': tray,
-    'battery_pack': batt,  # placeholder solid for viz
     'servo_bay_L': bay_L,
     'servo_bay_R': bay_R,
     'pulley': pulley,
@@ -523,7 +521,7 @@ def comb(bs):
 bodies = []
 # printed structure (50% fill estimate)
 for n in ['hip_plate', 'spine_frame', 'shoulder_bracket_L', 'shoulder_bracket_R',
-          'battery_tray', 'servo_bay_L', 'servo_bay_R', 'bowden_exit_L', 'bowden_exit_R',
+          'servo_bay_L', 'servo_bay_R', 'bowden_exit_L', 'bowden_exit_R',
           'electronics_bay', 'cover_front', 'cover_back']:
     bodies.append(part_body(n))
 # 10 pulleys + 10 tensioner arms + 10 tensioner pulleys
@@ -535,7 +533,8 @@ for b in all_banks:
 bodies.append(part_body('head_placeholder'))
 
 # purchased / placeholder masses
-bodies.append(box_body(A['m_batt'], [A['batt_x'], 0, A['batt_z'] + A['batt_h'] / 2 + 2], [A['batt_w'], A['batt_l'], A['batt_h']]))
+pass  # v1.2: battery moved to pelvis box
+#bodies.append(box_body(A['m_batt'], [A['batt_x'], 0, A['batt_z'] + A['batt_h'] / 2 + 2], [A['batt_w'], A['batt_l'], A['batt_h']]))
 for b in all_banks:
     bodies.append(box_body(A['m_tservo'], b['servo_c'], [A['tservo'][1], A['tservo'][0], A['tservo'][2]]))
     bodies.append(box_body(A['m_tens'], b['tens_c'], [20, 15, 20]))  # spring+screw hardware
@@ -571,9 +570,9 @@ layout = dict(
     hip_plate=dict(w=hw, d=hd, t=ht),
     shoulder=dict(y=A['shoulder_y'], z=A['shoulder_z']),
     battery=dict(
-        type="6S 5000mAh Li-ion soft pack PLACEHOLDER",
+        type="MOVED to pelvis-v1.2 box (below waist yaw)",
         dims_mm=[A['batt_w'], A['batt_l'], A['batt_h']],
-        mass_g=A['m_batt'] * 1000,
+        mass_g=0,
         tray_z=A['batt_z'],
         com_mm=[A['batt_x'], 0, A['batt_z'] + A['batt_h'] / 2 + 2],
     ),
@@ -592,13 +591,13 @@ layout = dict(
 )
 
 summary = dict(
-    version="torso-v1.3-low (for pelvis-v1.1)",
+    version="torso-v1.3-low-nobatt (for pelvis-v1.2)",
     robot_height_target_cm=70,
     reference="HighTorque Mini Pi Plus ~68 cm / 15.4 kg / 22 DOF (inspiration only)",
     total_upper_body_g=round(upper['m'] * 1000, 1),
     torso_only_g=round(torso_only['m'] * 1000, 1),
     two_arms_without_finger_servos_g=round(2 * arm_g, 1),
-    battery_g=A['m_batt'] * 1000,
+    battery_g=0,  # v1.2 moved to pelvis
     battery_note="6S 5000mAh Li-ion PLACEHOLDER ~155×50×45 mm, 650 g",
     finger_servos_g=10 * A['m_tservo'] * 1000,
     tensioners_hardware_g=10 * A['m_tens'] * 1000,

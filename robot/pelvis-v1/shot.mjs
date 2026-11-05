@@ -9,7 +9,7 @@ await pg.waitForFunction('window.ready',{timeout:90000});
 const sh=async(f)=>{await new Promise(r=>setTimeout(r,1800));await pg.screenshot({path:'shots/'+f});console.log('shot',f)};
 await pg.evaluate(()=>{setCovers(true);setCom(true);setAuto(true);setDir(0.35,0.4,0.85);snapFit()});
 await sh('01_front_pelvis.png');
-await pg.evaluate(()=>{setCom(true);focusSide()});
+await pg.evaluate(()=>{setCom(true);setAuto(true);setDir(0.02,0.12,1);snapFit()});
 await sh('02_side_com.png');
 await pg.evaluate(()=>{setCovers(false);setJ({waist:25,yaw_L:15,roll_L:15,pitch_R:45});setAuto(true);setDir(0.75,0.4,0.5);snapFit()});
 await sh('03_joints_posed.png');

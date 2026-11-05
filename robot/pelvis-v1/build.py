@@ -1,4 +1,4 @@
-# pelvis-v1.1 — waist yaw + pelvis + 2x 3-axis hip (yaw/roll/pitch) + thigh stubs
+# pelvis-v1.2 — waist yaw + pelvis + 2x 3-axis hip (yaw/roll/pitch) + thigh stubs
 # Units mm. Frame = torso-v1: origin hip-plate TOP centre, +Z up, +Y left, +X forward.
 # ALL dimensions / masses are PLACEHOLDERS (no datasheet check yet).
 import json, math, cadquery as cq
@@ -13,7 +13,9 @@ A = dict(
   act_d=53, act_h=45, m_act=0.260,              # AK45-10-class pancake placeholder
   bearing_od=72, bearing_id=52, bearing_t=7, m_bearing=0.045,  # waist crossed-roller/thin bearing PLACEHOLDER
   adapter_t=6,
-  pelvis_w=110, pelvis_d=84, pelvis_h=36,       # pelvis block (Y × X × Z); pitch actuators sit OUTSIDE ±55
+  pelvis_w=110, pelvis_d=172, pelvis_h=56,      # v1.2 pelvis BOX (Y × X × Z) holds the battery; pitch actuators OUTSIDE ±55
+  batt_l=155, batt_w=50, batt_h=45, m_batt=0.650,  # 6S 5000 mAh PLACEHOLDER, long side along X, below waist yaw
+  floor_t=6, m_loop=0.025,                        # box floor; waist cable service loop PLACEHOLDER 25 g
   wing_w=200, wing_d=64, wing_t=6,             # pelvis floor wings carrying hip-yaw servos
   hip_y=80,                                     # leg line: yaw axis, pitch actuator centre (Y=±80)
   roll_x=-52,                                   # roll actuator centre (behind pitch)
@@ -64,8 +66,23 @@ pel = pel.union(box([0,0,z_pel_bot+A['wing_t']/2],[A['wing_d'],A['wing_w'],A['wi
 for s_ in (1,-1):
     pel = pel.cut(cyl([0,s_*A['hip_y'],z_pel_bot+3],6,8))
     pel = pel.cut(box([0,s_*(pw/2+ (A['wing_w']/2-pw/2)/2),z_pel_bot+A['wing_t']/2],[A['wing_d']-30,18,10]))  # lightening
-pel = pel.cut(cyl([0,0,z_pel_top-2],10,6))
+pel = pel.union(box([0,0,z_pel_bot+A['floor_t']/2],[pd,pw,A['floor_t']]).edges('|Z').fillet(12))  # v1.2 full floor
+pel = pel.cut(cyl([0,0,z_pel_top-2],10,6))   # cable pass-through from service loop
+pel = pel.cut(box([-pd/2,0,z_pel_bot+A['floor_t']+A['batt_h']/2+2],[10,A['batt_w']+6,A['batt_h']+4]))  # rear hatch (battery swap) PLACEHOLDER
 parts['pelvis_block']=pel
+# v1.2 battery INSIDE the pelvis box, below the waist yaw → turns with the pelvis
+bz0=z_pel_bot+A['floor_t']
+parts['pelvis_battery_pack']=box([0,0,bz0+A['batt_h']/2],[A['batt_l'],A['batt_w'],A['batt_h']])
+st=None
+for dx in (-45,45):
+    b_=box([dx,0,bz0+(A['batt_h']+2)/2],[20,A['batt_w']+4,A['batt_h']+2]).cut(box([dx,0,bz0+A['batt_h']/2-0.9],[22,A['batt_w']+0.4,A['batt_h']+2.2]))
+    st=b_ if st is None else st.union(b_)
+parts['pelvis_battery_strap']=st
+# waist cable service loop: 300° slack arc around the waist servo, ±45° yaw (PLACEHOLDER)
+lz=z_waist+12; lr=45
+arc=cq.Workplane('XY').workplane(offset=lz).moveTo(lr,0).radiusArc((lr*math.cos(math.radians(300)),lr*math.sin(math.radians(300))),-lr)
+prof=cq.Workplane('YZ',origin=(lr,0,lz)).circle(3.5)
+parts['waist_cable_loop']=prof.sweep(arc).union(cyl([lr*math.cos(math.radians(300)),lr*math.sin(math.radians(300)),(lz+z_pel_top)/2],3.5,lz-z_pel_top))
 ad_=A['act_d']; ah=A['act_h']; r_=ad_/2
 for s,n in ((1,'L'),(-1,'R')):
     y=s*A['hip_y']
@@ -96,7 +113,7 @@ for s,n in ((1,'L'),(-1,'R')):
     th = th.union(box([0,y,z_rp-tz-26],[30,30,60]).edges('|Z').fillet(6))
     parts['thigh_stub_'+n]=th
 
-BOUGHT={'waist_servo_STS3215':A['m_sts'],'waist_bearing':A['m_bearing'],
+BOUGHT={'pelvis_battery_pack':A['m_batt'],'waist_cable_loop':A['m_loop'],'waist_servo_STS3215':A['m_sts'],'waist_bearing':A['m_bearing'],
         'hip_yaw_servo_L':A['m_sts'],'hip_yaw_servo_R':A['m_sts'],
         'hip_roll_act_L':A['m_act'],'hip_roll_act_R':A['m_act'],'hip_pitch_act_L':A['m_act'],'hip_pitch_act_R':A['m_act']}
 res={}; bodies=[]
@@ -114,7 +131,8 @@ def comb(bs):
 mp,cp = comb(bodies)
 mu,cu = TORSO['mass_upper_g']/1000, TORSO['com_upper_mm']
 mt,ct = comb(bodies+[(mu,cu)])
-summary=dict(version='pelvis-v1.1',coords='origin=torso hip_plate top centre; +Z up +Y left +X fwd',
+batt_g_below_waist=A['m_batt']*1000
+summary=dict(battery_below_waist_yaw_g=batt_g_below_waist,version='pelvis-v1.2',coords='origin=torso hip_plate top centre; +Z up +Y left +X fwd',
   joints_mm=J, joint_order_per_leg=['hip_yaw (Z, STS3215)','hip_roll (X, AK45-10 class)','hip_pitch (Y, AK45-10 class)'],
   pelvis_and_hips_g=round(mp*1000,1), com_pelvis_mm=[round(x,1) for x in cp],
   upper_body_g=round(mu*1000,1), com_upper_mm=[round(x,1) for x in cu],
@@ -123,12 +141,12 @@ summary=dict(version='pelvis-v1.1',coords='origin=torso hip_plate top centre; +Z
   hardware_misc_g=hw_g,
   assumptions=['ALL dims/masses PLACEHOLDER','STS3215 45×25×35 mm 55 g','AK45-10 class 53 dia × 45 mm 260 g (same as torso-v1 shoulder)',
     'PLA 1.24 g/cm³ × 50% print factor','waist thin bearing 72/52×7 mm 45 g carries bending; servo torque only',
-    'thigh = stub only; legs below hip pitch not counted','torso = torso-v1.3-low: spine/shoulders −30 mm, battery on thin strap tray at z=2, x=−35 behind spine','arms hanging (torso estimate, shoulders z=220)'],
+    'thigh = stub only; legs below hip pitch not counted','torso = torso-v1.3-low-nobatt: spine/shoulders −30 mm, NO battery (moved to pelvis box below waist yaw in v1.2)','battery 6S 5000 mAh 650 g PLACEHOLDER in pelvis box, rear hatch','waist cable service loop 300° arc r45 PLACEHOLDER 25 g','arms hanging (torso estimate, shoulders z=220)'],
   params=A)
 json.dump(dict(parts=res,summary=summary),open('results.json','w'),indent=1)
 json.dump(dict(joints=J,z_rp=z_rp,com_total_mm=ct,total_g=mt*1000,pelvis_g=mp*1000,upper_g=mu*1000,
   parts={n:{'parent':('torso' if n.startswith('waist_adapter') or n=='waist_servo_STS3215' else
-     'pelvis' if n in('waist_bearing','pelvis_block') or n.startswith('hip_yaw_servo') or n.startswith('hip_yaw_mount') else
+     'pelvis' if n in('waist_bearing','pelvis_block','pelvis_battery_pack','pelvis_battery_strap','waist_cable_loop') or n.startswith('hip_yaw_servo') or n.startswith('hip_yaw_mount') else
      'yaw_'+n[-1] if n.startswith('hip_yaw_yoke') or n.startswith('hip_roll_act') else
      'roll_'+n[-1] if n.startswith('hip_roll_bracket') or n.startswith('hip_pitch_act') else 'pitch_'+n[-1])} for n in parts}),
   open('layout.json','w'),indent=1)

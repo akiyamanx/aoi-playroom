@@ -4,7 +4,7 @@ m=lambda v:' '.join(f'{x/1000:.4f}' for x in v)
 frames={'torso':[0,0,0],'pelvis':J['waist']}
 for s in 'LR':
     frames['yaw_'+s]=J['hip_yaw_'+s];frames['roll_'+s]=J['hip_roll_'+s];frames['pitch_'+s]=J['hip_pitch_'+s]
-out=['<?xml version="1.0"?>','<!-- pelvis-v1.1 (PLACEHOLDER dims/masses). torso_link = torso-v1.3-low upper body (+waist adapter) lumped. -->','<robot name="cocomi_pelvis_v1_1">']
+out=['<?xml version="1.0"?>','<!-- pelvis-v1.1 (PLACEHOLDER dims/masses). torso_link = torso-v1.3-low upper body (+waist adapter) lumped. -->','<robot name="cocomi_pelvis_v1_2">']
 def link(name,fr,extra=''):
     ps=[n for n in P if P[n]['parent']==fr]
     mm=sum(R[n]['mass_g'] for n in ps)/1000; c=[sum(R[n]['mass_g']*R[n]['com_mm'][i] for n in ps)/1000/max(mm,1e-9) for i in range(3)]

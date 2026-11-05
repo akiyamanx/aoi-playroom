@@ -8,43 +8,43 @@
   "hip_yaw_L": [
    0,
    80,
-   -96.0
+   -116.0
   ],
   "hip_roll_L": [
    -52,
    80,
-   -175.0
+   -195.0
   ],
   "hip_pitch_L": [
    0,
    80,
-   -175.0
+   -195.0
   ],
   "hip_yaw_R": [
    0,
    -80,
-   -96.0
+   -116.0
   ],
   "hip_roll_R": [
    -52,
    -80,
-   -175.0
+   -195.0
   ],
   "hip_pitch_R": [
    0,
    -80,
-   -175.0
+   -195.0
   ]
  },
- "z_rp": -175.0,
+ "z_rp": -195.0,
  "com_total_mm": [
-  -5.639912158752545,
-  0.0023696803984253664,
-  13.107080130028592
+  -0.546618029060845,
+  -0.11766358294971647,
+  -9.996750542303252
  ],
- "total_g": 4856.560215676902,
- "pelvis_g": 1663.2652478264304,
- "upper_g": 3193.294967850471,
+ "total_g": 4993.096455062056,
+ "pelvis_g": 2468.0678776115847,
+ "upper_g": 2525.0285774504714,
  "parts": {
   "waist_adapter": {
    "parent": "torso"
@@ -56,6 +56,15 @@
    "parent": "pelvis"
   },
   "pelvis_block": {
+   "parent": "pelvis"
+  },
+  "pelvis_battery_pack": {
+   "parent": "pelvis"
+  },
+  "pelvis_battery_strap": {
+   "parent": "pelvis"
+  },
+  "waist_cable_loop": {
    "parent": "pelvis"
   },
   "hip_yaw_servo_L": {
