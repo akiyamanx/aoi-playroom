@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃん 全身 legs-v1.4（電装トレイ）</title>
+<title>ここちゃん 全身 legs-v1.5（胸IMU）</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.4（電装トレイ・IMUは骨盤・背骨＝アルミパイプ×2・こし前後・身長94cm）</h1>
-<p>v1.4：背骨パイプに割りリングで電装トレイ（コンピュータ・CAN/バス基板・電源基板、高さ調整可）＋背中に非常停止ボタン／IMUは骨盤のまん中（こし関節の下・ゲルパッド）＋足うらセンサー読み取り基板／v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.5（IMU×2＝骨盤＋胸・電装トレイ・背骨＝アルミパイプ×2・こし前後・身長94cm）</h1>
+<p>v1.5：胸にも IMU（背骨パイプに小さなクランプ＋ゲルパッド、肩ヨークの下）。骨盤IMU＝バランス、胸IMU＝上半身のかたむき・ゆれ／v1.4：背骨パイプに割りリングで電装トレイ（コンピュータ・CAN/バス基板・電源基板、高さ調整可）＋背中に非常停止ボタン／IMUは骨盤のまん中（こし関節の下・ゲルパッド）＋足うらセンサー読み取り基板／v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -106,11 +106,11 @@ for(const [n,p] of Object.entries(SPJ.parts)){if(n==='spine_hw')continue;const p
 // --- v1.4 electronics tray (torso frame, slides along the pipes) ---
 const EJ=(await (await fetch('elec.json')).json());window.EJ=EJ;const TZ0=EJ.summary.params.TZ;
 const tray=new THREE.Group();root.add(tray);window.tray=tray;M.elec=[];M.pel=[];
-const ECOL={elec_tray:0x9b7fd1,elec_clamp_lo:0x9b7fd1,elec_clamp_hi:0x9b7fd1,elec_computer:0x2e8b57,elec_driver_CAN_bus:0x3b6fd6,elec_power_dcdc:0xd68a2e,elec_estop:0xe03030,pelvis_imu_cup:0x9b7fd1,pelvis_imu_pad:0x333333,pelvis_imu:0x3b6fd6,pelvis_footsensor_board:0x2e8b57};
+const ECOL={elec_tray:0x9b7fd1,elec_clamp_lo:0x9b7fd1,elec_clamp_hi:0x9b7fd1,elec_computer:0x2e8b57,elec_driver_CAN_bus:0x3b6fd6,elec_power_dcdc:0xd68a2e,elec_estop:0xe03030,pelvis_imu_cup:0x9b7fd1,chest_imu_clamp:0xff9f1c,chest_imu_pad:0x333333,chest_imu:0xff3388,pelvis_imu_pad:0x333333,pelvis_imu:0x3b6fd6,pelvis_footsensor_board:0x2e8b57};
 const pelvisElec=[];
 for(const [n,p] of Object.entries(EJ.parts)){if(n==='elec_wiring'||n==='elec_hw')continue;
   if(p.frame==='pelvis'){pelvisElec.push(n);continue;}
-  jobs.push(loadSTL(n+'.stl',p.tray?tray:root,ECOL[n]||0x888888,'brain',1,0));}
+  jobs.push(loadSTL(n+'.stl',p.tray?tray:root,ECOL[n]||0x888888,'brain',1,0).then(m=>{if(m)m.userData.n=n;}));}
 let explodeK=0,explodeT=null;
 window.setExplode=(on,instant)=>{const tgt=on?1:0;const a0=explodeK,t0=performance.now();
   const st=()=>{const k=instant?1:Math.min(1,(performance.now()-t0)/700);explodeK=a0+(tgt-a0)*k;
@@ -460,6 +460,7 @@ document.getElementById('rs').onclick=()=>{auto=true;dirV.set(0.7,0.35,0.6).norm
 
 window.snapFit=()=>fit(1);
 window.focusOn=(obj,d)=>{auto=false;body.updateMatrixWorld(true);const ct=new THREE.Box3().setFromObject(obj).getCenter(new THREE.Vector3());ctl.target.copy(ct);curD=d;c.position.copy(ct).addScaledVector(dirV,d);c.near=d/50;c.far=d*12;c.updateProjectionMatrix();ctl.update&&ctl.update();};
+window.focusName=(n,d)=>{const o=M.brain.find(m=>m.userData.n===n);focusOn(o||body,d)};
 window.focusIMU=(d)=>{const o=M.brain.find(m=>m.parent&&m.parent.parent===window.F_pelvis);focusOn(o||body,d)};
 window.setDir=(x,y,z)=>{dirV.set(x,y,z).normalize();auto=true};
 window.setCovers=setCovers;

@@ -1,5 +1,5 @@
 # legs-v1.4 — electronics: split-ring clamps on the 2 Ø12 spine pipes → stays → vertical tray (rack) behind the pipes,
-# boards on its back face; E-stop through the back cover; IMU moved to the pelvis centre; foot-sensor reader under the pelvis.
+# boards on its back face; v1.5: + chest IMU clamped on the pipes under the shoulder yoke; E-stop through the back cover; IMU moved to the pelvis centre; foot-sensor reader under the pelvis.
 # Torso parts in TORSO frame; pelvis parts in PELVIS(=legs) frame. ALL dims/masses PLACEHOLDER.
 import json, math, glob, cadquery as cq
 from cadquery import exporters
@@ -15,6 +15,7 @@ A=dict(TZ=32, TZ_range=None,      # tray bottom height on the pipes (torso z); s
   m_wire=0.030,
   imu=(25,20,5), m_imu=0.005, pad_t=2.0, m_pad=0.001,   # IMU on gel pad, rigid printed cup under the pelvis centre
   fsb=(40,30,10), m_fsb=0.012,     # foot-sensor reader (8× FSR → ADC/MCU, sends over the serial bus)
+  cimu_z=(163.5,170.5), m_cimu=0.005, m_cpad=0.001,   # v1.5 chest IMU: clamp in the gap between chest mounts (≤162) and shoulder yoke (≥172)
   rho=1.27e-3, pf=0.5)
 def box(c,d): return W().box(*d).translate(tuple(c))
 def cylz(x,y,z,r,h): return W().workplane(offset=z).center(x,y).circle(r).extrude(h)
@@ -43,6 +44,13 @@ def torso_parts(TZ):
     wx,wy,wz=A['pwr']; P['elec_power_dcdc']=box([x0-wx/2-0.5,-4-wy/2,zt+88+wz/2],[wx,wy,wz])
     ex,ey,ez=A['estop_c']
     P['elec_estop']=cyl([ex-9,ey,ez],20,18,'X').union(cyl([ex+18,ey,ez],11,36,'X'))   # cap outside, body inside (x −58…−22)
+    # v1.5 chest IMU: split rings on both pipes + bridge + hanging tab; IMU card (XZ plane) on a 2 mm gel pad, between the pipes
+    za,zb=A['cimu_z'];h=zb-za;ix,iy,iz=A['imu']
+    c=cylz(px,py,za,R,h).union(cylz(px,-py,za,R,h)).union(box([px,0,za+h/2],[8,2*py,h]))
+    c=c.union(box([px+4,-3.5,138+(zb-138)/2],[24,3,zb-138]))
+    for sg in (1,-1): c=c.cut(cylz(px,sg*py,za-1,bore/2,h+2)).cut(box([px,sg*(py+R/2+2),za+h/2],[1.5,R,h+2]))
+    P['chest_imu_clamp']=c
+    P['chest_imu_pad']=box([px+4,-1,150],[ix,2,iy]); P['chest_imu']=box([px+4,2.5,150],[ix,iz,iy])
     return P
 PE={}
 # pelvis: IMU cup under the pelvis block centre (block bottom z −116), right under the waist axis (0,0)
@@ -66,7 +74,7 @@ L=json.load(open('../pelvis-v1/torso/layout.json'))
 for i,f in enumerate(L['finger_servos']):
     others[f'finger_servo_{i}']=box(f['servo_c'],[23,12.2,12.2]).val()
     others[f'pulley_{i}']=cyl([f['pulley_c'][0]+3,f['pulley_c'][1],f['pulley_c'][2]],9,6,'X').val()
-DES={('elec_clamp_lo','spine_pipe_L'),('elec_clamp_lo','spine_pipe_R'),('elec_clamp_hi','spine_pipe_L'),('elec_clamp_hi','spine_pipe_R'),('elec_estop','cover_back_v14')}
+DES={('elec_clamp_lo','spine_pipe_L'),('elec_clamp_lo','spine_pipe_R'),('elec_clamp_hi','spine_pipe_L'),('elec_clamp_hi','spine_pipe_R'),('elec_estop','cover_back_v14'),('chest_imu_clamp','spine_pipe_L'),('chest_imu_clamp','spine_pipe_R')}
 def check(TZ,verbose=False):
     P=torso_parts(TZ); hits=[]
     for n,wp in P.items():
@@ -96,7 +104,7 @@ for n,wp in PE.items():
         if v>1.0: ph.append([n,o,round(v,1)])
 print('pelvis hits',ph)
 BOUGHT={'elec_computer':A['m_comp'],'elec_driver_CAN_bus':A['m_drv'],'elec_power_dcdc':A['m_pwr'],'elec_estop':A['m_estop'],
-        'pelvis_imu':A['m_imu'],'pelvis_imu_pad':A['m_pad'],'pelvis_footsensor_board':A['m_fsb']}
+        'chest_imu':A['m_cimu'],'chest_imu_pad':A['m_cpad'],'pelvis_imu':A['m_imu'],'pelvis_imu_pad':A['m_pad'],'pelvis_footsensor_board':A['m_fsb']}
 res={}
 for grp,parent in ((P,'torso'),(PE,'pelvis')):
     for n,wp in grp.items():
@@ -122,7 +130,7 @@ zc=lambda c:c[2]+DZ-ZP
 h1=(mr0*h0-sum(m*zc(c) for m,c in REM)+sum(m*zc(c) for m,c in tor))/mr; f1=(mr0*f0-sum(m*c[0] for m,c in REM)+sum(m*c[0] for m,c in tor))/mr
 tq={a:round(mr/1000*9.81*(h1*math.sin(math.radians(a))+f1*math.cos(math.radians(a)))/1000,2) for a in (0,15,30,45,60,-15)}
 fl=WJ['summary']['com_above_floor_mm']-WJ['summary']['com_mm'][2]
-summary=dict(version='legs-v1.4',params=A,removed_g=mrem,added_g=round(madd,1),delta_g=round(madd-mrem,1),total_g=round(Mn,1),com_mm=[round(v,1) for v in Cn],
+summary=dict(version='legs-v1.5',params=A,removed_g=mrem,added_g=round(madd,1),delta_g=round(madd-mrem,1),total_g=round(Mn,1),com_mm=[round(v,1) for v in Cn],
   com_above_floor_mm=round(Cn[2]+fl,1),rotating_mass_g=round(mr,1),rotating_com_above_axis_mm=round(h1,1),rotating_com_fwd_mm=round(f1,1),torque_Nm=tq,
   torso_hits=hits,pelvis_hits=ph,removed=REM)
 json.dump(dict(summary=summary,parts=res),open('elec.json','w'),indent=1)

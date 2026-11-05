@@ -42,5 +42,7 @@ await pg.evaluate(()=>{setTray(32);setCovers(true);setDir(-1,0.3,0.15);focusOn(t
 await sh('15_tray_back_covers_off.png');
 await pg.evaluate(()=>{setCovers(false);setDir(0.35,0.25,-1);focusIMU(800)});
 await sh('16_pelvis_imu_below.png');
+await pg.evaluate(()=>{setCovers(true);setCom(false);M.arm.forEach(m=>m.visible=false);M.cover.forEach(m=>m.visible=false);setDir(0.9,-0.45,0.35);focusName('chest_imu',420)});
+await sh('17_chest_imu_close.png');
 console.log('com',await pg.evaluate(()=>liveCom().map(v=>Math.round(v*10)/10)));
 await b.close();
