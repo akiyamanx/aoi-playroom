@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃんの「からだ」中身 v1</title>
+<title>ここちゃんの「からだ」中身 v1.1</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
 #t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃんの「からだ」中身 v1</h1>
-<p>指サーボは胴のなか・ボーデンでうでへ　／　ひっぱって回す・2本指でズーム</p></div>
+<div id="t"><h1>🤖 ここちゃんの「からだ」中身 v1.1</h1>
+<p>改訂：親指向き修正　／　指サーボは胴のなか・ボーデンでうでへ　／　ひっぱって回す・2本指でズーム</p></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -59,9 +59,11 @@ const GROUPS={
   brain:{label:'頭脳・センサー',color:0xb07cff,files:['electronics_bay']},
   cover:{label:'カバー',color:0xa8e4ff,files:['cover_front','cover_back'],opacity:0.35},
   arm:{label:'うで',color:0xffb3d1,files:[]},
+  // hands filled at runtime for close-ups
+
   head:{label:'あたま',color:0xffcce0,files:['head_placeholder']},
 };
-const M={};for(const k in GROUPS)M[k]=[];
+const M={};for(const k in GROUPS)M[k]=[];M.hands=[];
 
 function mat(col,op=1,metal=0){
   return new THREE.MeshStandardMaterial({
@@ -170,18 +172,20 @@ const armFiles=[
 const fl=Object.entries(armLay.layout.fingers).concat([['thumb',armLay.layout.thumb]]);
 
 function buildArm(side){
-  // side=+1 left (torso +Y), -1 right. Right-handed basis only (no mirror).
-  // Arm CAD extends -X; flange/actuator along Z. Hang: arm -X → torso -Z.
+  // side=+1 left (torso +Y), -1 right.
+  // Arm CAD is a left hand: extends -X, thumb at +Y, palm faces -Z.
+  // Hang: arm -X → torso -Z. Palms medial, both thumbs forward (+X, face side).
+  // Right hand cannot do that with a pure rotation (would be left-handed), so
+  // mirror local Y (swaps thumb side, keeps palm/curl toward -Z) and negate Z joint angles.
   const wrap=new THREE.Group();
   wrap.position.set(0, side*shY, shZ);
-  // arm +X → +Z (up), so distal -X hangs down.
-  // arm +Z → outboard ±Y; arm +Y chosen so det=+1 (palm -Z → medial).
   const basis=new THREE.Matrix4().makeBasis(
     new THREE.Vector3(0,0,1),                 // arm X → +Z up
-    new THREE.Vector3(side>0?1:-1, 0, 0),     // arm Y → ±X forward/back
-    new THREE.Vector3(0, side, 0)             // arm Z → outboard Y
+    new THREE.Vector3(side>0?1:-1, 0, 0),     // arm Y → ±X (pre-mirror)
+    new THREE.Vector3(0, side, 0)             // arm Z → outboard Y (palm -Z → medial)
   );
   wrap.quaternion.setFromRotationMatrix(basis);
+  if(side<0) wrap.scale.y=-1;  // right: thumb +Y → forward after mirror
 
   const G=()=>new THREE.Group();
   const sh=G(),el=G(),ro=G(),wr=G();
@@ -190,17 +194,22 @@ function buildArm(side){
   ro.position.fromArray(armLay.frames.roll);el.add(ro);
   wr.position.fromArray(armLay.frames.wrist);ro.add(wr);
 
-  // relaxed: both arms hang, elbows slightly bent
-  sh.rotation.z=-0.25;
-  el.rotation.z=-0.9;
+  // relaxed: both arms hang, elbows slightly bent (negate Z rotations when Y-mirrored)
+  const zSign=side>0?1:-1;
+  sh.rotation.z=-0.25*zSign;
+  el.rotation.z=-0.9*zSign;
 
   const loads=[];
+  // DoubleSide: negative scale flips winding; keep faces lit
   for(const [f,col] of armFiles){
     const par=f.includes('actuator')||f.includes('shoulder_cup')?wrap: f.includes('upper')?sh: f.includes('proximal')?el: f.includes('distal')?ro:wr;
     loads.push(new Promise(res=>L.load(ARM+f+'.stl',g=>{
       g.computeVertexNormals();
       const m=new THREE.Mesh(g,mat(col));
-      par.add(m);M.arm.push(m);res();
+      if(side<0) m.material.side=THREE.DoubleSide;
+      par.add(m);M.arm.push(m);
+      if(f==='palm') M.hands.push(m);
+      res();
     },undefined,()=>res())));
   }
   for(const [nm,d] of fl){
@@ -211,7 +220,8 @@ function buildArm(side){
       loads.push(new Promise(res=>L.load(ARM+`finger_${nm}_${i+1}.stl`,geo=>{
         geo.computeVertexNormals();
         const m=new THREE.Mesh(geo,mat(0xfff3b0));
-        g.add(m);M.arm.push(m);res();
+        if(side<0) m.material.side=THREE.DoubleSide;
+        g.add(m);M.arm.push(m);M.hands.push(m);res();
       },undefined,()=>res())));
       par=g;x=-l;
     });
@@ -330,6 +340,32 @@ window.focusSide=()=>{
   curD=Math.max(bx.getSize(new THREE.Vector3()).length()*0.9,420);
   c.position.copy(ct).addScaledVector(dirV,curD);
 };
+window.focusHands=()=>{
+  auto=false;
+  setCovers(true);
+  setCom(false);
+  M.frame.forEach(m=>m.visible=false);
+  M.batt.forEach(m=>m.visible=false);
+  M.servo.forEach(m=>m.visible=false);
+  M.tens.forEach(m=>m.visible=false);
+  M.brain.forEach(m=>m.visible=false);
+  M.cover.forEach(m=>m.visible=false);
+  M.head.forEach(m=>m.visible=false);
+  M.arm.forEach(m=>m.visible=true);
+  root.updateMatrixWorld(true);
+  const bx=new THREE.Box3();
+  M.hands.forEach(m=>{m.updateWorldMatrix(true,true);bx.expandByObject(m)});
+  // aim at lower third of hands bbox (world Y) so UI viewOffset still keeps hands on screen
+  const ct=bx.getCenter(new THREE.Vector3());
+  const sz=bx.getSize(new THREE.Vector3());
+  ct.y-=sz.y*0.2;
+  ctl.target.copy(ct);
+  dirV.set(0.55,0.25,0.8).normalize(); // three-quarter front so both hands + thumbs readable
+  curD=Math.max(sz.length()*1.05,380);
+  c.position.copy(ct).addScaledVector(dirV,curD);
+  c.near=curD/50;c.far=curD*20;c.updateProjectionMatrix();
+  return {ct:ct.toArray(),sz:sz.toArray(),curD};
+};
 window.focusTensioners=()=>{
   auto=false;
   M.arm.forEach(m=>m.visible=false);
@@ -344,6 +380,6 @@ window.focusTensioners=()=>{
   curD=120;
   c.position.copy(wp).addScaledVector(dirV,curD);
 };
-window.M=M;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
+window.THREE=THREE;window.M=M;window.root=root;window.getAuto=()=>auto;window.setAuto=v=>{auto=!!v};window.ready=true;
 r.setAnimationLoop(()=>{if(auto)fit(0.06);ctl.update();r.render(s,c)});
 </script></body></html>

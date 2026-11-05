@@ -830,14 +830,14 @@
   }
  },
  "summary": {
-  "version": "torso-v1",
+  "version": "torso-v1.1",
   "robot_height_target_cm": 70,
   "reference": "HighTorque Mini Pi Plus ~68 cm / 15.4 kg / 22 DOF (inspiration only)",
   "total_upper_body_g": 3261.3,
   "torso_only_g": 1960.1,
   "two_arms_without_finger_servos_g": 1301.2,
   "battery_g": 650.0,
-  "battery_note": "6S 5000mAh Li-ion PLACEHOLDER ~155\u00d750\u00d745 mm, 650 g",
+  "battery_note": "6S 5000mAh Li-ion PLACEHOLDER ~155×50×45 mm, 650 g",
   "finger_servos_g": 109.99999999999999,
   "tensioners_hardware_g": 80.0,
   "com_upper_mm": [
@@ -849,16 +849,17 @@
   "print_factor": 0.5,
   "rho_pla": 0.00124,
   "assumptions": [
-   "PLA density 1.24 g/cm\u00b3; printed parts mass \u2248 50% of solid (infill estimate)",
-   "Battery: 6S 5000mAh Li-ion soft pack PLACEHOLDER 650 g \u2014 pick real pack later",
-   "Micro servo 11 g PLACEHOLDER dims 12.2\u00d723\u00d729 mm (same as arm-v5)",
+   "PLA density 1.24 g/cm³; printed parts mass ≈ 50% of solid (infill estimate)",
+   "Battery: 6S 5000mAh Li-ion soft pack PLACEHOLDER 650 g — pick real pack later",
+   "Micro servo 11 g PLACEHOLDER dims 12.2×23×29 mm (same as arm-v5)",
    "Tensioner hardware (spring+screw+axle) 8 g each PLACEHOLDER",
    "AK45-10 260 g included inside each arm-v5 mass",
-   "Arm mass = arm-v5 705.6 g \u2212 5\u00d711 g finger servos (moved to torso) = 650.6 g each",
-   "Arm CoM approximated as box at shoulder\u00b1Y, Z=shoulder\u2212140 \u2014 not from full FK",
+   "Arm mass = arm-v5 705.6 g − 5×11 g finger servos (moved to torso) = 650.6 g each",
+   "Arm CoM approximated as box at shoulder±Y, Z=shoulder−140 — not from full FK",
    "Head 80 g electronics PLACEHOLDER + printed shell",
    "Hip motors NOT included (legs future)",
    "No shape-memory alloy; Bowden PTFE+PE/stainless push-pull loops"
-  ]
+  ],
+  "revision": "v1.1: right-hand thumb mirrored to face forward; battery/CoM unchanged"
  }
 }

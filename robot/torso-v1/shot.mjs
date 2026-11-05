@@ -6,7 +6,7 @@ pg.on('console',m=>{if(m.type()==='error')console.log('C',m.text())});
 await pg.setViewport({width:390,height:844,deviceScaleFactor:2});
 await pg.goto(url,{waitUntil:'networkidle0',timeout:120000});
 await pg.waitForFunction('window.ready',{timeout:90000});
-const sh=async(f)=>{await new Promise(r=>setTimeout(r,1500));await pg.screenshot({path:'shots/'+f});console.log('shot',f)};
+const sh=async(f)=>{await new Promise(r=>setTimeout(r,1800));await pg.screenshot({path:'shots/'+f});console.log('shot',f)};
 await pg.evaluate(()=>{setCovers(true);setCom(true);setAuto(true);setDir(0.35,0.4,0.85);snapFit()});
 await sh('01_front_covers_off.png');
 await pg.evaluate(()=>{setCovers(true);setCom(true);window.M.arm.forEach(m=>m.visible=false);focusSide()});
@@ -19,4 +19,7 @@ await pg.evaluate(()=>{setCovers(false);setCom(true);setAuto(true);setDir(0.45,0
 await sh('04_front_covers_on.png');
 await pg.evaluate(()=>{setCovers(true);setAuto(true);setDir(0.75,0.4,0.5);snapFit()});
 await sh('05_three_quarter.png');
+// close-up of both hands from the front — thumbs must point forward
+await pg.evaluate(()=>{window.M.arm.forEach(m=>m.visible=true);window.M.head.forEach(m=>m.visible=true);window.M.batt.forEach(m=>m.visible=true);window.M.cover.forEach(m=>m.visible=false);focusHands()});
+await sh('06_hands_thumbs_front.png');
 await b.close();
