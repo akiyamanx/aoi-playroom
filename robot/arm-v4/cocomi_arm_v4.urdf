@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!-- COCOMI / ここちゃん arm v4 (auto-generated). PLA mass = ~50% printed estimate; servos/actuator added as boxes.
+     STS3215 55 g x3, 6806 bearing 18 g, 5 tendon micro servos 11 g each (PLACEHOLDER) in forearm_distal, AK45-10 placeholder 260 g. Units m/kg/rad.
+     Each finger has its own actuated joint <name>_curl; distal segments use <mimic> (approximates one tendon curling all segments).
+     Positive angle = curl toward the palm (axis 0 -1 0, same sign convention as the viewer). -->
+<robot name="cocomi_arm_v4">
+ <link name="shoulder_base">
+  <inertial><origin xyz="3.7728e-10 0.00039949 -0.023343"/><mass value="0.27900"/>
+   <inertia ixx="1.1966e-04" ixy="-8.6654e-13" ixz="-8.3695e-13" iyy="1.1667e-04" iyz="2.3620e-06" izz="1.3768e-04"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="shoulder_cup.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="actuator_AK45-10_placeholder.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <link name="upper_arm">
+  <inertial><origin xyz="-0.088002 -5.6798e-12 0.019498"/><mass value="0.09141"/>
+   <inertia ixx="1.7332e-05" ixy="3.6248e-14" ixz="1.6594e-05" iyy="1.4181e-04" iyz="5.4687e-15" izz="1.3773e-04"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="upper_arm.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="upper_arm.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="forearm">
+  <inertial><origin xyz="-0.038925 0.0091292 0.014781"/><mass value="0.09619"/>
+   <inertia ixx="2.6797e-05" ixy="-2.4713e-06" ixz="1.4432e-06" iyy="2.9391e-05" iyz="-1.9267e-07" izz="4.2018e-05"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="forearm_proximal.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="forearm_proximal.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="forearm_distal">
+  <inertial><origin xyz="-0.077106 9.3816e-11 0.0061274"/><mass value="0.14401"/>
+   <inertia ixx="2.7371e-05" ixy="3.6514e-14" ixz="2.8906e-05" iyy="2.3086e-04" iyz="-2.3236e-13" izz="2.2025e-04"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="forearm_distal.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="forearm_distal.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <link name="hand">
+  <inertial><origin xyz="-0.033109 0.00041034 0.010749"/><mass value="0.05379"/>
+   <inertia ixx="2.5023e-05" ixy="-6.5660e-08" ixz="-3.6932e-07" iyy="3.9596e-05" iyz="-1.2020e-08" izz="6.0493e-05"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="palm.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <collision><geometry><mesh filename="palm.stl" scale="0.001 0.001 0.001"/></geometry></collision>
+ </link>
+ <joint name="shoulder_pitch" type="revolute"><parent link="shoulder_base"/><child link="upper_arm"/>
+  <origin xyz="0 0 0"/><axis xyz="0 0 1"/><limit lower="-2.8" upper="0.8" effort="3" velocity="5"/></joint>
+ <joint name="elbow" type="revolute"><parent link="upper_arm"/><child link="forearm"/>
+  <origin xyz="-0.12 0 0.047"/><axis xyz="0 0 1"/><limit lower="-2.4" upper="0" effort="1.5" velocity="4"/></joint>
+ <joint name="forearm_roll" type="revolute"><parent link="forearm"/><child link="forearm_distal"/>
+  <origin xyz="-0.058 0 0.0156"/><axis xyz="1 0 0"/><limit lower="-1.5708" upper="1.5708" effort="1.5" velocity="4"/></joint>
+ <joint name="wrist" type="revolute"><parent link="forearm_distal"/><child link="hand"/>
+  <origin xyz="-0.124 0 0.036"/><axis xyz="0 0 1"/><limit lower="-1.2" upper="1.2" effort="1.5" velocity="4"/></joint>
+ <link name="finger_index_1">
+  <inertial><origin xyz="-0.015087 1.6252e-12 -9.642e-12"/><mass value="0.00236"/>
+   <inertia ixx="6.9504e-08" ixy="-3.7352e-17" ixz="3.4880e-16" iyy="2.1203e-07" iyz="9.0762e-19" izz="2.2178e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_index_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="index_curl" type="revolute"><parent link="hand"/><child link="finger_index_1"/>
+  <origin xyz="-0.079 0.0255 0.011" rpy="0 0 0.0000"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.400" effort="0.2" velocity="3"/></joint>
+ <link name="finger_index_2">
+  <inertial><origin xyz="-0.011191 2.7564e-12 -1.3414e-11"/><mass value="0.00150"/>
+   <inertia ixx="4.3751e-08" ixy="-2.9150e-17" ixz="2.4155e-16" iyy="9.9056e-08" iyz="8.0441e-19" izz="1.0655e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_index_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="index_j2" type="revolute"><parent link="finger_index_1"/><child link="finger_index_2"/>
+  <origin xyz="-0.026 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.610" effort="0.2" velocity="3"/><mimic joint="index_curl" multiplier="1.15" offset="0"/></joint>
+ <link name="finger_index_3">
+  <inertial><origin xyz="-0.011052 2.3766e-11 -3.146e-10"/><mass value="0.00173"/>
+   <inertia ixx="4.3328e-08" ixy="1.8975e-16" ixz="-1.6801e-15" iyy="9.2277e-08" iyz="-2.9984e-16" izz="9.3665e-08"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_index_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="index_j3" type="revolute"><parent link="finger_index_2"/><child link="finger_index_3"/>
+  <origin xyz="-0.018 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.260" effort="0.2" velocity="3"/><mimic joint="index_curl" multiplier="0.9" offset="0"/></joint>
+ <link name="finger_middle_1">
+  <inertial><origin xyz="-0.016071 1.4604e-12 -9.0925e-12"/><mass value="0.00258"/>
+   <inertia ixx="7.5942e-08" ixy="-3.9146e-17" ixz="3.7856e-16" iyy="2.5100e-07" iyz="9.3342e-19" izz="2.6132e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_middle_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="middle_curl" type="revolute"><parent link="hand"/><child link="finger_middle_1"/>
+  <origin xyz="-0.079 0.0085 0.011" rpy="0 0 0.0000"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.400" effort="0.2" velocity="3"/></joint>
+ <link name="finger_middle_2">
+  <inertial><origin xyz="-0.012155 2.3673e-12 -1.2117e-11"/><mass value="0.00172"/>
+   <inertia ixx="5.0189e-08" ixy="-3.1339e-17" ixz="2.6654e-16" iyy="1.2172e-07" iyz="8.3021e-19" izz="1.2978e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_middle_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="middle_j2" type="revolute"><parent link="finger_middle_1"/><child link="finger_middle_2"/>
+  <origin xyz="-0.028 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.610" effort="0.2" velocity="3"/><mimic joint="middle_curl" multiplier="1.15" offset="0"/></joint>
+ <link name="finger_middle_3">
+  <inertial><origin xyz="-0.011605 2.242e-11 -3.072e-10"/><mass value="0.00184"/>
+   <inertia ixx="4.6547e-08" ixy="2.1159e-16" ixz="-1.9144e-15" iyy="1.0304e-07" iyz="-3.0897e-16" izz="1.0471e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_middle_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="middle_j3" type="revolute"><parent link="finger_middle_2"/><child link="finger_middle_3"/>
+  <origin xyz="-0.02 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.260" effort="0.2" velocity="3"/><mimic joint="middle_curl" multiplier="0.9" offset="0"/></joint>
+ <link name="finger_ring_1">
+  <inertial><origin xyz="-0.015087 1.6252e-12 -9.642e-12"/><mass value="0.00236"/>
+   <inertia ixx="6.9504e-08" ixy="-3.7352e-17" ixz="3.4880e-16" iyy="2.1203e-07" iyz="9.0762e-19" izz="2.2178e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_ring_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="ring_curl" type="revolute"><parent link="hand"/><child link="finger_ring_1"/>
+  <origin xyz="-0.079 -0.0085 0.011" rpy="0 0 0.0000"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.400" effort="0.2" velocity="3"/></joint>
+ <link name="finger_ring_2">
+  <inertial><origin xyz="-0.011191 2.7564e-12 -1.3414e-11"/><mass value="0.00150"/>
+   <inertia ixx="4.3751e-08" ixy="-2.9150e-17" ixz="2.4155e-16" iyy="9.9056e-08" iyz="8.0441e-19" izz="1.0655e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_ring_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="ring_j2" type="revolute"><parent link="finger_ring_1"/><child link="finger_ring_2"/>
+  <origin xyz="-0.026 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.610" effort="0.2" velocity="3"/><mimic joint="ring_curl" multiplier="1.15" offset="0"/></joint>
+ <link name="finger_ring_3">
+  <inertial><origin xyz="-0.011052 2.3766e-11 -3.146e-10"/><mass value="0.00173"/>
+   <inertia ixx="4.3328e-08" ixy="1.8975e-16" ixz="-1.6801e-15" iyy="9.2277e-08" iyz="-2.9984e-16" izz="9.3665e-08"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_ring_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="ring_j3" type="revolute"><parent link="finger_ring_2"/><child link="finger_ring_3"/>
+  <origin xyz="-0.018 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.260" effort="0.2" velocity="3"/><mimic joint="ring_curl" multiplier="0.9" offset="0"/></joint>
+ <link name="finger_pinky_1">
+  <inertial><origin xyz="-0.01264 2.2071e-12 -1.1583e-11"/><mass value="0.00182"/>
+   <inertia ixx="5.3408e-08" ixy="-3.2402e-17" ixz="2.7951e-16" iyy="1.3432e-07" iyz="8.4311e-19" izz="1.4266e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_pinky_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="pinky_curl" type="revolute"><parent link="hand"/><child link="finger_pinky_1"/>
+  <origin xyz="-0.079 -0.0255 0.011" rpy="0 0 0.0000"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.400" effort="0.2" velocity="3"/></joint>
+ <link name="finger_pinky_2">
+  <inertial><origin xyz="-0.009762 3.3991e-12 -1.6195e-11"/><mass value="0.00118"/>
+   <inertia ixx="3.4219e-08" ixy="-2.5030e-17" ixz="2.0636e-16" iyy="7.0669e-08" iyz="7.6429e-19" izz="7.7237e-08"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_pinky_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="pinky_j2" type="revolute"><parent link="finger_pinky_1"/><child link="finger_pinky_2"/>
+  <origin xyz="-0.021 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.610" effort="0.2" velocity="3"/><mimic joint="pinky_curl" multiplier="1.15" offset="0"/></joint>
+ <link name="finger_pinky_3">
+  <inertial><origin xyz="-0.0099218 2.703e-11 -3.3254e-10"/><mass value="0.00152"/>
+   <inertia ixx="3.6890e-08" ixy="1.4973e-16" ixz="-1.2567e-15" iyy="7.3247e-08" iyz="-2.8159e-16" izz="7.4070e-08"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_pinky_3.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="pinky_j3" type="revolute"><parent link="finger_pinky_2"/><child link="finger_pinky_3"/>
+  <origin xyz="-0.015 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.260" effort="0.2" velocity="3"/><mimic joint="pinky_curl" multiplier="0.9" offset="0"/></joint>
+ <link name="finger_thumb_1">
+  <inertial><origin xyz="-0.014105 1.823e-12 -1.0302e-11"/><mass value="0.00215"/>
+   <inertia ixx="6.3065e-08" ixy="-3.5449e-17" ixz="3.2020e-16" iyy="1.7778e-07" iyz="8.8182e-19" izz="1.8696e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_thumb_1.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="thumb_curl" type="revolute"><parent link="hand"/><child link="finger_thumb_1"/>
+  <origin xyz="-0.030589 0.037277 0.011" rpy="0 0 -0.9599"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.000" effort="0.2" velocity="3"/></joint>
+ <link name="finger_thumb_2">
+  <inertial><origin xyz="-0.012696 2.0152e-11 -2.9473e-10"/><mass value="0.00205"/>
+   <inertia ixx="5.2985e-08" ixy="2.5869e-16" ixz="-2.4268e-15" iyy="1.2736e-07" iyz="-3.2722e-16" izz="1.2960e-07"/></inertial>
+  <visual><origin xyz="0 0 0" rpy="0 0 0"/><geometry><mesh filename="finger_thumb_2.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+ </link>
+ <joint name="thumb_j2" type="revolute"><parent link="finger_thumb_1"/><child link="finger_thumb_2"/>
+  <origin xyz="-0.024 0 0"/><axis xyz="0 -1 0"/><limit lower="0" upper="1.150" effort="0.2" velocity="3"/><mimic joint="thumb_curl" multiplier="1.15" offset="0"/></joint>
+</robot>
