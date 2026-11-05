@@ -1,9 +1,9 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ここちゃん 全身 legs-v1.5（胸IMU）</title>
+<title>ここちゃん 全身 legs-v1.6（こしコンパクト）</title>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#fdf6ff,#e8f4ff);font-family:sans-serif;color:#5a3a8a}
 #t{position:fixed;top:6px;left:0;right:0;text-align:center;pointer-events:none;z-index:2}
-#t h1{font-size:17px;margin:4px}#t p{font-size:11px;margin:1px;opacity:.85}
+#t h1{font-size:13px;margin:2px 4px;background:#ffffffb0;display:inline-block;padding:2px 8px;border-radius:10px}#t details{pointer-events:auto;font-size:10px;max-width:92vw;margin:0 auto}#t summary{cursor:pointer;color:#7a5aa8;font-size:11px}#t p{font-size:10.5px;margin:1px;background:#fffffff0;border-radius:8px;padding:4px;text-align:left}
 #ui{position:fixed;left:0;right:0;bottom:0;padding:6px 8px 8px;background:#ffffffd9;border-radius:16px 16px 0 0;box-shadow:0 -2px 10px #0001;z-index:2;max-height:42vh;overflow:auto}
 .row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:3px 0}
 button{font-size:12px;padding:6px 9px;border-radius:16px;border:2px solid #b48ae8;background:#fff;color:#5a3a8a}
@@ -13,8 +13,8 @@ button.off{opacity:.35}button.main{background:#b48ae8;color:#fff}
 #stats{text-align:center;font-size:11px;color:#5a3a8a;margin:2px}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head><body>
-<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.5（IMU×2＝骨盤＋胸・電装トレイ・背骨＝アルミパイプ×2・こし前後・身長94cm）</h1>
-<p>v1.5：胸にも IMU（背骨パイプに小さなクランプ＋ゲルパッド、肩ヨークの下）。骨盤IMU＝バランス、胸IMU＝上半身のかたむき・ゆれ／v1.4：背骨パイプに割りリングで電装トレイ（コンピュータ・CAN/バス基板・電源基板、高さ調整可）＋背中に非常停止ボタン／IMUは骨盤のまん中（こし関節の下・ゲルパッド）＋足うらセンサー読み取り基板／v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></div>
+<div id="t"><h1>🤖 ここちゃん 全身 legs-v1.6（こしコンパクト・身長 約90cm）</h1>
+<details><summary>ℹ️ 説明・変更履歴（タップ）</summary><p>v1.6：こしのねじりとおじぎの軸を近づけた（73→32 mm）。ねじりサーボをおじぎ台の中に入れ、おじぎモーター（AK45-36）は横に置いて軸は同じ線上のまま。上半身が4 cm下がった／v1.5：胸にも IMU（背骨パイプに小さなクランプ＋ゲルパッド、肩ヨークの下）。骨盤IMU＝バランス、胸IMU＝上半身のかたむき・ゆれ／v1.4：背骨パイプに割りリングで電装トレイ（コンピュータ・CAN/バス基板・電源基板、高さ調整可）＋背中に非常停止ボタン／IMUは骨盤のまん中（こし関節の下・ゲルパッド）＋足うらセンサー読み取り基板／v1.3：背骨をアルミパイプ Ø12×1 ×2本＋印刷クランプ（真鍮インサート・M3）に／v1.2：こし前後（おじぎ）関節を追加（AK45-36・ねじりの上）／v1.1：足を長く（もも165＋すね160）・ひざモーターは腰の近くに上げてベルト(2:1)で駆動・ひざ細く／足：もも＋ひざ＋すね＋足首2軸（STS3215×2＋押し棒）＋ガンダム風の四角い足うら（圧力センサー×4）　／　寸法はぜんぶ仮　／　ひっぱって回す</p></details></div>
 <div id="ui">
 <div class="row" id="parts"></div>
 <div class="row">
@@ -306,7 +306,7 @@ const jobs3=Object.entries(LG.parts).map(([n,p])=>new Promise(res=>L.load(n+'.st
   const m=new THREE.Mesh(g,mat(colL(n),1,n.includes('_act')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
   F[p.parent].add(m);M.legs.push(m);res();},undefined,()=>res())));
 await Promise.all(jobs3);
-const jobs2=Object.entries(PJ.parts).filter(([n])=>!n.startsWith('thigh_stub')).map(([n,p])=>new Promise(res=>L.load('../pelvis-v1/'+n+'.stl',g=>{g.computeVertexNormals();
+const jobs2=Object.entries(PJ.parts).filter(([n])=>!n.startsWith('thigh_stub')&&n!=='waist_adapter').map(([n,p])=>new Promise(res=>L.load('../pelvis-v1/'+n+'.stl',g=>{g.computeVertexNormals();
   const m=new THREE.Mesh(g,mat(col(n),1,n.includes('_act_')?0.4:0.1));const w=FW[p.parent];m.position.set(-w[0],-w[1],-w[2]);
   F[p.parent].add(m);M.pelvis.push(m);res();},undefined,()=>res())));
 await Promise.all(jobs2);
@@ -319,7 +319,7 @@ const PR=(await (await fetch('../pelvis-v1/results.json')).json()).parts;const L
 const TL=(await (await fetch('../pelvis-v1/torso/layout.json')).json());
 const MS=[{g:root,m:TL.mass_upper_g,c:TL.com_upper_mm}];
 const addP=(m,c,par)=>{const w=FW[par];MS.push({g:F[par],m,c:[c[0]-w[0],c[1]-w[1],c[2]-w[2]]});};
-for(const [n,p] of Object.entries(PR)){if(n.startsWith('thigh_stub'))continue;const par=(PJ.parts[n]||{}).parent||'pelvis';addP(p.mass_g,p.com_mm,par);}
+for(const [n,p] of Object.entries(PR)){if(n.startsWith('thigh_stub')||n==='waist_adapter')continue;const par=(PJ.parts[n]||{}).parent||'pelvis';addP(p.mass_g,p.com_mm,par);}
 for(const [n,p] of Object.entries(LR))addP(p.mass_g,p.com_mm,p.parent);
 for(const [n,p] of Object.entries(WJ.parts))addP(p.mass_g,p.com_mm,p.parent);
 window._MS=MS;
@@ -460,6 +460,7 @@ document.getElementById('rs').onclick=()=>{auto=true;dirV.set(0.7,0.35,0.6).norm
 
 window.snapFit=()=>fit(1);
 window.focusOn=(obj,d)=>{auto=false;body.updateMatrixWorld(true);const ct=new THREE.Box3().setFromObject(obj).getCenter(new THREE.Vector3());ctl.target.copy(ct);curD=d;c.position.copy(ct).addScaledVector(dirV,d);c.near=d/50;c.far=d*12;c.updateProjectionMatrix();ctl.update&&ctl.update();};
+window.focusPt=(x,y,z,d)=>{auto=false;body.updateMatrixWorld(true);const ct=body.localToWorld(new THREE.Vector3(x,y,z));ctl.target.copy(ct);curD=d;c.position.copy(ct).addScaledVector(dirV,d);c.near=d/50;c.far=d*12;c.updateProjectionMatrix();};
 window.focusName=(n,d)=>{const o=M.brain.find(m=>m.userData.n===n);focusOn(o||body,d)};
 window.focusIMU=(d)=>{const o=M.brain.find(m=>m.parent&&m.parent.parent===window.F_pelvis);focusOn(o||body,d)};
 window.setDir=(x,y,z)=>{dirV.set(x,y,z).normalize();auto=true};

@@ -5,7 +5,7 @@ PLy=json.load(open('../pelvis-v1/layout.json')); LL=json.load(open('layout.json'
 J=dict(PLy['joints']); J.update(LL['joints'])
 P={};PAR={}
 for n,p in PLy['parts'].items():
-    if n.startswith('thigh_stub'): continue
+    if n.startswith('thigh_stub') or n=='waist_adapter': continue   # v1.6: adapter replaced by waist_yaw_carrier
     P[n]=cq.importers.importStep('../pelvis-v1/'+n+'.step').val(); PAR[n]='wyaw' if p['parent']=='torso' else p['parent']
 WJ=json.load(open('waist.json')); DZ=WJ['summary']['params']['DZ']; ZP=WJ['summary']['params']['ZP']
 for n,p in WJ['parts'].items():
@@ -39,7 +39,7 @@ def pose(n,Q):
         j=J[f'{JN[c]}_{side}']; a=ang(c,q,sg)
         if a: s=s.rotate(cq.Vector(*j),cq.Vector(*j)+cq.Vector(*AX[c]),a)
     return s
-DESIGNED={frozenset(p) for p in [('waist_pitch_lower_yoke','waist_adapter'),('waist_pitch_lower_yoke','waist_pitch_act'),('waist_pitch_upper_yoke','waist_pitch_act'),
+DESIGNED={frozenset(p) for p in [('waist_yaw_carrier','waist_pitch_act'),('waist_yaw_carrier','waist_servo_STS3215'),('waist_yaw_carrier','waist_bearing'),('waist_yaw_carrier','waist_pitch_upper_yoke'),('waist_pitch_upper_yoke','waist_pitch_act'),
   ('waist_pitch_upper_yoke','torso_hip_plate'),('waist_pitch_upper_yoke','waist_pitch_lower_yoke'),('waist_adapter','waist_servo_STS3215'),('waist_servo_STS3215','waist_bearing'),('waist_adapter','waist_bearing'),('pelvis_imu_cup','pelvis_block'),('pelvis_footsensor_board','pelvis_block')]}
 def ok_pair(a,b):
     if frozenset((a,b)) in DESIGNED: return True
@@ -53,7 +53,7 @@ POSES=[('neutral',{}),('walk swing L: hip30 knee60 / R stance push-off ankle20',
  ('hip roll 20 + ankle roll -20',both({'roll':20,'aroll':-20})),('hip roll -7 (adduct) BOTH',both({'roll':-7})),
  ('hip yaw 15 + knee 45 BOTH (toes out)',both({'yaw':15,'knee':45})),('hip yaw -30 + knee 60 BOTH (toes in)',both({'yaw':-30,'knee':60})),('hip yaw -30 L / +30 R',{'L':{'yaw':-30},'R':{'yaw':30}}),('hip -30 knee 0',both({'pitch':-30})),
  ('BOW waist pitch +60',{'W':{'pitch':60}}),('waist pitch -15 (lean back)',{'W':{'pitch':-15}}),('waist pitch +30 & yaw 45',{'W':{'pitch':30,'yaw':45}}),
- ('waist pitch +60 & yaw -45',{'W':{'pitch':60,'yaw':-45}}),('bow 45 + hips 30 knees 30',{'W':{'pitch':45},'L':{'pitch':30,'knee':30},'R':{'pitch':30,'knee':30}})]
+ ('waist pitch +60 & yaw -45',{'W':{'pitch':60,'yaw':-45}}),('bow 45 + hips 30 knees 30',{'W':{'pitch':45},'L':{'pitch':30,'knee':30},'R':{'pitch':30,'knee':30}}),('waist yaw +45',{'W':{'yaw':45}}),('waist yaw -45 + lean back -15',{'W':{'yaw':-45,'pitch':-15}}),('bow 60 & yaw +45',{'W':{'pitch':60,'yaw':45}})]
 allok=True
 for name,Q in POSES:
     S={n:pose(n,Q) for n in P}; hits=[]

@@ -16,17 +16,17 @@
     "I_mm4": 289.8,
     "W_mm3": 58.0,
     "g_per_m": 76.3,
-    "sigma_MPa_x3": 92.4,
-    "SF_yield": 1.57,
-    "tip_defl_mm": 0.96,
+    "sigma_MPa_x3": 93.2,
+    "SF_yield": 1.56,
+    "tip_defl_mm": 0.97,
     "id_mm": 8
    },
    "12x1": {
     "I_mm4": 527.0,
     "W_mm3": 87.8,
     "g_per_m": 93.3,
-    "sigma_MPa_x3": 61.0,
-    "SF_yield": 2.38,
+    "sigma_MPa_x3": 61.5,
+    "SF_yield": 2.36,
     "tip_defl_mm": 0.53,
     "id_mm": 10
    },
@@ -34,8 +34,8 @@
     "I_mm4": 1083.1,
     "W_mm3": 144.4,
     "g_per_m": 118.8,
-    "sigma_MPa_x3": 37.1,
-    "SF_yield": 3.91,
+    "sigma_MPa_x3": 37.4,
+    "SF_yield": 3.88,
     "tip_defl_mm": 0.26,
     "id_mm": 13
    },
@@ -43,8 +43,8 @@
     "I_mm4": 1331.2,
     "W_mm3": 166.4,
     "g_per_m": 127.2,
-    "sigma_MPa_x3": 32.2,
-    "SF_yield": 4.51,
+    "sigma_MPa_x3": 32.5,
+    "SF_yield": 4.47,
     "tip_defl_mm": 0.21,
     "id_mm": 14
    }
@@ -59,30 +59,30 @@
    "M3\u00d710 shoulder bracket\u2192yoke + insert": 4,
    "M3\u00d78 head\u2192neck (insert)": 2
   },
-  "total_g": 6547.0,
+  "total_g": 6468.5,
   "com_mm": [
-   2.5,
-   -0.2,
-   -49.0
+   2.6,
+   2.4,
+   -67.6
   ],
-  "com_above_floor_mm": 516.0,
-  "rotating_mass_g": 2517.2,
-  "rotating_com_above_axis_mm": 160.4,
-  "rotating_com_fwd_mm": 11.5,
+  "com_above_floor_mm": 497.4,
+  "rotating_mass_g": 2522.1,
+  "rotating_com_above_axis_mm": 161.2,
+  "rotating_com_fwd_mm": 11.4,
   "torque_Nm": {
    "0": 0.28,
    "15": 1.3,
-   "30": 2.23,
-   "45": 3.0,
-   "60": 3.57,
-   "-15": -0.75
+   "30": 2.24,
+   "45": 3.02,
+   "60": 3.6,
+   "-15": -0.76
   },
   "torque_v12_Nm": {
    "0": 0.25,
-   "15": 1.29,
-   "30": 2.25,
-   "45": 3.06,
-   "60": 3.66,
+   "15": 1.3,
+   "30": 2.27,
+   "45": 3.08,
+   "60": 3.68,
    "-15": -0.82
   },
   "hits": [],

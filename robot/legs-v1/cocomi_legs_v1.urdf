@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3) + electronics tray / pelvis IMU (legs-v1.4), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->
+<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3) + electronics tray / pelvis IMU (legs-v1.4) + chest IMU (v1.5) + compact waist, pitch axis 32 mm above yaw plane (legs-v1.6), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->
 <robot name="cocomi_legs_v1">
   <link name="pelvis_link"><inertial><origin xyz="0.0007 -0.0006 -0.0400"/><mass value="1.0446"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="../pelvis-v1/waist_bearing.stl" scale="0.001 0.001 0.001"/></geometry></visual>
@@ -12,18 +12,17 @@
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="../pelvis-v1/hip_yaw_servo_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="../pelvis-v1/hip_yaw_mount_R.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
-  <link name="waist_link"><inertial><origin xyz="-0.0005 -0.0013 0.0612"/><mass value="0.5535"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="../pelvis-v1/waist_adapter.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <link name="waist_link"><inertial><origin xyz="-0.0004 0.0327 0.0296"/><mass value="0.4700"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="../pelvis-v1/waist_servo_STS3215.stl" scale="0.001 0.001 0.001"/></geometry></visual>
-    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_pitch_lower_yoke.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+    <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_yaw_carrier.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_pitch_act.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 0.0000 0.0530"/><geometry><mesh filename="waist_pitch_cable_loop.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
-  <link name="torso_link"><inertial><origin xyz="0.0083 -0.0002 0.1595"/><mass value="2.7710"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><origin xyz="0.0000 0.0000 -0.0200"/><geometry><mesh filename="waist_pitch_upper_yoke.stl" scale="0.001 0.001 0.001"/></geometry></visual>
+  <link name="torso_link"><inertial><origin xyz="0.0083 0.0001 0.1603"/><mass value="2.7759"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
+    <visual><origin xyz="0.0000 0.0000 0.0210"/><geometry><mesh filename="waist_pitch_upper_yoke.stl" scale="0.001 0.001 0.001"/></geometry></visual>
   </link>
   <joint name="waist_yaw" type="revolute"><parent link="pelvis_link"/><child link="waist_link"/><origin xyz="0.0000 0.0000 0.0000"/><axis xyz="0 0 1"/><limit lower="-0.79" upper="0.79" effort="2.9" velocity="6"/></joint>
-  <joint name="waist_pitch" type="revolute"><parent link="waist_link"/><child link="torso_link"/><origin xyz="0.0000 0.0000 0.0730"/><axis xyz="0 1 0"/><limit lower="-0.26" upper="1.05" effort="24" velocity="6"/></joint>
+  <joint name="waist_pitch" type="revolute"><parent link="waist_link"/><child link="torso_link"/><origin xyz="0.0000 0.0000 0.0320"/><axis xyz="0 1 0"/><limit lower="-0.26" upper="1.05" effort="24" velocity="6"/></joint>
   <link name="hip_yaw_link_L"><inertial><origin xyz="-0.0510 0.0000 -0.0764"/><mass value="0.2820"/><inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/></inertial>
     <visual><origin xyz="0.0000 -0.0800 0.1160"/><geometry><mesh filename="../pelvis-v1/hip_yaw_yoke_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>
     <visual><origin xyz="0.0000 -0.0800 0.1160"/><geometry><mesh filename="../pelvis-v1/hip_roll_act_L.stl" scale="0.001 0.001 0.001"/></geometry></visual>

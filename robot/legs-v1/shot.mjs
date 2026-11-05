@@ -44,5 +44,8 @@ await pg.evaluate(()=>{setCovers(false);setDir(0.35,0.25,-1);focusIMU(800)});
 await sh('16_pelvis_imu_below.png');
 await pg.evaluate(()=>{setCovers(true);setCom(false);M.arm.forEach(m=>m.visible=false);M.cover.forEach(m=>m.visible=false);setDir(0.9,-0.45,0.35);focusName('chest_imu',420)});
 await sh('17_chest_imu_close.png');
+await pg.evaluate(()=>{setCovers(true);setCom(false);M.arm.forEach(m=>m.visible=false);setDir(0.8,0.5,0.3);focusPt(0,0,WJ.summary.params.ZP,520)});
+await sh('18_waist_close_iso.png');
+await pg.evaluate(()=>{setBowNow(0)});
 console.log('com',await pg.evaluate(()=>liveCom().map(v=>Math.round(v*10)/10)));
 await b.close();

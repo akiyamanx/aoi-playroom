@@ -1,11 +1,11 @@
 {
  "parts": {
-  "waist_pitch_lower_yoke": {
-   "mass_g": 21.468846179400554,
+  "waist_yaw_carrier": {
+   "mass_g": 21.020278595296496,
    "com_mm": [
-    2.1881661381500165e-13,
-    -6.723929076538281e-15,
-    1.8259098134001297
+    1.1617437362192148e-15,
+    0.8212863046644019,
+    -37.526393218928845
    ],
    "valid": true,
    "parent": "wyaw"
@@ -13,19 +13,19 @@
   "waist_pitch_act": {
    "mass_g": 349.0,
    "com_mm": [
-    2.601762738766162e-15,
-    2.1681356156384687e-15,
-    20.0
+    3.035389861893856e-15,
+    45.24999999999999,
+    -21.000000000000004
    ],
    "valid": true,
    "parent": "wyaw"
   },
   "waist_pitch_upper_yoke": {
-   "mass_g": 22.851992740405517,
+   "mass_g": 27.751814343911107,
    "com_mm": [
-    -4.120825806804362e-15,
-    0.0,
-    42.17082214326295
+    5.7756511621417405e-15,
+    29.770829852252344,
+    4.028191840931941
    ],
    "valid": true,
    "parent": "wpitch"
@@ -33,9 +33,9 @@
   "waist_pitch_cable_loop": {
    "mass_g": 15.0,
    "com_mm": [
-    -17.66213943912144,
-    -46.25,
-    20.114399332938365
+    -11.809457919422204,
+    -30.500000000000007,
+    -20.828401000592443
    ],
    "valid": true,
    "parent": "wyaw"
@@ -45,81 +45,88 @@
    "com_mm": [
     0,
     0,
-    20
+    -21
    ],
    "valid": true,
    "parent": "wyaw"
   }
  },
  "summary": {
-  "version": "legs-v1.2",
+  "version": "legs-v1.6",
   "waist_pitch": {
    "order": "torso\u2192PITCH\u2192yaw\u2192pelvis",
-   "axis_z": 20,
-   "lift_mm": 64,
+   "axis_z": -21,
+   "lift_mm": 24,
+   "yaw_plane_z": -53,
+   "axis_gap_mm": 32,
+   "old": {
+    "axis_z": 20,
+    "lift_mm": 64,
+    "axis_gap_mm": 73
+   },
    "actuator": "AK45-36",
    "limits_deg": [
     -15,
     60
    ],
-   "rotating_mass_g": 2547.9,
-   "rotating_com_above_axis_mm": 163.2,
-   "rotating_com_fwd_mm": 9.9,
+   "rotating_mass_g": 2552.8,
+   "rotating_com_above_axis_mm": 164.0,
+   "rotating_com_fwd_mm": 9.8,
    "torque_Nm_and_arm_mm": {
     "0": [
      0.25,
-     9.9
+     9.8
     ],
     "15": [
-     1.29,
-     51.8
+     1.3,
+     51.9
     ],
     "30": [
-     2.25,
-     90.1
+     2.27,
+     90.5
     ],
     "45": [
-     3.06,
-     122.4
+     3.08,
+     122.9
     ],
     "60": [
-     3.66,
-     146.3
+     3.68,
+     146.9
     ],
     "-15": [
      -0.82,
-     -32.7
+     -32.9
     ]
    },
    "rated_Nm": 8.0,
    "peak_Nm": 24.0,
    "ak45_10_rated_Nm": 2.5,
    "ak45_10_peak_Nm": 7.0,
-   "module_g": 438.3
+   "module_g": 442.8
   },
-  "total_height_mm": 943.6,
-  "total_g": 6577.7,
+  "total_height_mm": 903.6,
+  "total_g": 6499.2,
   "com_mm": [
-   1.9,
-   -0.2,
-   -46.9
+   2.0,
+   2.4,
+   -65.5
   ],
-  "com_above_floor_mm": 518.1,
+  "com_above_floor_mm": 499.5,
   "com_bow30": [
-   33.0,
-   -57.3
+   33.6,
+   -76.1
   ],
   "com_bow60": [
-   54.8,
-   -81.8
+   55.8,
+   -101.1
   ],
   "sole_x_range": [
    -52,
    108
   ],
   "params": {
-   "DZ": 64,
-   "ZP": 20,
+   "ZP": -21,
+   "HP": 45,
    "act": "AK45-36",
    "act_d": 55,
    "act_h": 56.5,
@@ -132,7 +139,10 @@
    "lim": [
     -15,
     60
-   ]
+   ],
+   "ya": 17.0,
+   "yb": 73.5,
+   "DZ": 24
   },
   "com_bow30_inside_sole_x": true,
   "com_bow60_inside_sole_x": true
@@ -141,7 +151,7 @@
   "waist_pitch": [
    0,
    0,
-   20
+   -21
   ]
  }
 }

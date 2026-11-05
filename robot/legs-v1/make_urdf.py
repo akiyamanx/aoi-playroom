@@ -3,7 +3,7 @@ import json
 PL=json.load(open('../pelvis-v1/layout.json'));PR=json.load(open('../pelvis-v1/results.json'))['parts']
 LL=json.load(open('layout.json'));LR=json.load(open('results.json'))['parts']
 J=dict(PL['joints']);J.update(LL['joints'])
-R={k:dict(v,path='../pelvis-v1/'+k+'.stl',parent=PL['parts'][k]['parent']) for k,v in PR.items() if not k.startswith('thigh_stub')}
+R={k:dict(v,path='../pelvis-v1/'+k+'.stl',parent=PL['parts'][k]['parent']) for k,v in PR.items() if not k.startswith('thigh_stub') and k!='waist_adapter'}
 for k,v in LR.items(): R[k]=dict(v,path=(k+'.stl') if not k.startswith('hardware') else None)
 WJ=json.load(open('waist.json'));DZ=WJ['summary']['params']['DZ'];ZP=WJ['summary']['params']['ZP']
 for k,v in R.items():
@@ -13,7 +13,7 @@ m=lambda v:' '.join(f'{x/1000:.4f}' for x in v)
 fr={'torso':[0,0,ZP],'wpitch':[0,0,ZP],'wyaw':J['waist'],'pelvis':J['waist']}
 for s in 'LR':
     for f,j in (('yaw','hip_yaw'),('roll','hip_roll'),('pitch','hip_pitch'),('knee','knee'),('apitch','ankle_pitch'),('aroll','ankle_roll')): fr[f+'_'+s]=J[j+'_'+s]
-out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3) + electronics tray / pelvis IMU (legs-v1.4), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
+out=['<?xml version="1.0"?>','<!-- cocomi full body: torso-v1.3-low-nobatt + arms (lumped) + pelvis-v1.2 + legs-v1.1 + waist pitch (legs-v1.2) + aluminium-pipe spine (legs-v1.3) + electronics tray / pelvis IMU (legs-v1.4) + chest IMU (v1.5) + compact waist, pitch axis 32 mm above yaw plane (legs-v1.6), root=pelvis. PLACEHOLDER dims/masses, dummy inertia. -->','<robot name="cocomi_legs_v1">']
 def link(name,f):
     ps=[n for n in R if R[n]['parent']==(f if f!='torso' else 'wpitch')]; mm=sum(R[n]['mass_g'] for n in ps)/1000
     c=[sum(R[n]['mass_g']*R[n]['com_mm'][i] for n in ps)/1000/max(mm,1e-9) for i in range(3)]
