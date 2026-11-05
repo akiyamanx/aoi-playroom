@@ -45,7 +45,7 @@ const sv=(c,dims,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...dims),ne
 sv(lay.frames.elbow_servo_c,[45.2,24.7,35],sh);sv(lay.frames.wrist_servo_c,[45.2,24.7,35],el);sv(lay.frames.grip_servo_c,[22.5,22.8,12.2],wr);
 const pr=document.getElementById('parts');for(const k in PARTS){const b=document.createElement('button');b.textContent=PARTS[k];b.onclick=()=>{const v=!M[k][0].visible;M[k].forEach(m=>m.visible=v);b.classList.toggle('off',!v)};pr.appendChild(b);}
 const J=[0,0,0,0];const sl=[0,1,2,3].map(i=>document.getElementById('j'+i));
-function apply(){sh.rotation.z=J[0];el.rotation.z=J[1];wr.rotation.z=J[2];segs.forEach(o=>o.g.rotation.y=J[3]*o.k);
+function apply(){sh.rotation.z=J[0];el.rotation.z=J[1];wr.rotation.z=J[2];segs.forEach(o=>o.g.rotation.y=-J[3]*o.k);
   sl.forEach((e,i)=>{e.value=J[i];document.getElementById('v'+i).textContent=Math.round(J[i]*180/Math.PI)+'°'})}
 sl.forEach((e,i)=>e.oninput=()=>{stop();J[i]=+e.value;apply()});
 window.setPose=(a)=>{for(let i=0;i<4;i++)J[i]=a[i];apply()};
